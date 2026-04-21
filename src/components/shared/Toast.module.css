@@ -1,0 +1,51 @@
+.container {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #2d3436;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(45, 52, 54, 0.18);
+  border-left: 4px solid #ff6b6b;
+  animation: toastIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+  cursor: pointer;
+}
+
+.success {
+  border-left-color: #55efc4;
+  background: #effff8;
+}
+.info {
+  border-left-color: #ffd93d;
+  background: #fffcea;
+}
+.error {
+  border-left-color: #ff6b6b;
+  background: #fff5f5;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

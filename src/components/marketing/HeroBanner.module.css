@@ -1,0 +1,241 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 48px 0 32px;
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding: 96px 0 64px;
+  }
+}
+
+.glow1,
+.glow2 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.glow1 {
+  width: 480px;
+  height: 480px;
+  top: -180px;
+  right: -120px;
+  background: radial-gradient(closest-side, rgba(255, 107, 107, 0.35), transparent 70%);
+}
+
+.glow2 {
+  width: 520px;
+  height: 520px;
+  bottom: -220px;
+  left: -140px;
+  background: radial-gradient(closest-side, rgba(255, 217, 61, 0.3), transparent 70%);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  animation: heroFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.content > * {
+  animation: heroFade 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.content > *:nth-child(1) { animation-delay: 0.05s; }
+.content > *:nth-child(2) { animation-delay: 0.18s; }
+.content > *:nth-child(3) { animation-delay: 0.28s; }
+.content > *:nth-child(4) { animation-delay: 0.38s; }
+.content > *:nth-child(5) { animation-delay: 0.48s; }
+
+@keyframes heroFade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logoRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #dfe6e9;
+  box-shadow: 0 4px 16px rgba(45, 52, 54, 0.06);
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  font-size: 14px;
+}
+
+.logoEmoji {
+  font-size: 20px;
+  display: inline-block;
+  animation: wiggle 3s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+.logoText {
+  color: var(--dark);
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+.headline {
+  margin: 20px 0 12px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.05;
+  font-size: clamp(32px, 7vw, 64px);
+  background: linear-gradient(135deg, #2d3436 0%, #ff6b6b 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subheadline {
+  color: var(--dark-light);
+  font-size: clamp(16px, 2.3vw, 20px);
+  max-width: 540px;
+  margin: 0 0 28px;
+}
+
+.ctaWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .ctaWrap {
+    flex-direction: row;
+  }
+}
+
+.note {
+  margin-top: 16px;
+  color: var(--dark-light);
+  font-size: 13px;
+}
+
+.visual {
+  position: relative;
+  z-index: 1;
+  display: none;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .visual {
+    display: block;
+    width: 40%;
+  }
+}
+
+.phone {
+  position: relative;
+  margin-left: auto;
+  width: 300px;
+  aspect-ratio: 9 / 19;
+  background: #111;
+  border-radius: 42px;
+  padding: 12px;
+  box-shadow: 0 40px 80px rgba(45, 52, 54, 0.35);
+  transform: rotate(-3deg);
+}
+
+.phoneScreen {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #fffaf8 0%, #ffeae6 100%);
+  border-radius: 32px;
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.phoneHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--dark);
+  font-size: 14px;
+}
+
+.phoneTitle {
+  letter-spacing: -0.4px;
+}
+
+.phoneCardWant,
+.phoneCardNice {
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  gap: 10px;
+  background: white;
+  box-shadow: 0 8px 18px rgba(45, 52, 54, 0.08);
+}
+.phoneCardWant {
+  border-left: 4px solid #ff6b6b;
+}
+.phoneCardNice {
+  border-left: 4px solid #ffd93d;
+}
+
+.phoneDot,
+.phoneDotGold {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.phoneDot {
+  background: linear-gradient(135deg, #ff6b6b, #ff8787);
+}
+.phoneDotGold {
+  background: linear-gradient(135deg, #ffd93d, #ffe066);
+}
+
+.phoneBars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+
+.phoneBar {
+  height: 6px;
+  border-radius: 3px;
+  background: #dfe6e9;
+}
+
+.phoneCTA {
+  margin-top: auto;
+  text-align: center;
+  padding: 12px;
+  border-radius: 50px;
+  background: #55efc4;
+  color: #2d3436;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 6px 18px rgba(85, 239, 196, 0.4);
+}

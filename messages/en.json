@@ -1,0 +1,344 @@
+{
+  "common": {
+    "appName": "PokloniMi",
+    "buttons": {
+      "back": "Back",
+      "next": "Next",
+      "save": "Save",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "edit": "Edit",
+      "delete": "Delete",
+      "share": "Share",
+      "copy": "Copy link",
+      "copied": "Copied!",
+      "close": "Close",
+      "skip": "Skip",
+      "continue": "Continue",
+      "publish": "Publish event",
+      "createFirst": "Create your first event",
+      "tryIt": "Try it yourself"
+    },
+    "errors": {
+      "required": "This field is required",
+      "tooShort": "Too short",
+      "tooLong": "Too long",
+      "invalidEmail": "Invalid email",
+      "generic": "Something went wrong. Please try again."
+    },
+    "states": {
+      "loading": "Loading...",
+      "empty": "No data yet",
+      "saved": "Draft saved"
+    },
+    "language": "Language",
+    "languages": {
+      "sr": "Srpski",
+      "en": "English",
+      "de": "Deutsch"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "create": "New event",
+    "dashboard": "My events",
+    "demo": "Demo",
+    "login": "Log in",
+    "profile": "Profile",
+    "logout": "Log out",
+    "signIn": "Sign in"
+  },
+  "landing": {
+    "meta": {
+      "title": "PokloniMi — Celebrations without unwanted gifts",
+      "description": "Create a wishlist, share with guests, everyone wins. Guests don't need to register."
+    },
+    "hero": {
+      "headline": "Celebrations without unwanted gifts",
+      "subheadline": "Create a wishlist, share it with your guests, everyone wins.",
+      "cta": "Create your event — free",
+      "note": "No registration for guests. No app install."
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "step1": {
+        "title": "Build your list",
+        "desc": "Add the gifts you actually want, grouped by priority."
+      },
+      "step2": {
+        "title": "Send to guests",
+        "desc": "Share a link on Viber, WhatsApp or SMS. No apps, no accounts."
+      },
+      "step3": {
+        "title": "Enjoy the party",
+        "desc": "Guests pick in real time — no duplicates, no surprises."
+      }
+    },
+    "why": {
+      "title": "Why PokloniMi?",
+      "item1": {
+        "title": "Zero friction for guests",
+        "desc": "No signup, no app. Just a link and 3 taps."
+      },
+      "item2": {
+        "title": "Guest privacy",
+        "desc": "Guests pick with their name — no public lists, no awkwardness."
+      },
+      "item3": {
+        "title": "Real-time list",
+        "desc": "The moment someone reserves, the list updates for everyone."
+      },
+      "item4": {
+        "title": "Your style",
+        "desc": "Add your photo, message, and make the page truly yours."
+      }
+    },
+    "mockup": {
+      "title": "What your guests will see",
+      "tagline": "Open the link → see the list → pick a gift → done. Under 30 seconds."
+    },
+    "testimonials": {
+      "title": "What users say",
+      "t1": "Finally something smart for a wedding. Every guest knew exactly what to bring.",
+      "t1Name": "Jelena M.",
+      "t2": "We used it for Luka's first birthday. No duplicate gifts!",
+      "t2Name": "Marko & Ana",
+      "t3": "Sent the link to a family Viber group — within an hour everyone had picked something.",
+      "t3Name": "Dejan S."
+    },
+    "finalCta": {
+      "title": "Ready for the next celebration?",
+      "button": "Start for free"
+    },
+    "footer": {
+      "copyright": "PokloniMi © 2026",
+      "about": "About",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "contact": "Contact"
+    }
+  },
+  "auth": {
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Sign up in under a minute",
+      "nameLabel": "Full name",
+      "namePlaceholder": "e.g. John Doe",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@email.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "passwordHint": "At least 8 characters.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "submit": "Create account",
+      "terms": "By signing up, you agree to our terms and privacy policy.",
+      "haveAccount": "Already have an account?",
+      "noAccount": "Don't have an account?",
+      "signIn": "Sign in",
+      "signUp": "Sign up",
+      "successToast": "Welcome to PokloniMi!"
+    },
+    "errors": {
+      "nameTooShort": "Name must be at least 2 characters",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "emailInUse": "Email is already in use",
+      "invalidCredentials": "Invalid email or password",
+      "network": "Cannot reach the server. Please try again.",
+      "googleFailed": "Google sign-in failed. Please try again."
+    },
+    "google": {
+      "continueWith": "Continue with Google",
+      "orDivider": "or"
+    }
+  },
+  "host": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@email.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "successToast": "Welcome!",
+      "backToHome": "Back to home"
+    },
+    "onboarding": {
+      "skip": "Skip",
+      "slide1": {
+        "title": "Welcome to PokloniMi",
+        "desc": "A simple tool for better celebrations — without unwanted gifts."
+      },
+      "slide2": {
+        "title": "3 steps to a done list",
+        "desc": "Build the list, send to guests, enjoy."
+      },
+      "slide3": {
+        "title": "Let's get started",
+        "desc": "In under 5 minutes you'll have your first list ready to share."
+      },
+      "cta": "Create your first event"
+    },
+    "create": {
+      "steps": {
+        "details": "Details",
+        "gifts": "Gifts",
+        "guests": "Guests",
+        "review": "Review"
+      },
+      "step1": {
+        "title": "What's the occasion? 🎉",
+        "typeLabel": "Event type",
+        "types": {
+          "wedding": "Wedding",
+          "birthday": "Birthday",
+          "baptism": "Baptism",
+          "other": "Other"
+        },
+        "nameLabel": "Event name",
+        "namePlaceholder": "e.g. Marko & Ana's Wedding",
+        "dateLabel": "Date",
+        "messageLabel": "Message to guests",
+        "messagePlaceholder": "Dear guests, these are the gifts that would mean the most to us...",
+        "imageLabel": "Background image (optional)",
+        "imageHint": "Drop an image here or click to upload"
+      },
+      "step2": {
+        "title": "What would you like to receive? 🎁",
+        "desc": "Add gifts and sort them by priority",
+        "addGift": "+ Add gift",
+        "categories": {
+          "want": "Really want",
+          "wantTagline": "This matters most",
+          "nice": "Nice to have",
+          "niceTagline": "A lovely surprise",
+          "avoid": "Please avoid",
+          "avoidTagline": "Kindly avoid"
+        },
+        "form": {
+          "type": "Type",
+          "typeItem": "Gift",
+          "typeEnvelope": "Envelope",
+          "name": "Name",
+          "description": "Description (optional)",
+          "price": "Price (optional)",
+          "quantity": "Quantity",
+          "color": "Color (optional)",
+          "store": "Store (optional)",
+          "suggestedAmounts": "Suggested amounts",
+          "customAmount": "Custom amount",
+          "submit": "Add",
+          "editSubmit": "Save changes"
+        }
+      },
+      "step3": {
+        "title": "Who's coming? 📨",
+        "desc": "Share a link with your guests — no need to add each one manually.",
+        "link": "Guest link",
+        "qrHint": "Scan or share the link",
+        "channels": {
+          "viber": "Viber",
+          "whatsapp": "WhatsApp",
+          "sms": "SMS",
+          "copy": "Copy link"
+        },
+        "tabs": {
+          "book": "From contacts",
+          "manual": "Manual"
+        },
+        "messagePreview": "Message preview",
+        "defaultMessage": "Hi! I'd like to invite you to check out the gift list for our event:"
+      },
+      "step4": {
+        "title": "Review",
+        "details": "Event details",
+        "giftsCount": "Gifts",
+        "inviteChannel": "Invite channel",
+        "successTitle": "Your event is live!",
+        "successDesc": "Share the link with your guests and you're done.",
+        "referral": "Know someone who'd enjoy this? Share PokloniMi."
+      }
+    },
+    "dashboard": {
+      "title": "My events",
+      "stats": {
+        "guests": "Guests",
+        "reserved": "Reserved gifts",
+        "envelope": "In envelopes"
+      },
+      "filters": {
+        "all": "All",
+        "active": "Active",
+        "past": "Past"
+      },
+      "emptyTitle": "No events yet",
+      "emptyDesc": "Create your first event in under 5 minutes.",
+      "actions": {
+        "view": "View",
+        "edit": "Edit",
+        "share": "Share",
+        "delete": "Delete"
+      },
+      "deleteConfirm": "Are you sure you want to delete this event?"
+    }
+  },
+  "guest": {
+    "header": {
+      "date": "Date"
+    },
+    "categories": {
+      "want": "Really want",
+      "wantTagline": "This matters most",
+      "nice": "Nice to have",
+      "niceTagline": "A lovely surprise",
+      "avoid": "Please avoid",
+      "avoidTagline": "Kindly avoid"
+    },
+    "gift": {
+      "remaining": "{remaining} of {total} left",
+      "color": "Color",
+      "store": "Store",
+      "priceFrom": "from {price}",
+      "priceRange": "{min} — {max}",
+      "googleSearch": "Look it up on Google",
+      "reserve": "Pick this gift",
+      "reserved": "Reserved ✓",
+      "soldOut": "All reserved"
+    },
+    "envelope": {
+      "title": "Envelope",
+      "desc": "Any amount means a lot to us.",
+      "contribute": "Contribute",
+      "customAmount": "Custom amount"
+    },
+    "reservation": {
+      "title": "Reservation",
+      "envelopeTitle": "Contribution",
+      "nameLabel": "Your name",
+      "namePlaceholder": "e.g. Jelena M.",
+      "quantityLabel": "Quantity",
+      "amountLabel": "Amount (€)",
+      "messageLabel": "Message to host (optional)",
+      "submit": "Confirm",
+      "submitEnvelope": "Confirm contribution",
+      "successTitle": "Thank you!",
+      "successDesc": "Your reservation is saved."
+    },
+    "promo": {
+      "title": "Love PokloniMi?",
+      "desc": "Create a list for your next celebration — free, no install.",
+      "cta": "Create your event"
+    },
+    "realtime": {
+      "reservedBy": "{name} reserved {gift}"
+    }
+  },
+  "eventTypes": {
+    "wedding": "Wedding 💒",
+    "birthday": "Birthday 🎂",
+    "baptism": "Baptism 👶",
+    "other": "Other ✨"
+  }
+}

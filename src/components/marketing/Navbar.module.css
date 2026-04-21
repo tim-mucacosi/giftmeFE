@@ -1,0 +1,126 @@
+.mobileTopBar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255, 250, 248, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid #dfe6e9;
+}
+
+.topNav {
+  display: none;
+}
+
+.logoEmoji {
+  display: inline-block;
+  animation: wiggle 3s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+.bottomNav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid #dfe6e9;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.bottomList {
+  display: grid;
+  grid-auto-flow: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bottomItem {
+  display: flex;
+}
+
+.bottomLink {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px 10px;
+  min-height: 56px;
+  color: #636e72;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  transition: color 0.15s ease;
+}
+
+.bottomLinkActive {
+  color: #ff6b6b;
+}
+
+.activeIndicator {
+  position: absolute;
+  inset: 6px 10%;
+  border-radius: 14px;
+  background: rgba(255, 107, 107, 0.12);
+  z-index: 0;
+}
+
+.bottomIcon {
+  position: relative;
+  z-index: 1;
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.bottomLinkActive .bottomIcon {
+  transform: scale(1.15);
+}
+
+.bottomLabel {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .mobileTopBar {
+    display: none;
+  }
+
+  .topNav {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(255, 250, 248, 0.9);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid #dfe6e9;
+  }
+
+  .bottomNav {
+    display: none;
+  }
+}

@@ -1,0 +1,344 @@
+{
+  "common": {
+    "appName": "PokloniMi",
+    "buttons": {
+      "back": "Nazad",
+      "next": "Dalje",
+      "save": "Sačuvaj",
+      "cancel": "Otkaži",
+      "confirm": "Potvrdi",
+      "edit": "Izmeni",
+      "delete": "Obriši",
+      "share": "Podeli",
+      "copy": "Kopiraj link",
+      "copied": "Kopirano!",
+      "close": "Zatvori",
+      "skip": "Preskoči",
+      "continue": "Nastavi",
+      "publish": "Objavi event",
+      "createFirst": "Napravi prvi event",
+      "tryIt": "Isprobaj i ti"
+    },
+    "errors": {
+      "required": "Ovo polje je obavezno",
+      "tooShort": "Unos je prekratak",
+      "tooLong": "Unos je predugačak",
+      "invalidEmail": "Neispravan email",
+      "generic": "Došlo je do greške. Pokušajte ponovo."
+    },
+    "states": {
+      "loading": "Učitavanje...",
+      "empty": "Nema podataka",
+      "saved": "Nacrt sačuvan"
+    },
+    "language": "Jezik",
+    "languages": {
+      "sr": "Srpski",
+      "en": "English",
+      "de": "Deutsch"
+    }
+  },
+  "nav": {
+    "home": "Početna",
+    "create": "Novi event",
+    "dashboard": "Moji eventi",
+    "demo": "Demo",
+    "login": "Prijavi se",
+    "profile": "Profil",
+    "logout": "Odjavi se",
+    "signIn": "Prijavi se"
+  },
+  "landing": {
+    "meta": {
+      "title": "PokloniMi — Slavlje bez neželjenih poklona",
+      "description": "Napravi listu želja, podeli sa gostima, i svi su srećni. Bez registracije za goste."
+    },
+    "hero": {
+      "headline": "Slavlje bez neželjenih poklona",
+      "subheadline": "Napravi listu želja, podeli sa gostima, i svi su srećni.",
+      "cta": "Kreiraj svoj event — besplatno",
+      "note": "Bez registracije za goste. Bez instalacije."
+    },
+    "howItWorks": {
+      "title": "Kako funkcioniše?",
+      "step1": {
+        "title": "Napravi listu",
+        "desc": "Dodaj poklone koje zaista želiš i rasporedi ih po prioritetu."
+      },
+      "step2": {
+        "title": "Pošalji gostima",
+        "desc": "Podeli link na Viber, WhatsApp ili SMS. Bez aplikacija, bez naloga."
+      },
+      "step3": {
+        "title": "Uživaj na slavlju",
+        "desc": "Gosti biraju u realnom vremenu — nema dupliranih poklona."
+      }
+    },
+    "why": {
+      "title": "Zašto PokloniMi?",
+      "item1": {
+        "title": "Zero friction za goste",
+        "desc": "Bez registracije, bez aplikacije. Samo link i 3 tap-a."
+      },
+      "item2": {
+        "title": "Privatnost gostiju",
+        "desc": "Gost bira sa imenom — bez javnih listi i nezgodnih situacija."
+      },
+      "item3": {
+        "title": "Real-time lista",
+        "desc": "Čim neko rezerviše poklon, lista se ažurira za sve."
+      },
+      "item4": {
+        "title": "Tvoj stil",
+        "desc": "Dodaj svoju sliku, tekst, i napravi event stranicu po svom ukusu."
+      }
+    },
+    "mockup": {
+      "title": "Kako to izgleda za tvoje goste",
+      "tagline": "Gost otvori link → vidi listu → izabere poklon → gotovo. Pod 30 sekundi."
+    },
+    "testimonials": {
+      "title": "Šta kažu korisnici",
+      "t1": "Konačno nešto pametno za svadbu. Svi gosti su znali šta da kupe.",
+      "t1Name": "Jelena M.",
+      "t2": "Koristili smo za Lukin prvi rođendan. Nema dupliranih poklona!",
+      "t2Name": "Marko i Ana",
+      "t3": "Poslao sam link u family grupu na Viber-u i za sat vremena svi izabrali.",
+      "t3Name": "Dejan S."
+    },
+    "finalCta": {
+      "title": "Spremni za sledeće slavlje?",
+      "button": "Započni besplatno"
+    },
+    "footer": {
+      "copyright": "PokloniMi © 2026",
+      "about": "O nama",
+      "terms": "Uslovi",
+      "privacy": "Privatnost",
+      "contact": "Kontakt"
+    }
+  },
+  "auth": {
+    "register": {
+      "title": "Napravi nalog",
+      "subtitle": "Napravi nalog za manje od minuta",
+      "nameLabel": "Ime i prezime",
+      "namePlaceholder": "npr. Marko Marković",
+      "emailLabel": "Email",
+      "emailPlaceholder": "tvoj@email.com",
+      "passwordLabel": "Lozinka",
+      "passwordPlaceholder": "Najmanje 8 karaktera",
+      "passwordHint": "Najmanje 8 karaktera.",
+      "showPassword": "Prikaži lozinku",
+      "hidePassword": "Sakrij lozinku",
+      "submit": "Napravi nalog",
+      "terms": "Registracijom prihvataš uslove korišćenja i politiku privatnosti.",
+      "haveAccount": "Već imaš nalog?",
+      "noAccount": "Nemaš nalog?",
+      "signIn": "Prijavi se",
+      "signUp": "Registruj se",
+      "successToast": "Dobrodošli u PokloniMi!"
+    },
+    "errors": {
+      "nameTooShort": "Ime mora imati najmanje 2 karaktera",
+      "passwordTooShort": "Lozinka mora imati najmanje 8 karaktera",
+      "emailInUse": "Email je već u upotrebi",
+      "invalidCredentials": "Neispravan email ili lozinka",
+      "network": "Nema konekcije sa serverom. Pokušaj ponovo.",
+      "googleFailed": "Google prijava nije uspela. Pokušaj ponovo."
+    },
+    "google": {
+      "continueWith": "Nastavi sa Google nalogom",
+      "orDivider": "ili"
+    }
+  },
+  "host": {
+    "login": {
+      "title": "Dobrodošli",
+      "subtitle": "Prijavi se na svoj nalog.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "tvoj@email.com",
+      "passwordLabel": "Lozinka",
+      "passwordPlaceholder": "Tvoja lozinka",
+      "forgotPassword": "Zaboravljena lozinka?",
+      "submit": "Prijavi se",
+      "successToast": "Dobrodošli!",
+      "backToHome": "Nazad na početnu"
+    },
+    "onboarding": {
+      "skip": "Preskoči",
+      "slide1": {
+        "title": "Dobrodošao u PokloniMi",
+        "desc": "Jednostavan alat za lepša slavlja — bez neželjenih poklona."
+      },
+      "slide2": {
+        "title": "3 koraka do gotove liste",
+        "desc": "Napravi listu, pošalji gostima, uživaj."
+      },
+      "slide3": {
+        "title": "Započnimo",
+        "desc": "Za manje od 5 minuta imaćeš prvu listu spremnu za deljenje."
+      },
+      "cta": "Napravi prvi event"
+    },
+    "create": {
+      "steps": {
+        "details": "Detalji",
+        "gifts": "Pokloni",
+        "guests": "Gosti",
+        "review": "Pregled"
+      },
+      "step1": {
+        "title": "O čemu se radi? 🎉",
+        "typeLabel": "Tip slavlja",
+        "types": {
+          "wedding": "Svadba",
+          "birthday": "Rođendan",
+          "baptism": "Krštenje",
+          "other": "Drugo"
+        },
+        "nameLabel": "Naziv eventa",
+        "namePlaceholder": "npr. Svadba Marka i Ane",
+        "dateLabel": "Datum",
+        "messageLabel": "Poruka gostima",
+        "messagePlaceholder": "Dragi gosti, ovo su pokloni koji bi nam značili...",
+        "imageLabel": "Pozadinska slika (opciono)",
+        "imageHint": "Prevuci sliku ovde ili klikni za upload"
+      },
+      "step2": {
+        "title": "Šta bi voleo da dobiješ? 🎁",
+        "desc": "Dodaj poklone i rasporedi ih po prioritetu",
+        "addGift": "+ Dodaj poklon",
+        "categories": {
+          "want": "Baš mi treba",
+          "wantTagline": "Ovo im najviše znači",
+          "nice": "Može i ovo",
+          "niceTagline": "Lepo iznenađenje",
+          "avoid": "Ne treba mi",
+          "avoidTagline": "Molimo izbegavajte"
+        },
+        "form": {
+          "type": "Tip",
+          "typeItem": "Poklon",
+          "typeEnvelope": "Koverta",
+          "name": "Naziv",
+          "description": "Opis (opciono)",
+          "price": "Cena (opciono)",
+          "quantity": "Količina",
+          "color": "Boja (opciono)",
+          "store": "Prodavnica (opciono)",
+          "suggestedAmounts": "Predloženi iznosi",
+          "customAmount": "Proizvoljan iznos",
+          "submit": "Dodaj",
+          "editSubmit": "Sačuvaj izmene"
+        }
+      },
+      "step3": {
+        "title": "Ko dolazi? 📨",
+        "desc": "Podeli link sa gostima — nema potrebe da svakoga ručno dodaješ.",
+        "link": "Link za goste",
+        "qrHint": "Skeniraj ili podeli link",
+        "channels": {
+          "viber": "Viber",
+          "whatsapp": "WhatsApp",
+          "sms": "SMS",
+          "copy": "Kopiraj link"
+        },
+        "tabs": {
+          "book": "Iz imenika",
+          "manual": "Ručno"
+        },
+        "messagePreview": "Pregled poruke",
+        "defaultMessage": "Zdravo! Pozivam te da pogledaš listu poklona za naš event:"
+      },
+      "step4": {
+        "title": "Pregled",
+        "details": "Detalji eventa",
+        "giftsCount": "Poklona",
+        "inviteChannel": "Kanal za poziv",
+        "successTitle": "Event je objavljen!",
+        "successDesc": "Podeli link sa gostima i gotovo.",
+        "referral": "Poznaš nekoga kome bi ovo koristilo? Podeli PokloniMi."
+      }
+    },
+    "dashboard": {
+      "title": "Moji eventi",
+      "stats": {
+        "guests": "Broj gostiju",
+        "reserved": "Rezervisanih poklona",
+        "envelope": "Ukupno u kovertama"
+      },
+      "filters": {
+        "all": "Svi",
+        "active": "Aktivni",
+        "past": "Prošli"
+      },
+      "emptyTitle": "Nemaš još eventa",
+      "emptyDesc": "Napravi prvi event za manje od 5 minuta.",
+      "actions": {
+        "view": "Pogledaj",
+        "edit": "Izmeni",
+        "share": "Podeli",
+        "delete": "Obriši"
+      },
+      "deleteConfirm": "Da li si siguran da želiš da obrišeš ovaj event?"
+    }
+  },
+  "guest": {
+    "header": {
+      "date": "Datum"
+    },
+    "categories": {
+      "want": "Baš mi treba",
+      "wantTagline": "Ovo im najviše znači",
+      "nice": "Može i ovo",
+      "niceTagline": "Lepo iznenađenje",
+      "avoid": "Ne treba mi",
+      "avoidTagline": "Molimo izbegavajte"
+    },
+    "gift": {
+      "remaining": "Preostalo {remaining} od {total}",
+      "color": "Boja",
+      "store": "Prodavnica",
+      "priceFrom": "od {price}",
+      "priceRange": "{min} — {max}",
+      "googleSearch": "Pogledaj na Google-u",
+      "reserve": "Izaberi ovaj poklon",
+      "reserved": "Rezervisano ✓",
+      "soldOut": "Svi su rezervisani"
+    },
+    "envelope": {
+      "title": "Koverta",
+      "desc": "Svaki iznos nam puno znači.",
+      "contribute": "Doprinesi",
+      "customAmount": "Proizvoljan iznos"
+    },
+    "reservation": {
+      "title": "Rezervacija",
+      "envelopeTitle": "Doprinos",
+      "nameLabel": "Tvoje ime",
+      "namePlaceholder": "npr. Jelena M.",
+      "quantityLabel": "Količina",
+      "amountLabel": "Iznos (€)",
+      "messageLabel": "Poruka domaćinu (opciono)",
+      "submit": "Potvrdi",
+      "submitEnvelope": "Potvrdi doprinos",
+      "successTitle": "Hvala ti!",
+      "successDesc": "Rezervacija je zabeležena."
+    },
+    "promo": {
+      "title": "Sviđa ti se PokloniMi?",
+      "desc": "Napravi listu za sledeće slavlje — besplatno i bez instalacije.",
+      "cta": "Napravi svoj event"
+    },
+    "realtime": {
+      "reservedBy": "{name} je rezervisao/la {gift}"
+    }
+  },
+  "eventTypes": {
+    "wedding": "Svadba 💒",
+    "birthday": "Rođendan 🎂",
+    "baptism": "Krštenje 👶",
+    "other": "Drugo ✨"
+  }
+}
