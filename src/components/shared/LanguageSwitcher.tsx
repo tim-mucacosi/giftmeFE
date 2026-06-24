@@ -32,9 +32,6 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         className,
       )}
     >
-      <span aria-hidden="true" className="text-base leading-none">
-        {FLAGS[current]}
-      </span>
       <span className="sr-only">{t('common.language')}</span>
       <select
         aria-label={t('common.language')}
@@ -45,7 +42,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
       >
         {ALL_LANGUAGES.map((lang) => (
           <option key={lang} value={lang}>
-            {t(`common.languages.${lang}`)}
+            {FLAGS[lang]} {t(`common.languages.${lang}`)}
           </option>
         ))}
       </select>

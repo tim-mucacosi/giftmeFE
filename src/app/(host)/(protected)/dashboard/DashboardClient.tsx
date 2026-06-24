@@ -1,42 +1,78 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useTranslate } from '@tolgee/react'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
+import { loadSession } from '@/lib/auth/session'
+import { useToast } from '@/components/shared/Toast'
+import { getEventsByUser } from '@/lib/api/events'
 import { cn } from '@/lib/utils/cn'
 import type { Event, EventType } from '@/types/event'
 
-// ---------------------------------------------------------------------------
-// Mock events — replace with real API call when the backend is ready
-// ---------------------------------------------------------------------------
 const TODAY = new Date()
-const d = (offset: number) => {
-  const date = new Date(TODAY)
-  date.setDate(date.getDate() + offset)
-  return date.toISOString().split('T')[0]!
-}
-
-const MOCK_EVENTS: Event[] = [
-  { id: '1', slug: 'svadba-ane-i-marka', type: 'wedding',   name: "Ana & Marko's Wedding",   date: d(30),  message: 'Join us!',       hostId: 'usr_1', createdAt: d(-10), updatedAt: d(-10) },
-  { id: '2', slug: 'rodjendane-luke',    type: 'birthday',  name: "Luka's 1st Birthday",      date: d(10),  message: 'Come celebrate!', hostId: 'usr_1', createdAt: d(-5),  updatedAt: d(-5)  },
-  { id: '3', slug: 'krstenje-sofije',    type: 'baptism',   name: "Sofia's Baptism",          date: d(-15), message: 'Thank you!',      hostId: 'usr_1', createdAt: d(-20), updatedAt: d(-20) },
-  { id: '4', slug: 'slava-petrovic',     type: 'patrons_day', name: "Petrović Family Slava",  date: d(-3),  message: 'You are welcome!', hostId: 'usr_1', createdAt: d(-30), updatedAt: d(-30) },
-  { id: '5', slug: 'rodjendane-jelene',  type: 'birthday',  name: "Jelena's 30th Birthday",   date: d(60),  message: 'Big party!',       hostId: 'usr_1', createdAt: d(-2),  updatedAt: d(-2)  },
-  { id: '6', slug: 'svadba-dusana',      type: 'wedding',   name: "Dušan & Milica's Wedding", date: d(-45), message: 'Thank you all!',   hostId: 'usr_1', createdAt: d(-60), updatedAt: d(-60) },
-]
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 type StatusFilter = 'all' | 'active' | 'past'
 
-const EVENT_TYPE_EMOJIS: Record<EventType, string> = {
-  wedding:     '💒',
-  birthday:    '🎂',
-  baptism:     '👶',
-  patrons_day: '🕯️',
-  other:       '✨',
+function getEventEmoji(type: EventType, gender?: string): string {
+  if (type === 'birthday') {
+    return gender === 'girl' ? '🎂👧' : gender === 'boy' ? '🎂👦' : '🎂'
+  }
+  if (type === 'baptism') {
+    return gender === 'girl' ? '⛪👧' : gender === 'boy' ? '⛪👦' : '⛪'
+  }
+  const TYPE_EMOJIS: Record<EventType, string> = {
+    wedding:     '💒',
+    birthday:    '🎂',
+    baptism:     '⛪',
+    patrons_day: '🕯️',
+    other:       '✨',
+  }
+  return TYPE_EMOJIS[type] ?? '✨'
+}
+
+// Calendar-aware {years, months, days} diff. `from` and `to` should already
+// be normalized to local-midnight to avoid time-of-day rounding errors.
+function diffYMD(from: Date, to: Date) {
+  let y = to.getFullYear() - from.getFullYear()
+  let m = to.getMonth() - from.getMonth()
+  let d = to.getDate() - from.getDate()
+  if (d < 0) {
+    // Borrow from previous month to avoid negative days
+    m -= 1
+    d += new Date(to.getFullYear(), to.getMonth(), 0).getDate()
+  }
+  if (m < 0) {
+    y -= 1
+    m += 12
+  }
+  return { y, m, d }
+}
+
+function pluralize(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`
+}
+
+function formatTimeUntil(target: Date, now: Date): string {
+  const startOf = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const t = startOf(target)
+  const n = startOf(now)
+  if (+t === +n) return 'Today'
+
+  const past = t < n
+  const { y, m, d } = diffYMD(past ? t : n, past ? n : t)
+  if (y === 0 && m === 0 && d === 1) return past ? 'Yesterday' : 'Tomorrow'
+
+  const parts: string[] = []
+  if (y > 0) parts.push(pluralize(y, 'year', 'years'))
+  if (m > 0) parts.push(pluralize(m, 'month', 'months'))
+  if (d > 0) parts.push(pluralize(d, 'day', 'days'))
+  const phrase = parts.join(', ')
+  return past ? `${phrase} ago` : `In ${phrase}`
 }
 
 // ---------------------------------------------------------------------------
@@ -44,20 +80,61 @@ const EVENT_TYPE_EMOJIS: Record<EventType, string> = {
 // ---------------------------------------------------------------------------
 export function DashboardClient() {
   const { t } = useTranslate()
-  const { user } = useCurrentUser()
+  const { user, ready } = useCurrentUser()
+  const toast = useToast()
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [typeFilter, setTypeFilter] = useState<EventType | 'all'>('all')
+  const [origin, setOrigin] = useState('')
 
-  // Derive unique event types present in the data for the type filter pills
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') setOrigin(window.location.origin)
+  }, [])
+
+  useEffect(() => {
+    if (!ready) return
+    if (!user) {
+      setEvents([])
+      setLoading(false)
+      return
+    }
+    const session = loadSession()
+    const token = session?.accessToken ?? ''
+
+    let cancelled = false
+    setLoading(true)
+    setErrorMessage(null)
+
+    getEventsByUser(user.id, token)
+      .then((list) => {
+        if (!cancelled) setEvents(list)
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        const message = err instanceof Error ? err.message : t('common.errors.generic')
+        setErrorMessage(message)
+        toast.error(message)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [ready, user, t, toast])
+
   const availableTypes = useMemo(
-    () => Array.from(new Set(MOCK_EVENTS.map((e) => e.type))),
-    [],
+    () => Array.from(new Set(events.map((e) => e.type))),
+    [events],
   )
 
-  // Apply both filters
   const filtered = useMemo(() => {
-    return MOCK_EVENTS.filter((event) => {
+    return events.filter((event) => {
       const eventDate = new Date(event.date)
       const isActive = eventDate >= TODAY
 
@@ -67,7 +144,7 @@ export function DashboardClient() {
 
       return true
     })
-  }, [statusFilter, typeFilter])
+  }, [events, statusFilter, typeFilter])
 
   const STATUS_TABS: { key: StatusFilter; label: string }[] = [
     { key: 'all',    label: t('host.dashboard.filters.all') },
@@ -142,13 +219,56 @@ export function DashboardClient() {
                 : 'border-gray-light text-dark-light hover:border-coral hover:text-coral',
             )}
           >
-            {EVENT_TYPE_EMOJIS[type]} {t(`eventTypes.${type}`)}
+            {getEventEmoji(type)} {t(`eventTypes.${type}`)}
           </button>
         ))}
       </div>
 
       {/* Event list */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <ul className="flex flex-col gap-3" aria-busy="true" aria-live="polite">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-3 rounded-2xl border border-gray-light bg-white p-4 shadow-card"
+            >
+              <div className="h-11 w-11 shrink-0 animate-pulse rounded-xl bg-gray-light" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-2/3 animate-pulse rounded bg-gray-light" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-gray-light" />
+                <div className="h-7 w-full animate-pulse rounded-md bg-gray-light/70" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : errorMessage ? (
+        <div className="flex flex-col items-center gap-3 rounded-3xl border border-red-soft bg-red-soft/10 py-12 text-center">
+          <span className="text-3xl">⚠️</span>
+          <p className="px-6 text-sm text-dark">{errorMessage}</p>
+          <button
+            type="button"
+            onClick={() => {
+              if (user) {
+                const session = loadSession()
+                setLoading(true)
+                setErrorMessage(null)
+                getEventsByUser(user.id, session?.accessToken ?? '')
+                  .then(setEvents)
+                  .catch((err: unknown) => {
+                    const message =
+                      err instanceof Error ? err.message : t('common.errors.generic')
+                    setErrorMessage(message)
+                    toast.error(message)
+                  })
+                  .finally(() => setLoading(false))
+              }
+            }}
+            className="rounded-full bg-coral px-4 py-1.5 text-sm font-semibold text-white hover:bg-coral-dark"
+          >
+            {t('common.buttons.retry')}
+          </button>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-gray-light py-16 text-center">
           <span className="text-4xl">📭</span>
           <p className="font-semibold text-dark">{t('host.dashboard.emptyTitle')}</p>
@@ -163,7 +283,7 @@ export function DashboardClient() {
       ) : (
         <ul className="flex flex-col gap-3">
           {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id} event={event} origin={origin} />
           ))}
         </ul>
       )}
@@ -174,30 +294,55 @@ export function DashboardClient() {
 // ---------------------------------------------------------------------------
 // EventCard sub-component
 // ---------------------------------------------------------------------------
-function EventCard({ event }: { event: Event }) {
+function EventCard({ event, origin }: { event: Event; origin: string }) {
   const { t } = useTranslate()
+  const toast = useToast()
   const eventDate = new Date(event.date)
   const isPast = eventDate < TODAY
-  const daysFromNow = Math.round((eventDate.getTime() - TODAY.getTime()) / (1000 * 60 * 60 * 24))
+  const dateLabel = formatTimeUntil(eventDate, TODAY)
 
-  const dateLabel = isPast
-    ? `${Math.abs(daysFromNow)} days ago`
-    : daysFromNow === 0
-    ? 'Today'
-    : `In ${daysFromNow} days`
+  const eventUrl = origin ? `${origin}/event/${event.slug}` : `/event/${event.slug}`
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(eventUrl)
+      toast.success(t('common.buttons.copied'))
+    } catch {
+      toast.error(t('common.errors.generic'))
+    }
+  }
 
   return (
-    <li className="flex items-start gap-3 rounded-2xl border border-gray-light bg-white p-4 shadow-card transition-shadow hover:shadow-card-hover">
+    <li className="group relative flex items-start gap-3 overflow-hidden rounded-2xl border border-gray-light bg-white p-4 pt-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-coral/40 hover:shadow-card-hover focus-within:ring-2 focus-within:ring-coral/40">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-coral via-coral-light to-gold"
+      />
+
+      {/* Stretched link makes the whole card the primary manage target.
+          Sits behind interactive children (z-[1]) so buttons and links still work. */}
+      <Link
+        href={`/event/${event.slug}/edit`}
+        aria-label={`${t('host.dashboard.actions.manage')} - ${event.name}`}
+        className="absolute inset-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+      >
+        <span className="sr-only">
+          {t('host.dashboard.actions.manage')} - {event.name}
+        </span>
+      </Link>
+
       {/* Type icon */}
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-coral/15 to-gold/15 text-2xl">
-        {EVENT_TYPE_EMOJIS[event.type]}
+        {getEventEmoji(event.type, event.gender)}
       </div>
 
       {/* Info + actions */}
       <div className="min-w-0 flex-1">
         {/* Name + status badge */}
         <div className="flex items-center gap-2">
-          <p className="truncate font-semibold text-dark">{event.name}</p>
+          <p className="truncate font-semibold text-dark transition-colors group-hover:text-coral">
+            {event.name}
+          </p>
           <span className={cn(
             'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold',
             isPast ? 'bg-gray-light text-dark-light' : 'bg-coral/10 text-coral',
@@ -206,7 +351,7 @@ function EventCard({ event }: { event: Event }) {
           </span>
         </div>
 
-        {/* Meta row — wraps naturally on narrow screens */}
+        {/* Meta row wraps naturally on narrow screens */}
         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-dark-light">
           <span>{new Date(event.date).toLocaleDateString()}</span>
           <span aria-hidden="true">·</span>
@@ -217,13 +362,36 @@ function EventCard({ event }: { event: Event }) {
           <span className="capitalize">{t(`eventTypes.${event.type}`)}</span>
         </div>
 
-        {/* Action */}
-        <div className="mt-2">
+        {/* Event link */}
+        <div className="mt-2.5 flex flex-col gap-2">
+          <span
+            className="block w-full truncate rounded-md bg-bg px-2.5 py-1.5 text-xs text-dark-light"
+            title={eventUrl}
+          >
+            {eventUrl}
+          </span>
+          <button
+            type="button"
+            onClick={copyLink}
+            className="relative z-[1] block w-full rounded-full bg-coral/10 px-3 py-1.5 text-xs font-semibold text-coral transition-colors hover:bg-coral/20"
+          >
+            📋 {t('host.dashboard.actions.copyLink')}
+          </button>
+        </div>
+
+        {/* Secondary action: public guest view */}
+        <div className="mt-2 flex flex-wrap gap-2">
           <Link
             href={`/event/${event.slug}`}
-            className="inline-flex rounded-full bg-gray-light/60 px-3 py-1 text-xs font-semibold text-dark-light transition-colors hover:bg-gray-light hover:text-dark"
+            className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-gray-light/60 px-3 py-1 text-xs font-semibold text-dark-light transition-colors hover:bg-gray-light hover:text-dark"
           >
-            {t('host.dashboard.actions.view')}
+            👁️ {t('host.dashboard.actions.view')}
+          </Link>
+          <Link
+            href={`/create?eventId=${event.slug}`}
+            className="relative z-[1] ml-auto inline-flex items-center gap-1 rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white shadow-sm transition-transform hover:translate-x-0.5"
+          >
+            ✏️ {t('host.dashboard.actions.manage')} →
           </Link>
         </div>
       </div>

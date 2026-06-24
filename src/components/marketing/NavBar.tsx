@@ -6,6 +6,7 @@ import { useTranslate } from '@tolgee/react'
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 import { UserMenu } from '@/components/shared/UserMenu'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
+import { useEventViewMode } from '@/lib/state/eventViewMode'
 import { cn } from '@/lib/utils/cn'
 import styles from './Navbar.module.css'
 
@@ -27,24 +28,37 @@ export function Navbar() {
   const pathname = usePathname()
   const { t } = useTranslate()
   const { user, ready, logout } = useCurrentUser()
+  const eventViewMode = useEventViewMode()
 
+  // Highlight rules:
+  //  - Home only on the exact "/" path.
+  //  - Other items match their prefix.
+  //  - Event detail/edit pages (`/event/<id>` and `/event/<id>/edit`) live
+  //    under "My events" conceptually, so /dashboard stays selected there
+  //    instead of leaving the user with no active tab.
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
+    if (href === '/dashboard') {
+      return pathname?.startsWith('/dashboard') || !!pathname?.startsWith('/event/')
+    }
     return pathname?.startsWith(href)
   }
+
+  const showLanguageSwitcher =
+    eventViewMode !== 'guest' && eventViewMode !== 'viewer'
 
   const mobileItems = BASE_ITEMS
 
   return (
     <>
-      {/* Mobile top bar — logo + language switcher (hidden on desktop) */}
+      {/* Mobile top bar */}
       <header className={styles.mobileTopBar} aria-label="Mobile top bar">
         <Link href="/" className="flex items-center gap-2 text-base font-extrabold tracking-tight">
           <span className={styles.logoEmoji} aria-hidden="true">🎁</span>
           <span>{t('common.appName')}</span>
         </Link>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
+          {showLanguageSwitcher ? <LanguageSwitcher /> : null}
           {ready && user && <UserMenu user={user} onLogout={logout} />}
         </div>
       </header>
@@ -71,7 +85,7 @@ export function Navbar() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            {showLanguageSwitcher ? <LanguageSwitcher /> : null}
             {!ready ? (
               <div className="hidden h-9 w-[120px] animate-pulse rounded-full bg-gray-light lg:block" />
             ) : user ? (

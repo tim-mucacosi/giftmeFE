@@ -8,7 +8,7 @@ export function MockupPreview() {
   const { t } = useTranslate()
 
   return (
-    <section className="py-16 lg:py-24">
+    <section className="bg-white py-16 lg:py-24">
       <div className="mx-auto w-full max-w-container px-4 sm:px-6 lg:px-8">
         <FadeUp>
           <h2 className="text-center font-extrabold tracking-tight text-dark text-[clamp(26px,5vw,44px)] mb-10">

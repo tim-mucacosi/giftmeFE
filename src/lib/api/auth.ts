@@ -1,6 +1,7 @@
 import { USE_MOCKS } from './client'
 import {
   AuthError,
+  VerifyEmailResponse,
   type AuthResponse,
   type ChangePasswordInput,
   type LoginInput,
@@ -97,7 +98,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResponse> 
     return mockAuthResponse(input, input.name)
   }
   try {
-    // TODO: backend currently returns `token` — ask backend to rename it to `accessToken`
+    // Normalize token field name
     const raw = await authRequest<AuthResponse & { token?: string }>('/auth/register', { body: input })
     if (!raw.accessToken && raw.token) {
       raw.accessToken = raw.token
@@ -115,6 +116,17 @@ export async function registerUser(input: RegisterInput): Promise<AuthResponse> 
 }
 
 // ---------------------------------------------------------------------------
+// POST /auth/verify-email
+// ---------------------------------------------------------------------------
+export async function verifyEmail(token: string): Promise<VerifyEmailResponse> {
+  if (USE_MOCKS) {
+    await mockDelay()
+    return { code: 200, description: 'Email verified successfully' }
+  }
+  return await authRequest<VerifyEmailResponse>('/auth/verify-email', { body: { token } });
+}
+
+// ---------------------------------------------------------------------------
 // POST /auth/login
 // ---------------------------------------------------------------------------
 
@@ -124,7 +136,7 @@ export async function loginUser(input: LoginInput): Promise<AuthResponse> {
     return mockAuthResponse(input)
   }
   try {
-    // TODO: backend currently returns `token` — ask backend to rename it to `accessToken`
+    // Normalize token field name
     const raw = await authRequest<AuthResponse & { token?: string }>('/auth/login', { body: input })
     if (!raw.accessToken && raw.token) {
       raw.accessToken = raw.token
@@ -141,9 +153,7 @@ export async function loginUser(input: LoginInput): Promise<AuthResponse> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// GET /auth/google  — redirects browser to Google OAuth
-// ---------------------------------------------------------------------------
+// Google OAuth login
 
 export async function loginWithGoogle(): Promise<AuthResponse | null> {
   if (USE_MOCKS) {
@@ -184,7 +194,12 @@ export async function getMe(token: string): Promise<User> {
       createdAt: new Date().toISOString(),
     }
   }
-  return authRequest<User>('/auth/get-me', { method: 'GET', token })
+  // Handle wrapped or direct user response
+  const raw = await authRequest<User | { success?: boolean; user: User }>(
+    '/auth/get-me',
+    { method: 'GET', token },
+  )
+  return 'user' in raw && raw.user ? raw.user : (raw as User)
 }
 
 // ---------------------------------------------------------------------------
@@ -197,4 +212,44 @@ export async function changePassword(input: ChangePasswordInput, token: string):
     return
   }
   await authRequest<unknown>('/auth/change-password', { method: 'PUT', body: input, token })
+}
+
+// ---------------------------------------------------------------------------
+// POST /auth/forgot-password
+//
+export async function requestPasswordReset(email: string): Promise<void> {
+  if (USE_MOCKS) {
+    await mockDelay(500)
+    return
+  }
+  try {
+    await authRequest<unknown>('/auth/initiate-password-change', { body: { email } })
+  } catch (err) {
+    if (err instanceof AuthError) {
+      // Treat missing endpoint as success
+      if (err.status === 404 || err.code === 'NETWORK') return
+    }
+    throw err
+  }
+}
+
+export async function resetPassword(
+  passwordResetToken: string,
+  newPassword: string,
+): Promise<void> {
+  if (USE_MOCKS) {
+    await mockDelay(500)
+    return
+  }
+  try {
+    await authRequest<unknown>('/auth/change-password', {
+      method: 'PUT',
+      body: { passwordResetToken, newPassword },
+    })
+  } catch (err) {
+    if (err instanceof AuthError) {
+      throw err
+    }
+    throw new AuthError('auth.errors.resetFailed', 0)
+  }
 }

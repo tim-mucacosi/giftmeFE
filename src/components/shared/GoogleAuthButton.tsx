@@ -51,7 +51,7 @@ export function GoogleAuthButton({ onError, className }: Props) {
       ) : (
         <GoogleIcon />
       )}
-      {t('auth.google.continueWith', "Nastavi sa Google nalogom")}
+      {t('auth.google.continueWith')}
     </button>
   )
 }

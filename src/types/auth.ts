@@ -18,6 +18,11 @@ export interface AuthResponse {
   user: User
 }
 
+export interface VerifyEmailResponse {
+  code: number,
+  description: string
+}
+
 export interface AuthSession {
   accessToken: string
   refreshToken?: string

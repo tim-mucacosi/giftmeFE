@@ -1,0 +1,246 @@
+.heroBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, #ffd1ba 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, #ffb8b8 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, #ffc9a8 0%, transparent 40%),
+    linear-gradient(135deg, #e8917e 0%, #d4756b 25%, #c9836f 50%, #d4977a 75%, #e8a88e 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+.heroBg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255, 180, 150, 0.2) 0%, transparent 35%);
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(30, 20, 15, 0.75) 0%,
+    rgba(30, 20, 15, 0.3) 40%,
+    rgba(30, 20, 15, 0.05) 100%
+  );
+}
+
+.heroEmoji {
+  display: inline-block;
+  animation: floatEmoji 3s ease-in-out infinite;
+}
+
+@keyframes floatEmoji {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.04),
+    transparent
+  );
+  z-index: 1;
+  animation: shimmer 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    left: -100%;
+  }
+  50% {
+    left: 150%;
+  }
+}
+
+.giftCard {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s ease;
+}
+
+.giftCard.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.giftCard:nth-child(1).visible {
+  transition-delay: 0ms;
+}
+.giftCard:nth-child(2).visible {
+  transition-delay: 80ms;
+}
+.giftCard:nth-child(3).visible {
+  transition-delay: 160ms;
+}
+.giftCard:nth-child(4).visible {
+  transition-delay: 240ms;
+}
+.giftCard:nth-child(5).visible {
+  transition-delay: 320ms;
+}
+.giftCard:nth-child(6).visible {
+  transition-delay: 400ms;
+}
+
+.modalOverlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modalOverlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modalSheet {
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modalOverlay.active .modalSheet {
+  transform: translateY(0);
+}
+
+@media (min-width: 1024px) {
+  .modalOverlay {
+    align-items: center;
+  }
+  .modalSheet {
+    border-radius: 24px;
+    max-width: 420px;
+    margin: auto;
+  }
+}
+
+.successOverlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.successOverlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.successCheck {
+  animation: popIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.confettiPiece {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.floatingBadge {
+  transform: translateX(-50%) translateY(80px);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floatingBadge.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.badgeDot {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+.heroContent > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.heroContent > *:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.heroContent > *:nth-child(3) {
+  animation-delay: 0.35s;
+}
+.heroContent > *:nth-child(4) {
+  animation-delay: 0.45s;
+}
+.heroContent > *:nth-child(5) {
+  animation-delay: 0.55s;
+}
+
+.heroContent > * {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeIn 0.7s ease forwards;
+}
+
+@keyframes heroFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -13,12 +13,6 @@ export function HeroBanner() {
       <div className={styles.glow2} aria-hidden="true" />
       <div className="mx-auto w-full max-w-container px-4 sm:px-6 lg:flex lg:items-center lg:gap-16 lg:px-8">
         <div className={styles.content}>
-          <div className={styles.logoRow}>
-            <span className={styles.logoEmoji} aria-hidden="true">
-              🎁
-            </span>
-            <span className={styles.logoText}>{t('common.appName')}</span>
-          </div>
           <h1 className={styles.headline}>{t('landing.hero.headline')}</h1>
           <p className={styles.subheadline}>{t('landing.hero.subheadline')}</p>
           <div className={styles.ctaWrap}>
@@ -49,7 +43,7 @@ export function HeroBanner() {
                   <div className={styles.phoneBar} style={{ width: '40%' }} />
                 </div>
               </div>
-              <div className={styles.phoneCTA}>✓ Rezervisano</div>
+              <div className={styles.phoneCTA}>✓ {t('landing.hero.reserved')}</div>
             </div>
           </div>
         </div>

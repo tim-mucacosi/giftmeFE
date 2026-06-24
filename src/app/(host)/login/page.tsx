@@ -43,7 +43,7 @@ export default function LoginPage() {
         password: values.password,
       })
       saveSession(response)
-      toast.success(t('host.login.successToast'))
+      toast.success(t('host.login.successToast'));
       router.push(next)
       router.refresh()
     } catch (err) {
@@ -88,7 +88,7 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-light" />
-            <span className="text-xs font-medium text-dark-light">{t('auth.google.orDivider', 'ili')}</span>
+            <span className="text-xs font-medium text-dark-light">{t('auth.google.orDivider')}</span>
             <div className="h-px flex-1 bg-gray-light" />
           </div>
 

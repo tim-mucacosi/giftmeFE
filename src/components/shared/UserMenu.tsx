@@ -72,9 +72,16 @@ export function UserMenu({ user, onLogout }: Props) {
               <span aria-hidden="true">📋</span>
               {t('nav.dashboard')}
             </Link>
+            {/* Only local-auth users have a password to change. Hide for Google/Facebook accounts. */}
+            {(!user.provider || user.provider === 'local') && (
+              <Link href="/settings/password" role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-dark transition-colors hover:bg-gray-light/60">
+                <span aria-hidden="true">🔑</span>
+                {t('auth.changePassword.title')}
+              </Link>
+            )}
             <button type="button" role="menuitem" onClick={handleLogout} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-coral transition-colors hover:bg-coral/10">
               <span aria-hidden="true">👋</span>
-              {t('nav.logout', 'Odjavi se')}
+              {t('nav.logout')}
             </button>
           </div>
         </div>

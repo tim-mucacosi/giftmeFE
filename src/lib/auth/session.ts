@@ -17,7 +17,7 @@ export function saveSession(response: AuthResponse): AuthSession {
       window.dispatchEvent(new Event('poklonimi:session-changed'))
     }
   } catch {
-    // Storage may be full or disabled — the in-memory return is still valid.
+    // Storage unavailable, return what we have
   }
   return session
 }

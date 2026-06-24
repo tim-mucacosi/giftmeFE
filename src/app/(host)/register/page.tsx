@@ -85,7 +85,7 @@ export default function RegisterPage() {
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-light" />
-            <span className="text-xs font-medium text-dark-light">{t('auth.google.orDivider', 'ili')}</span>
+            <span className="text-xs font-medium text-dark-light">{t('auth.google.orDivider')}</span>
             <div className="h-px flex-1 bg-gray-light" />
           </div>
 
