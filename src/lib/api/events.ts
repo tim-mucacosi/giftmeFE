@@ -1,9 +1,16 @@
-import { apiClient, USE_MOCKS } from './client'
+import { USE_MOCKS } from './client'
 import { mockEvents } from '@/lib/mocks/events'
 import type { Event, EventType, EventGender } from '@/types/event'
 import type { Gift, GiftCategory } from '@/types/gift'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://giftmebe.onrender.com/api'
+
+export interface CreateEventGiftInput
+  extends Pick<Gift, 'name' | 'category' | 'description' | 'quantity' | 'price' | 'priceRange' | 'store' | 'type'> {
+  /** Backend subdocument id, present when editing an existing gift. */
+  serverId?: string
+  suggestedAmounts?: number[]
+}
 
 export interface CreateEventInput {
   name: string
@@ -14,7 +21,7 @@ export interface CreateEventInput {
   backgroundImageUrl?: string
   /** ISO date string for when the celebration happens. */
   date?: string
-  gifts: Pick<Gift, 'name' | 'category' | 'description' | 'quantity' | 'price' | 'priceRange' | 'store'>[]
+  gifts: CreateEventGiftInput[]
 }
 
 export class EventApiError extends Error {
@@ -28,40 +35,38 @@ export class EventApiError extends Error {
   }
 }
 
-export async function getEvents(): Promise<Event[]> {
-  if (USE_MOCKS) return mockEvents
-  try {
-    return await apiClient.get<Event[]>('/events')
-  } catch {
-    return mockEvents
-  }
-}
-
-export async function getEvent(slug: string): Promise<Event | null> {
-  if (USE_MOCKS) return mockEvents.find((e) => e.slug === slug) ?? mockEvents[0] ?? null
-  try {
-    return await apiClient.get<Event>(`/events/${slug}`)
-  } catch {
-    return mockEvents.find((e) => e.slug === slug) ?? null
-  }
-}
-
 interface ApiGift {
+  _id?: string
+  id?: string
   name?: string
   description?: string
   whereToBuy?: string
   priceInRange?: string
+  type?: string
   quantity?: number
+  reservedQuantity?: number
+  suggestedAmounts?: number[]
+}
+
+interface ApiReservation {
+  _id?: string
+  id?: string
+  giftId?: string
+  category?: string
+  giftName?: string
+  guestName?: string
+  message?: string
+  createdAt?: string
 }
 
 interface ApiEventDto {
   _id?: string
   id?: string
+  publicId?: string
   name?: string
   eventType?: { name?: string } | string
   gender?: string
   user?: string | { _id?: string; id?: string; name?: string; email?: string }
-  slug?: string
   message?: string
   backgroundImageUrl?: string
   /**
@@ -71,21 +76,39 @@ interface ApiEventDto {
   expirationDate?: string
   createdAt?: string
   updatedAt?: string
-  iWant?: Array<ApiGift | string>
-  iAmOkWithIt?: Array<ApiGift | string>
-  iDontWant?: Array<ApiGift | string>
+  iWant?: ApiGift[]
+  iAmOkWithIt?: ApiGift[]
+  iDontWant?: ApiGift[]
+  reservations?: ApiReservation[]
 }
 
 export interface DetailGift {
+  /** Backend gift id used for reservations. Empty for legacy gifts. */
+  id: string
   name: string
   description?: string
   whereToBuy?: string
   priceInRange?: string
+  type: 'item' | 'envelope'
   quantity: number
+  reservedQuantity: number
+  /** Remaining units. Envelope gifts are always available. */
+  available: number
+  suggestedAmounts?: number[]
+}
+
+export interface HostReservation {
+  id: string
+  giftId: string
+  giftName: string
+  guestName: string
+  message?: string
+  createdAt: string
 }
 
 export interface EventDetail {
   id: string
+  /** Public share identifier (falls back to id for legacy events). */
   slug: string
   type: EventType
   gender?: EventGender
@@ -102,6 +125,8 @@ export interface EventDetail {
     nice: DetailGift[]
     avoid: DetailGift[]
   }
+  /** Present only on the authenticated host endpoint. */
+  reservations?: HostReservation[]
 }
 
 function extractHostId(user: ApiEventDto['user']): string {
@@ -115,23 +140,34 @@ function extractHostName(user: ApiEventDto['user']): string | undefined {
   return user.name
 }
 
-function mapGiftArr(arr: ApiEventDto['iWant']): DetailGift[] {
-  if (!Array.isArray(arr)) return []
-  return arr
-    .map((g) => {
-      const name = typeof g === 'string' ? g : (g?.name ?? '')
-      return {
-        name: name.trim(),
-        description: typeof g === 'string' ? undefined : g?.description,
-        whereToBuy: typeof g === 'string' ? undefined : g?.whereToBuy,
-        priceInRange: typeof g === 'string' ? undefined : g?.priceInRange,
-        quantity: typeof g === 'string' ? 1 : (g?.quantity ?? 1),
-      }
-    })
-    .filter((g) => g.name.length > 0)
+export function mapGift(g: ApiGift): DetailGift {
+  const type = g.type === 'envelope' ? 'envelope' : 'item'
+  const quantity = typeof g.quantity === 'number' && g.quantity > 0 ? g.quantity : 1
+  const reservedQuantity = typeof g.reservedQuantity === 'number' ? g.reservedQuantity : 0
+  return {
+    id: g._id ?? g.id ?? '',
+    name: (g.name ?? '').trim(),
+    description: g.description,
+    whereToBuy: g.whereToBuy,
+    priceInRange: g.priceInRange,
+    type,
+    quantity,
+    reservedQuantity,
+    available: type === 'envelope' ? Number.POSITIVE_INFINITY : Math.max(0, quantity - reservedQuantity),
+    suggestedAmounts: g.suggestedAmounts,
+  }
 }
 
-function mapApiEvent(dto: ApiEventDto): Event {
+function mapGiftArr(arr: ApiEventDto['iWant']): DetailGift[] {
+  if (!Array.isArray(arr)) return []
+  return arr.map(mapGift).filter((g) => g.name.length > 0)
+}
+
+function sumBy<T>(arr: T[], fn: (item: T) => number): number {
+  return arr.reduce((acc, item) => acc + fn(item), 0)
+}
+
+export function mapApiEvent(dto: ApiEventDto): Event {
   const id = dto._id ?? dto.id ?? ''
   const eventTypeName =
     typeof dto.eventType === 'string' ? dto.eventType : dto.eventType?.name
@@ -140,9 +176,12 @@ function mapApiEvent(dto: ApiEventDto): Event {
   // the backend; expires the list for guests after that day). Fall back to
   // createdAt for legacy events that predate the field.
   const eventDate = dto.expirationDate ?? created
+  const items = [...mapGiftArr(dto.iWant), ...mapGiftArr(dto.iAmOkWithIt)].filter(
+    (g) => g.type === 'item',
+  )
   return {
     id,
-    slug: dto.slug ?? id,
+    slug: dto.publicId ?? id,
     type: (eventTypeName ?? 'other') as EventType,
     name: dto.name ?? '',
     date: eventDate,
@@ -150,10 +189,16 @@ function mapApiEvent(dto: ApiEventDto): Event {
     hostId: extractHostId(dto.user),
     createdAt: created,
     updatedAt: dto.updatedAt ?? created,
+    stats: {
+      gifts: items.length,
+      desired: sumBy(items, (g) => g.quantity),
+      reserved: sumBy(items, (g) => g.reservedQuantity),
+      reservationCount: Array.isArray(dto.reservations) ? dto.reservations.length : undefined,
+    },
   }
 }
 
-function mapApiEventDetail(dto: ApiEventDto): EventDetail {
+export function mapApiEventDetail(dto: ApiEventDto): EventDetail {
   const base = mapApiEvent(dto)
   return {
     id: base.id,
@@ -172,160 +217,166 @@ function mapApiEventDetail(dto: ApiEventDto): EventDetail {
       nice: mapGiftArr(dto.iAmOkWithIt),
       avoid: mapGiftArr(dto.iDontWant),
     },
+    reservations: Array.isArray(dto.reservations)
+      ? dto.reservations.map((r) => ({
+          id: r._id ?? r.id ?? '',
+          giftId: r.giftId ?? '',
+          giftName: r.giftName ?? '',
+          guestName: r.guestName ?? '',
+          message: r.message,
+          createdAt: r.createdAt ?? '',
+        }))
+      : undefined,
   }
 }
 
-export async function getEventById(id: string, token?: string): Promise<EventDetail | null> {
-  if (USE_MOCKS) {
-    const ev = mockEvents.find((e) => e.id === id || e.slug === id) ?? mockEvents[0]
-    if (!ev) return null
-    return {
-      id: ev.id,
-      slug: ev.slug,
-      type: ev.type,
-      name: ev.name,
-      hostId: ev.hostId,
-      hostName: 'Mock host',
-      message: ev.message ?? '',
-      backgroundImageUrl: ev.backgroundImageUrl,
-      date: ev.date,
-      createdAt: ev.createdAt,
-      gifts: {
-        want: [
-          { name: 'Bottle of red wine', quantity: 2, description: 'A nice red wine' },
-          { name: 'Hand-thrown ceramic bowl', quantity: 1 },
-        ],
-        nice: [
-          { name: 'Linen tablecloth set', quantity: 1, description: 'Natural linen' },
-        ],
-        avoid: [
-          { name: 'Generic gift cards', quantity: 999 },
-        ],
-      },
-    }
-  }
-
-  let response: Response
+async function readJson(response: Response): Promise<unknown> {
   try {
-    // Use /guests endpoint for public access (no auth required)
-    // Use regular endpoint for authenticated access (host)
-    const endpoint = token ? `/events/${encodeURIComponent(id)}` : `/events/${encodeURIComponent(id)}/guests`
-    response = await fetch(`${API_URL}${endpoint}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    })
+    const text = await response.text()
+    return text ? JSON.parse(text) : null
+  } catch {
+    return null
+  }
+}
+
+function throwApiError(response: Response, data: unknown): never {
+  const parsed = (data ?? {}) as { message?: string; code?: string }
+  throw new EventApiError(
+    parsed.message ?? `API error: ${response.status}`,
+    response.status,
+    parsed.code,
+  )
+}
+
+function unwrapDto(data: unknown): ApiEventDto | null {
+  // Accept either a bare object or a wrapper like { data: {...} } / { event: {...} }.
+  if (!data || typeof data !== 'object') return null
+  if ('data' in data) return ((data as { data: ApiEventDto }).data ?? null)
+  if ('event' in data) return ((data as { event: ApiEventDto }).event ?? null)
+  return data as ApiEventDto
+}
+
+async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(`${API_URL}${path}`, init)
   } catch {
     throw new EventApiError('Network error', 0, 'NETWORK')
   }
-
-  if (response.status === 404) return null
-
-  let data: unknown = null
-  try {
-    const text = await response.text()
-    data = text ? JSON.parse(text) : null
-  } catch {
-    data = null
-  }
-
-  if (!response.ok) {
-    const parsed = (data ?? {}) as { message?: string; code?: string }
-    throw new EventApiError(
-      parsed.message ?? `API error: ${response.status}`,
-      response.status,
-      parsed.code,
-    )
-  }
-
-  // Accept either a bare object or a wrapper like { data: {...} } / { event: {...} }.
-  const dto: ApiEventDto | null =
-    data && typeof data === 'object'
-      ? ('data' in data
-          ? ((data as { data: ApiEventDto }).data ?? null)
-          : 'event' in data
-            ? ((data as { event: ApiEventDto }).event ?? null)
-            : (data as ApiEventDto))
-      : null
-
-  if (!dto) return null
-  return mapApiEventDetail(dto)
 }
 
-export async function getEventsByUser(userId: string, token: string): Promise<Event[]> {
+function mockDetail(idOrSlug: string): EventDetail | null {
+  const ev = mockEvents.find((e) => e.id === idOrSlug || e.slug === idOrSlug) ?? mockEvents[0]
+  if (!ev) return null
+  const gift = (partial: Partial<DetailGift> & { id: string; name: string }): DetailGift => ({
+    type: 'item',
+    quantity: 1,
+    reservedQuantity: 0,
+    available: 1,
+    ...partial,
+  })
+  return {
+    id: ev.id,
+    slug: ev.slug,
+    type: ev.type,
+    name: ev.name,
+    hostId: ev.hostId,
+    hostName: 'Mock host',
+    message: ev.message ?? '',
+    backgroundImageUrl: ev.backgroundImageUrl,
+    date: ev.date,
+    createdAt: ev.createdAt,
+    gifts: {
+      want: [
+        gift({ id: 'mock-wine', name: 'Bottle of red wine', quantity: 2, available: 2, description: 'A nice red wine' }),
+        gift({ id: 'mock-envelope', name: 'Money in an envelope', type: 'envelope', available: Number.POSITIVE_INFINITY }),
+      ],
+      nice: [gift({ id: 'mock-linen', name: 'Linen tablecloth set', description: 'Natural linen' })],
+      avoid: [gift({ id: 'mock-cards', name: 'Generic gift cards' })],
+    },
+    reservations: [],
+  }
+}
+
+/**
+ * Fetch one event. With a token the authenticated host endpoint is tried
+ * first (it includes reservations); when the requester is not the owner or
+ * the identifier is a public slug, it falls back to the public endpoint.
+ */
+export async function getEventById(idOrSlug: string, token?: string): Promise<EventDetail | null> {
+  if (USE_MOCKS) return mockDetail(idOrSlug)
+
+  const encoded = encodeURIComponent(idOrSlug)
+
+  if (token) {
+    const response = await apiFetch(`/events/${encoded}`, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+    })
+    if (response.ok) {
+      const dto = unwrapDto(await readJson(response))
+      return dto ? mapApiEventDetail(dto) : null
+    }
+    if (response.status !== 403 && response.status !== 404 && response.status !== 401) {
+      throwApiError(response, await readJson(response))
+    }
+    // Not the owner (or a public slug), so fall through to the public view.
+  }
+
+  const response = await apiFetch(`/events/public/${encoded}`, {
+    headers: { Accept: 'application/json' },
+  })
+  if (response.status === 404) return null
+  const data = await readJson(response)
+  if (!response.ok) throwApiError(response, data)
+  const dto = unwrapDto(data)
+  return dto ? mapApiEventDetail(dto) : null
+}
+
+/** List the authenticated host's own events. */
+export async function getMyEvents(token: string): Promise<Event[]> {
   if (USE_MOCKS) return mockEvents
 
-  let response: Response
-  try {
-    response = await fetch(`${API_URL}/events/user/${encodeURIComponent(userId)}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    })
-  } catch {
-    throw new EventApiError('Network error', 0, 'NETWORK')
-  }
-
-  if (response.status === 404) return []
-
-  let data: unknown = null
-  try {
-    const text = await response.text()
-    data = text ? JSON.parse(text) : null
-  } catch {
-    data = null
-  }
-
-  // Treat "no events found" response as empty list, not an error
-  if (!response.ok) {
-    const parsed = (data ?? {}) as { success?: boolean; message?: string; code?: string }
-    if (parsed.success === false && /no events found/i.test(parsed.message ?? '')) {
-      return []
-    }
-    throw new EventApiError(
-      parsed.message ?? `API error: ${response.status}`,
-      response.status,
-      parsed.code,
-    )
-  }
+  const response = await apiFetch('/events/mine', {
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+  })
+  const data = await readJson(response)
+  if (!response.ok) throwApiError(response, data)
 
   const list: ApiEventDto[] = Array.isArray(data)
     ? (data as ApiEventDto[])
     : Array.isArray((data as { data?: unknown })?.data)
       ? ((data as { data: ApiEventDto[] }).data)
-      : Array.isArray((data as { events?: unknown })?.events)
-        ? ((data as { events: ApiEventDto[] }).events)
-        : []
+      : []
 
   return list.map(mapApiEvent)
 }
 
-function buildEventPayload(input: CreateEventInput) {
+export function buildEventPayload(input: CreateEventInput) {
   const giftsByCategory = (cat: GiftCategory) =>
     input.gifts
       .filter((g) => g.category === cat)
       .map((g) => {
-        const gift: any = { name: g.name.trim(), quantity: g.quantity ?? 1 }
+        const isEnvelope = g.type === 'envelope'
+        const gift: Record<string, unknown> = isEnvelope
+          ? { name: g.name.trim() || 'Money in an envelope', type: 'envelope' }
+          : { name: g.name.trim(), quantity: g.quantity ?? 1 }
+        if (g.serverId && /^[0-9a-f]{24}$/i.test(g.serverId)) gift._id = g.serverId
         if (g.description?.trim()) gift.description = g.description.trim()
         if (g.priceRange) gift.priceInRange = `${g.priceRange[0]}-${g.priceRange[1]}`
+        else if (g.price) gift.priceInRange = String(g.price)
         if (g.store?.trim()) gift.whereToBuy = g.store.trim()
+        if (isEnvelope && g.suggestedAmounts?.length) gift.suggestedAmounts = g.suggestedAmounts
         return gift
       })
-      .filter((g) => g.name.length > 0)
+      .filter((g) => typeof g.name === 'string' && (g.name as string).length > 0)
 
   return {
     name: input.name.trim(),
     eventType: { name: input.type },
     ...(input.gender ? { gender: input.gender } : {}),
-    user: input.userId,
     message: (input.message ?? '').trim(),
     ...(input.backgroundImageUrl ? { backgroundImageUrl: input.backgroundImageUrl } : {}),
     // Send the date as ISO under `expirationDate` (the field also represents
-    // when the list expires for guests. Omitted if blank.
+    // when the list expires for guests). Omitted if blank.
     ...(input.date ? { expirationDate: new Date(input.date).toISOString() } : {}),
     iWant: giftsByCategory('want'),
     iAmOkWithIt: giftsByCategory('nice'),
@@ -334,108 +385,91 @@ function buildEventPayload(input: CreateEventInput) {
 }
 
 async function sendEventMutation(
-  url: string,
+  path: string,
   method: 'POST' | 'PUT',
   payload: ReturnType<typeof buildEventPayload>,
   token: string,
-): Promise<unknown> {
-  let response: Response
-  try {
-    response = await fetch(url, {
-      method,
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(payload),
-    })
-  } catch {
-    throw new EventApiError('Network error', 0, 'NETWORK')
-  }
-
-  let data: unknown = null
-  try {
-    const text = await response.text()
-    data = text ? JSON.parse(text) : null
-  } catch {
-    data = null
-  }
-
-  if (!response.ok) {
-    const parsed = (data ?? {}) as { message?: string; code?: string }
-    throw new EventApiError(
-      parsed.message ?? `API error: ${response.status}`,
-      response.status,
-      parsed.code,
-    )
-  }
-
-  return data
+): Promise<EventDetail | null> {
+  const response = await apiFetch(path, {
+    method,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  })
+  const data = await readJson(response)
+  if (!response.ok) throwApiError(response, data)
+  const dto = unwrapDto(data)
+  return dto ? mapApiEventDetail(dto) : null
 }
 
-export async function createEvent(input: CreateEventInput, token: string): Promise<unknown> {
+export async function createEvent(input: CreateEventInput, token: string): Promise<EventDetail | null> {
   if (USE_MOCKS) {
     const now = new Date().toISOString()
     return {
+      ...mockDetail('mock')!,
       id: `evt_${Math.random().toString(36).slice(2, 8)}`,
       slug: input.name.toLowerCase().replace(/\s+/g, '-') || 'novi-event',
       type: input.type,
       name: input.name,
-      date: now,
-      message: '',
-      hostId: input.userId,
+      date: input.date ?? now,
       createdAt: now,
-      updatedAt: now,
     }
   }
-  return sendEventMutation(`${API_URL}/events`, 'POST', buildEventPayload(input), token)
+  return sendEventMutation('/events', 'POST', buildEventPayload(input), token)
 }
 
 export async function updateEvent(
   id: string,
   input: CreateEventInput,
   token: string,
-): Promise<unknown> {
-  if (USE_MOCKS) {
-    return { id, ...buildEventPayload(input), updatedAt: new Date().toISOString() }
-  }
-  return sendEventMutation(
-    `${API_URL}/events/${encodeURIComponent(id)}`,
-    'PUT',
-    buildEventPayload(input),
-    token,
-  )
+): Promise<EventDetail | null> {
+  if (USE_MOCKS) return mockDetail(id)
+  return sendEventMutation(`/events/${encodeURIComponent(id)}`, 'PUT', buildEventPayload(input), token)
 }
 
-export async function deleteEvent(id: string): Promise<void> {
+export async function deleteEvent(id: string, token: string): Promise<void> {
   if (USE_MOCKS) return
-  await apiClient.delete(`/events/${id}`)
+  const response = await apiFetch(`/events/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) throwApiError(response, await readJson(response))
 }
 
+export interface ReserveGiftResult {
+  event: EventDetail | null
+  alreadyReserved: boolean
+}
+
+/**
+ * Reserve one unit of a gift as a guest. `requestToken` must stay identical
+ * across retries of the same submission; the backend uses it to make the
+ * call idempotent.
+ */
 export async function reserveGift(
-  eventId: string,
-  category: 'want' | 'nice' | 'avoid',
-  giftIndex: number,
-): Promise<EventDetail> {
+  eventSlug: string,
+  giftId: string,
+  guestName: string,
+  requestToken: string,
+  message?: string,
+): Promise<ReserveGiftResult> {
   if (USE_MOCKS) {
-    throw new Error('Mock not implemented')
+    return { event: mockDetail(eventSlug), alreadyReserved: false }
   }
-  const response = await fetch(
-    `${API_URL}/events/${encodeURIComponent(eventId)}/reserve`,
+  const response = await apiFetch(
+    `/events/public/${encodeURIComponent(eventSlug)}/reservations`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, index: giftIndex }),
-    }
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ giftId, guestName, requestToken, ...(message ? { message } : {}) }),
+    },
   )
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new EventApiError(error || 'Failed to reserve gift', response.status)
-  }
-
-  const data = await response.json()
-  const dto = data?.data ?? data
-  return mapApiEventDetail(dto)
+  const data = await readJson(response)
+  if (!response.ok) throwApiError(response, data)
+  const parsed = data as { alreadyReserved?: boolean }
+  const dto = unwrapDto(data)
+  return { event: dto ? mapApiEventDetail(dto) : null, alreadyReserved: parsed?.alreadyReserved === true }
 }

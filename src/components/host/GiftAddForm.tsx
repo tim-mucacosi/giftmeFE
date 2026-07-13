@@ -42,9 +42,11 @@ export function GiftAddForm({ open, onClose, onSubmit, category, envelopeAllowed
       ? {
           type: 'envelope',
           category,
-          name: t('common.buttons.copy') ? 'Koverta' : 'Koverta',
+          name: name.trim() || t('host.create.step2.form.envelopeDefaultName', 'Koverta'),
           description: description.trim() || undefined,
-          quantity: 999,
+          // Envelope gifts have no inventory; the backend treats them as
+          // unlimited regardless of quantity.
+          quantity: 1,
           suggestedAmounts,
         }
       : {
@@ -147,6 +149,12 @@ export function GiftAddForm({ open, onClose, onSubmit, category, envelopeAllowed
           </>
         ) : (
           <>
+            <Input
+              label={t('host.create.step2.form.envelopeTitleLabel')}
+              placeholder={t('host.create.step2.form.envelopeDefaultName', 'Koverta')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <Textarea
               label={t('host.create.step2.form.description')}
               value={description}

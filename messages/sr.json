@@ -144,6 +144,8 @@
       "emailPlaceholder": "tvoj@email.com",
       "submit": "Pošalji link",
       "successTitle": "Proverite poštu",
+      "successDesc": "Ako nalog sa ovim email-om postoji, poslali smo link za resetovanje na:",
+      "comingSoonNotice": "Slanje email-ova se još uvek podešava, pa link može malo duže da stigne. Hvala na strpljenju!",
       "backToLogin": "Nazad na prijavu",
       "tryAnotherEmail": "Pokušaj sa drugim email-om"
     },
@@ -229,7 +231,11 @@
           "birthday": "Rođendan",
           "baptism": "Krštenje",
           "patrons_day": "Slava",
-          "other": "Drugo"
+          "other": "Drugo",
+          "baby_shower": "Babine",
+          "anniversary": "Godišnjica",
+          "house_warming": "Useljenje",
+          "graduation": "Diplomiranje"
         },
         "nameLabel": "Naziv eventa",
         "namePlaceholder": "npr. Svadba Marka i Ane",
@@ -240,7 +246,10 @@
         "imageHint": "Prevuci sliku ovde ili klikni za upload",
         "genderLabel": "Pol",
         "genderBoy": "Dečak",
-        "genderGirl": "Devojčica"
+        "genderGirl": "Devojčica",
+        "imageErrorType": "Izaberite JPG, PNG, WebP ili GIF sliku.",
+        "imageErrorSize": "Slika je prevelika (najviše 10 MB).",
+        "imageRemove": "Ukloni sliku"
       },
       "step2": {
         "title": "Šta bi voleo da dobiješ? 🎁",
@@ -265,7 +274,9 @@
           "store": "Prodavnica (opciono)",
           "suggestedAmounts": "Predloženi iznosi",
           "submit": "Dodaj",
-          "editSubmit": "Sačuvaj izmene"
+          "editSubmit": "Sačuvaj izmene",
+          "envelopeTitleLabel": "Naziv (opciono)",
+          "envelopeDefaultName": "Koverta"
         }
       },
       "step3": {
@@ -301,13 +312,19 @@
         "copyLink": "Kopiraj link",
         "delete": "Obriši",
         "manage": "Upravljaj"
-      }
+      },
+      "deleteTitle": "Obrisati događaj?",
+      "deleteConfirm": "Da li sigurno želite da obrišete",
+      "deleteWarning": "Svi predlozi poklona i rezervacije gostiju za ovaj događaj biće trajno obrisani. Ovo se ne može poništiti.",
+      "deleteSuccess": "Događaj je obrisan"
     },
     "event": {
       "saveSuccess": "Event je ažuriran",
       "notFound": {
-        "title": "Event nije pronađen"
+        "title": "Event nije pronađen",
+        "desc": "Nismo mogli da pronađemo taj event. Link je možda pogrešan ili je event uklonjen."
       },
+      "notHostBanner": "Nisi domaćin ovog eventa, pa možeš samo da ga pregledaš.",
       "openView": "Otvori prikaz",
       "editTitle": "Uredi event",
       "viewTitle": "Detalji eventa",
@@ -327,29 +344,27 @@
       "unsaved": "Imate nesačuvane izmene.",
       "allSaved": "Sve izmene su sačuvane.",
       "discard": "Odbaci",
-      "save": "Sačuvaj izmene"
+      "save": "Sačuvaj izmene",
+      "status": {
+        "title": "Status poklona",
+        "reserved": "Rezervisano",
+        "envelopes": "Koverte",
+        "guests": "Rezervacije",
+        "unlimited": "Neograničeno",
+        "reservationsTitle": "Rezervacije gostiju",
+        "noReservations": "Još nema rezervacija. Podelite link sa gostima!",
+        "showAll": "Prikaži sve",
+        "showLess": "Prikaži manje"
+      },
+      "progress": {
+        "reserved": "Rezervisani pokloni"
+      }
     },
     "guest": {
       "private": {
         "title": "Ovaj event još nije javan",
         "hint": "Ako ste domaćin, prijavite se i otvorite event sa kontrolne table.",
         "home": "Nazad na početnu"
-      },
-      "heroMessage": "Lista ideja za poklon — izaberi onu koja ti odgovara i domaćin će biti obavešten.",
-      "welcome": "Izaberi poklon ispod — čim odabereš, domaćin će biti obavešten i ostali gosti neće ga videti kao dostupnog.",
-      "count": {
-        "available": "dostupno",
-        "allReserved": "Svi su rezervisani"
-      },
-      "empty": {
-        "want": "Nema poklona na vrhu liste.",
-        "nice": "Nema poklona u ovoj kategoriji."
-      },
-      "giftCard": {
-        "cta": "Ja ću ovo doneti →",
-        "reserved": "Već rezervisano",
-        "topWish": "Glavni želja",
-        "welcomeToo": "Dobrodošlo i ovo"
       },
       "heroMessage": "Lista sa pažljivo odabranim idejama — izaberi nešto što ti se čini prikladno.",
       "welcome": "Izaberi poklon ispod — čim izabereš, domaćin zna i ostali gosti ga neće videti kao dostupan.",
@@ -360,6 +375,17 @@
       "empty": {
         "want": "Još uvek ništa na listi želja.",
         "nice": "Još nema lepaih stvari."
+      },
+      "giftCard": {
+        "cta": "Ja ću ovo doneti →",
+        "reserved": "Već rezervisano",
+        "topWish": "Glavni želja",
+        "welcomeToo": "Dobrodošlo i ovo",
+        "unlimited": "Uvek dostupno",
+        "ctaEnvelope": "Donosim kovertu",
+        "suggestedAmounts": "Predloženi iznosi",
+        "remaining": "Preostalo",
+        "pickedByYou": "vaš izbor"
       },
       "sep": {
         "gold": "💛 Dobrodošlo i ovo",
@@ -386,7 +412,11 @@
       "modal": {
         "title": "Potvrdi izbor",
         "confirm": "Da, ja ću ovo doneti ✓",
-        "cancel": "Ne, vrati me nazad"
+        "cancel": "Ne, vrati me nazad",
+        "nameLabel": "Vaše ime",
+        "namePlaceholder": "npr. Ana",
+        "nameHint": "Vaše ime vidi samo domaćin, da zna ko je izabrao poklon.",
+        "nameError": "Unesite svoje ime (najmanje 2 slova)"
       },
       "success": {
         "title": "Divno! 🎉",
@@ -397,14 +427,35 @@
         "shareTitle": "Sviđa ti se ideja?",
         "shareSub": "Podeli sa nekim ko planira slavlje:",
         "close": "Zatvori"
+      },
+      "errors": {
+        "justTaken": "Uh — neko je upravo rezervisao ovaj poklon. Izaberite drugi?",
+        "expired": "Ovaj događaj je već prošao; lista poklona je zatvorena.",
+        "offline": "Izgleda da ste van mreže. Za rezervaciju poklona potrebna je internet veza."
       }
     }
   },
   "eventTypes": {
-    "wedding": "Svadba 💒",
-    "birthday": "Rođendan 🎂",
-    "baptism": "Krštenje 👶",
-    "patrons_day": "Slava 🕯️",
-    "other": "Drugo ✨"
+    "wedding": "Svadba",
+    "birthday": "Rođendan",
+    "baptism": "Krštenje",
+    "patrons_day": "Slava",
+    "other": "Drugo",
+    "baby_shower": "Babine",
+    "anniversary": "Godišnjica",
+    "house_warming": "Useljenje",
+    "graduation": "Diplomiranje",
+    "christmas": "Božić"
+  },
+  "time": {
+    "today": "Danas",
+    "tomorrow": "Sutra",
+    "yesterday": "Juče",
+    "inDays": "Za {n, plural, one {# dan} few {# dana} other {# dana}}",
+    "daysAgo": "Pre {n, plural, one {# dan} few {# dana} other {# dana}}",
+    "inMonths": "Za {n, plural, one {# mesec} few {# meseca} other {# meseci}}",
+    "monthsAgo": "Pre {n, plural, one {# mesec} few {# meseca} other {# meseci}}",
+    "inYears": "Za {n, plural, one {# godinu} few {# godine} other {# godina}}",
+    "yearsAgo": "Pre {n, plural, one {# godinu} few {# godine} other {# godina}}"
   }
 }

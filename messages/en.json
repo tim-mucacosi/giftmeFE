@@ -144,6 +144,8 @@
       "emailPlaceholder": "you@email.com",
       "submit": "Send reset link",
       "successTitle": "Check your inbox",
+      "successDesc": "If an account exists for this email, we've sent a reset link to:",
+      "comingSoonNotice": "Email delivery is still being set up, so the link may take a while to arrive. Thanks for your patience!",
       "backToLogin": "Back to sign in",
       "tryAnotherEmail": "Use a different email"
     },
@@ -229,7 +231,11 @@
           "birthday": "Birthday",
           "baptism": "Baptism",
           "patrons_day": "Patron saint's day",
-          "other": "Other"
+          "other": "Other",
+          "baby_shower": "Baby shower",
+          "anniversary": "Anniversary",
+          "house_warming": "Housewarming",
+          "graduation": "Graduation"
         },
         "nameLabel": "Event name",
         "namePlaceholder": "e.g. Marko & Ana's Wedding",
@@ -240,7 +246,10 @@
         "imageHint": "Drop an image here or click to upload",
         "genderLabel": "Gender",
         "genderBoy": "Boy",
-        "genderGirl": "Girl"
+        "genderGirl": "Girl",
+        "imageErrorType": "Please choose a JPG, PNG, WebP or GIF image.",
+        "imageErrorSize": "Image is too large (max 10 MB).",
+        "imageRemove": "Remove image"
       },
       "step2": {
         "title": "What would you like to receive? 🎁",
@@ -265,7 +274,9 @@
           "store": "Store (optional)",
           "suggestedAmounts": "Suggested amounts",
           "submit": "Add",
-          "editSubmit": "Save changes"
+          "editSubmit": "Save changes",
+          "envelopeTitleLabel": "Title (optional)",
+          "envelopeDefaultName": "Money in an envelope"
         }
       },
       "step3": {
@@ -301,13 +312,19 @@
         "copyLink": "Copy link",
         "delete": "Delete",
         "manage": "Manage"
-      }
+      },
+      "deleteTitle": "Delete event?",
+      "deleteConfirm": "Are you sure you want to delete",
+      "deleteWarning": "All gift suggestions and guest reservations for this event will be permanently deleted. This cannot be undone.",
+      "deleteSuccess": "Event deleted"
     },
     "event": {
       "saveSuccess": "Event updated",
       "notFound": {
-        "title": "Event not found"
+        "title": "Event not found",
+        "desc": "We couldn't find that event. The link may be wrong or the event was removed."
       },
+      "notHostBanner": "You're not the host of this event, so you can only view it.",
       "openView": "Open view",
       "editTitle": "Edit event",
       "viewTitle": "Event details",
@@ -327,7 +344,21 @@
       "unsaved": "You have unsaved changes.",
       "allSaved": "All changes saved.",
       "discard": "Discard",
-      "save": "Save changes"
+      "save": "Save changes",
+      "status": {
+        "title": "Gift status",
+        "reserved": "Reserved",
+        "envelopes": "Envelopes",
+        "guests": "Reservations",
+        "unlimited": "Unlimited",
+        "reservationsTitle": "Guest reservations",
+        "noReservations": "No reservations yet. Share the link with your guests!",
+        "showAll": "Show all",
+        "showLess": "Show less"
+      },
+      "progress": {
+        "reserved": "Gifts reserved"
+      }
     },
     "guest": {
       "private": {
@@ -349,7 +380,12 @@
         "cta": "I'll bring this →",
         "reserved": "Already reserved",
         "topWish": "Top wish",
-        "welcomeToo": "Welcome too"
+        "welcomeToo": "Welcome too",
+        "unlimited": "Always available",
+        "ctaEnvelope": "I’ll bring an envelope",
+        "suggestedAmounts": "Suggested amounts",
+        "remaining": "Remaining",
+        "pickedByYou": "your pick"
       },
       "sep": {
         "gold": "💛 Also welcome",
@@ -376,7 +412,11 @@
       "modal": {
         "title": "Confirm your choice",
         "confirm": "Yes, I'll bring it ✓",
-        "cancel": "No, take me back"
+        "cancel": "No, take me back",
+        "nameLabel": "Your name",
+        "namePlaceholder": "e.g. Ana",
+        "nameHint": "Only the host will see your name, so they know who picked the gift.",
+        "nameError": "Please enter your name (at least 2 characters)"
       },
       "success": {
         "title": "Wonderful! 🎉",
@@ -387,14 +427,35 @@
         "shareTitle": "Like this idea?",
         "shareSub": "Share with someone planning a celebration:",
         "close": "Close"
+      },
+      "errors": {
+        "justTaken": "Oh no — someone reserved this gift moments ago. Pick another one?",
+        "expired": "This event has already passed; the gift list is closed.",
+        "offline": "You appear to be offline. A connection is needed to reserve a gift."
       }
     }
   },
   "eventTypes": {
-    "wedding": "Wedding 💒",
-    "birthday": "Birthday 🎂",
-    "baptism": "Baptism 👶",
-    "patrons_day": "Patron saint's day 🕯️",
-    "other": "Other ✨"
+    "wedding": "Wedding",
+    "birthday": "Birthday",
+    "baptism": "Baptism",
+    "patrons_day": "Patron saint's day",
+    "other": "Other",
+    "baby_shower": "Baby shower",
+    "anniversary": "Anniversary",
+    "house_warming": "Housewarming",
+    "graduation": "Graduation",
+    "christmas": "Christmas"
+  },
+  "time": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "inDays": "In {n, plural, one {# day} other {# days}}",
+    "daysAgo": "{n, plural, one {# day} other {# days}} ago",
+    "inMonths": "In {n, plural, one {# month} other {# months}}",
+    "monthsAgo": "{n, plural, one {# month} other {# months}} ago",
+    "inYears": "In {n, plural, one {# year} other {# years}}",
+    "yearsAgo": "{n, plural, one {# year} other {# years}} ago"
   }
 }

@@ -16,24 +16,26 @@ import {
   type DetailGift,
 } from '@/lib/api/events'
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
+import { getEventEmoji } from '@/lib/utils/eventEmoji'
 import { cn } from '@/lib/utils/cn'
 import type { EventType } from '@/types/event'
 
-const TYPES: { key: EventType; icon: string }[] = [
-  { key: 'wedding', icon: '💒' },
-  { key: 'birthday', icon: '🎂' },
-  { key: 'baptism', icon: '👶' },
-  { key: 'patrons_day', icon: '🕯️' },
-  { key: 'other', icon: '✨' },
+const TYPE_KEYS: EventType[] = [
+  'wedding',
+  'birthday',
+  'baptism',
+  'baby_shower',
+  'anniversary',
+  'house_warming',
+  'graduation',
+  'patrons_day',
+  'other',
 ]
 
-const TYPE_EMOJIS: Record<EventType, string> = {
-  wedding: '💒',
-  birthday: '🎂',
-  baptism: '👶',
-  patrons_day: '🕯️',
-  other: '✨',
-}
+const TYPES: { key: EventType; icon: string }[] = TYPE_KEYS.map((key) => ({
+  key,
+  icon: getEventEmoji(key),
+}))
 
 type ViewMode = 'view' | 'edit'
 
@@ -110,9 +112,12 @@ export function EventDetailClient({ slug, mode }: Props) {
     }
   }, [ready, slug, t])
 
+  // Share the public slug, never the internal id (the edit route is opened
+  // with the Mongo id, which must not appear in guest-facing links).
+  const shareSlug = event?.slug ?? slug
   const eventUrl = useMemo(
-    () => (origin ? `${origin}/event/${slug}` : `/event/${slug}`),
-    [origin, slug],
+    () => (origin ? `${origin}/event/${shareSlug}` : `/event/${shareSlug}`),
+    [origin, shareSlug],
   )
 
   const isHost = !!user && !!event && user.id === event.hostId
@@ -206,9 +211,32 @@ export function EventDetailClient({ slug, mode }: Props) {
       avoid: draft.avoid.map((s) => s.trim()).filter(Boolean),
     }
 
+    // Map an edited name back to the original gift so its backend id,
+    // quantity, and metadata survive the edit (the API preserves
+    // reservations by matching gift ids).
+    const toGiftInput = (
+      names: string[],
+      originals: DetailGift[],
+      category: 'want' | 'nice' | 'avoid',
+    ) =>
+      names.map((name, idx) => {
+        const orig =
+          originals.find((g) => g.name === name) ?? originals[idx]
+        return {
+          name,
+          category,
+          type: orig?.type ?? ('item' as const),
+          serverId: orig?.id,
+          quantity: orig?.quantity ?? 1,
+          description: orig?.description,
+          store: orig?.whereToBuy,
+          suggestedAmounts: orig?.suggestedAmounts,
+        }
+      })
+
     setSaving(true)
     try {
-      await updateEvent(
+      const saved = await updateEvent(
         event.id,
         {
           name: cleanedDraft.name.trim(),
@@ -218,43 +246,17 @@ export function EventDetailClient({ slug, mode }: Props) {
           // otherwise PUT (full-replace) would silently wipe them.
           message: event.message,
           date: event.date,
+          backgroundImageUrl: event.backgroundImageUrl,
           gifts: [
-            ...cleanedDraft.want.map((name) => {
-              const orig = event.gifts.want.find((g) => g.name === name)
-              return { name, category: 'want' as const, quantity: orig?.quantity ?? 1, description: orig?.description, whereToBuy: orig?.whereToBuy, priceInRange: orig?.priceInRange }
-            }),
-            ...cleanedDraft.nice.map((name) => {
-              const orig = event.gifts.nice.find((g) => g.name === name)
-              return { name, category: 'nice' as const, quantity: orig?.quantity ?? 1, description: orig?.description, whereToBuy: orig?.whereToBuy, priceInRange: orig?.priceInRange }
-            }),
-            ...cleanedDraft.avoid.map((name) => {
-              const orig = event.gifts.avoid.find((g) => g.name === name)
-              return { name, category: 'avoid' as const, quantity: orig?.quantity ?? 1, description: orig?.description, whereToBuy: orig?.whereToBuy, priceInRange: orig?.priceInRange }
-            }),
+            ...toGiftInput(cleanedDraft.want, event.gifts.want, 'want'),
+            ...toGiftInput(cleanedDraft.nice, event.gifts.nice, 'nice'),
+            ...toGiftInput(cleanedDraft.avoid, event.gifts.avoid, 'avoid'),
           ],
         },
         session.accessToken,
       )
 
-      const nextEvent: EventDetail = {
-        ...event,
-        name: cleanedDraft.name.trim(),
-        type: cleanedDraft.type,
-        gifts: {
-          want: cleanedDraft.want.map((name) => {
-            const orig = event.gifts.want.find((g) => g.name === name)
-            return orig || { name, quantity: 1 }
-          }),
-          nice: cleanedDraft.nice.map((name) => {
-            const orig = event.gifts.nice.find((g) => g.name === name)
-            return orig || { name, quantity: 1 }
-          }),
-          avoid: cleanedDraft.avoid.map((name) => {
-            const orig = event.gifts.avoid.find((g) => g.name === name)
-            return orig || { name, quantity: 1 }
-          }),
-        },
-      }
+      const nextEvent = saved ?? event
       setEvent(nextEvent)
       setDraft(detailToDraft(nextEvent))
       toast.success(t('host.event.saveSuccess', 'Event updated'))
@@ -326,7 +328,7 @@ export function EventDetailClient({ slug, mode }: Props) {
         <div className="flex flex-col gap-5">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-coral/15 to-gold/15 text-3xl">
-              {TYPE_EMOJIS[draft.type] ?? '✨'}
+              {getEventEmoji(draft.type, event.gender)}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
@@ -415,6 +417,9 @@ export function EventDetailClient({ slug, mode }: Props) {
         </div>
       </section>
 
+      {/* Reservation status (host only) */}
+      {isHost ? <HostGiftStatus event={event} /> : null}
+
       {/* Gifts */}
       <section className="mt-6 flex flex-col gap-4">
         <header className="flex items-end justify-between">
@@ -474,10 +479,7 @@ export function EventDetailClient({ slug, mode }: Props) {
       {/* Save bar (host edit only) */}
       {canEdit ? (
         <div
-          className={cn(
-            'sticky bottom-0 z-20 -mx-4 mt-8 border-t border-gray-light bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8',
-            !isDirty && 'opacity-90',
-          )}
+          className="sticky bottom-3 z-20 mt-8 rounded-2xl border border-gray-light bg-white px-4 py-3 shadow-[0_-4px_24px_rgba(0,0,0,0.10),0_4px_16px_rgba(0,0,0,0.08)] sm:px-6"
         >
           <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-dark-light">
@@ -521,6 +523,154 @@ export function EventDetailClient({ slug, mode }: Props) {
         </Link>
       </div>
     </Shell>
+  )
+}
+
+function HostGiftStatus({ event }: { event: EventDetail }) {
+  const { t } = useTranslate()
+  const [showAllReservations, setShowAllReservations] = useState(false)
+
+  const items = [...event.gifts.want, ...event.gifts.nice]
+  const itemGifts = items.filter((g) => g.type === 'item')
+  const envelopes = items.filter((g) => g.type === 'envelope')
+  const reservations = event.reservations ?? []
+
+  const totalDesired = itemGifts.reduce((acc, g) => acc + g.quantity, 0)
+  const totalReserved = itemGifts.reduce((acc, g) => acc + g.reservedQuantity, 0)
+  const envelopeCount = envelopes.reduce((acc, g) => acc + g.reservedQuantity, 0)
+
+  const visibleReservations = showAllReservations ? reservations : reservations.slice(0, 5)
+
+  return (
+    <section className="mt-6 rounded-3xl border border-gray-light bg-white p-5 shadow-card sm:p-6">
+      <h2 className="text-lg font-extrabold tracking-tight text-dark sm:text-xl">
+        📊 {t('host.event.status.title')}
+      </h2>
+
+      {/* Summary tiles */}
+      <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-2xl bg-coral/10 px-2 py-3">
+          <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
+            {t('host.event.status.reserved')}
+          </dt>
+          <dd className="mt-0.5 text-xl font-extrabold text-coral">
+            {totalReserved}/{totalDesired}
+          </dd>
+        </div>
+        <div className="rounded-2xl bg-gold/15 px-2 py-3">
+          <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
+            {t('host.event.status.envelopes')}
+          </dt>
+          <dd className="mt-0.5 text-xl font-extrabold text-gold-dark">
+            {envelopes.length > 0 ? envelopeCount : '—'}
+          </dd>
+        </div>
+        <div className="rounded-2xl bg-gray-light/40 px-2 py-3">
+          <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
+            {t('host.event.status.guests')}
+          </dt>
+          <dd className="mt-0.5 text-xl font-extrabold text-dark">
+            {reservations.length}
+          </dd>
+        </div>
+      </dl>
+
+      {/* Per-gift progress */}
+      {items.length > 0 ? (
+        <ul className="mt-4 flex flex-col gap-2.5">
+          {items.map((gift) => {
+            const soldOut = gift.type === 'item' && gift.reservedQuantity >= gift.quantity
+            return (
+              <li key={gift.id || gift.name} className="rounded-xl bg-bg px-3 py-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="min-w-0 flex-1 break-words text-sm font-semibold text-dark">
+                    {gift.type === 'envelope' ? '💌 ' : ''}
+                    {gift.name}
+                  </span>
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-full px-2 py-0.5 text-xs font-bold',
+                      gift.type === 'envelope'
+                        ? 'bg-gold/20 text-gold-dark'
+                        : soldOut
+                          ? 'bg-success/15 text-dark'
+                          : 'bg-coral/10 text-coral',
+                    )}
+                  >
+                    {gift.type === 'envelope'
+                      ? `${gift.reservedQuantity} · ${t('host.event.status.unlimited')}`
+                      : `${gift.reservedQuantity}/${gift.quantity}${soldOut ? ' ✓' : ''}`}
+                  </span>
+                </div>
+                {gift.type === 'item' ? (
+                  <div
+                    className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-gray-light/60"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={gift.quantity}
+                    aria-valuenow={gift.reservedQuantity}
+                    aria-label={`${gift.name}: ${gift.reservedQuantity}/${gift.quantity}`}
+                  >
+                    <div
+                      className={cn(
+                        'h-full rounded-full transition-all',
+                        soldOut ? 'bg-success' : 'bg-gradient-to-r from-coral to-gold',
+                      )}
+                      style={{
+                        width: `${Math.min(100, (gift.reservedQuantity / gift.quantity) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                ) : null}
+              </li>
+            )
+          })}
+        </ul>
+      ) : null}
+
+      {/* Reservation list */}
+      <h3 className="mt-5 text-sm font-extrabold uppercase tracking-wide text-dark-light">
+        {t('host.event.status.reservationsTitle')}
+      </h3>
+      {reservations.length === 0 ? (
+        <p className="mt-2 rounded-xl border-2 border-dashed border-gray-light px-3 py-4 text-center text-sm text-dark-light">
+          {t('host.event.status.noReservations')}
+        </p>
+      ) : (
+        <>
+          <ul className="mt-2 flex flex-col gap-1.5">
+            {visibleReservations.map((r) => (
+              <li
+                key={r.id}
+                className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 rounded-xl bg-bg px-3 py-2 text-sm"
+              >
+                <span className="font-semibold text-dark">{r.guestName}</span>
+                <span className="min-w-0 flex-1 truncate text-dark-light">
+                  → {r.giftName}
+                </span>
+                <span className="shrink-0 text-xs text-gray">
+                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
+                </span>
+                {r.message ? (
+                  <span className="w-full text-xs italic text-dark-light">“{r.message}”</span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {reservations.length > 5 ? (
+            <button
+              type="button"
+              onClick={() => setShowAllReservations((s) => !s)}
+              className="mt-2 text-sm font-semibold text-coral hover:text-coral-dark"
+            >
+              {showAllReservations
+                ? t('host.event.status.showLess')
+                : `${t('host.event.status.showAll')} (${reservations.length})`}
+            </button>
+          ) : null}
+        </>
+      )}
+    </section>
   )
 }
 

@@ -144,6 +144,8 @@
       "emailPlaceholder": "du@email.com",
       "submit": "Link senden",
       "successTitle": "Prüfe deinen Posteingang",
+      "successDesc": "Falls es ein Konto mit dieser E-Mail gibt, haben wir einen Link zum Zurücksetzen gesendet an:",
+      "comingSoonNotice": "Der E-Mail-Versand wird gerade noch eingerichtet, daher kann es etwas dauern, bis der Link ankommt. Danke für deine Geduld!",
       "backToLogin": "Zurück zur Anmeldung",
       "tryAnotherEmail": "Andere E-Mail versuchen"
     },
@@ -229,7 +231,11 @@
           "birthday": "Geburtstag",
           "baptism": "Taufe",
           "patrons_day": "Namenstag",
-          "other": "Andere"
+          "other": "Andere",
+          "baby_shower": "Babyparty",
+          "anniversary": "Jubiläum",
+          "house_warming": "Einweihungsfeier",
+          "graduation": "Abschlussfeier"
         },
         "nameLabel": "Event-Name",
         "namePlaceholder": "z.B. Hochzeit von Marko & Ana",
@@ -240,7 +246,10 @@
         "imageHint": "Bild hierhin ziehen oder klicken",
         "genderLabel": "Geschlecht",
         "genderBoy": "Junge",
-        "genderGirl": "Mädchen"
+        "genderGirl": "Mädchen",
+        "imageErrorType": "Bitte wähle ein JPG-, PNG-, WebP- oder GIF-Bild.",
+        "imageErrorSize": "Bild ist zu groß (max. 10 MB).",
+        "imageRemove": "Bild entfernen"
       },
       "step2": {
         "title": "Was möchtest du bekommen? 🎁",
@@ -265,7 +274,9 @@
           "store": "Laden (optional)",
           "suggestedAmounts": "Vorgeschlagene Beträge",
           "submit": "Hinzufügen",
-          "editSubmit": "Änderungen speichern"
+          "editSubmit": "Änderungen speichern",
+          "envelopeTitleLabel": "Titel (optional)",
+          "envelopeDefaultName": "Geldumschlag"
         }
       },
       "step3": {
@@ -301,13 +312,19 @@
         "copyLink": "Link kopieren",
         "delete": "Löschen",
         "manage": "Verwalten"
-      }
+      },
+      "deleteTitle": "Ereignis löschen?",
+      "deleteConfirm": "Möchtest du wirklich löschen:",
+      "deleteWarning": "Alle Geschenkvorschläge und Gästereservierungen dieses Ereignisses werden dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden.",
+      "deleteSuccess": "Ereignis gelöscht"
     },
     "event": {
       "saveSuccess": "Event aktualisiert",
       "notFound": {
-        "title": "Event nicht gefunden"
+        "title": "Event nicht gefunden",
+        "desc": "Wir konnten dieses Event nicht finden. Der Link ist möglicherweise falsch oder das Event wurde entfernt."
       },
+      "notHostBanner": "Du bist nicht der Host dieses Events und kannst es daher nur ansehen.",
       "openView": "Ansicht öffnen",
       "editTitle": "Event bearbeiten",
       "viewTitle": "Event-Details",
@@ -327,7 +344,21 @@
       "unsaved": "Du hast ungespeicherte Änderungen.",
       "allSaved": "Alle Änderungen gespeichert.",
       "discard": "Verwerfen",
-      "save": "Änderungen speichern"
+      "save": "Änderungen speichern",
+      "status": {
+        "title": "Geschenkstatus",
+        "reserved": "Reserviert",
+        "envelopes": "Umschläge",
+        "guests": "Reservierungen",
+        "unlimited": "Unbegrenzt",
+        "reservationsTitle": "Gästereservierungen",
+        "noReservations": "Noch keine Reservierungen. Teile den Link mit deinen Gästen!",
+        "showAll": "Alle anzeigen",
+        "showLess": "Weniger anzeigen"
+      },
+      "progress": {
+        "reserved": "Reservierte Geschenke"
+      }
     },
     "guest": {
       "private": {
@@ -349,7 +380,12 @@
         "cta": "Das bringe ich mit →",
         "reserved": "Bereits reserviert",
         "topWish": "Top-Wunsch",
-        "welcomeToo": "Auch willkommen"
+        "welcomeToo": "Auch willkommen",
+        "unlimited": "Immer verfügbar",
+        "ctaEnvelope": "Ich bringe einen Umschlag",
+        "suggestedAmounts": "Vorgeschlagene Beträge",
+        "remaining": "Verbleibend",
+        "pickedByYou": "deine Wahl"
       },
       "sep": {
         "gold": "💛 Auch willkommen",
@@ -376,7 +412,11 @@
       "modal": {
         "title": "Wahl bestätigen",
         "confirm": "Ja, das bringe ich mit ✓",
-        "cancel": "Nein, zurück"
+        "cancel": "Nein, zurück",
+        "nameLabel": "Dein Name",
+        "namePlaceholder": "z. B. Ana",
+        "nameHint": "Nur der Gastgeber sieht deinen Namen, damit er weiß, wer das Geschenk gewählt hat.",
+        "nameError": "Bitte gib deinen Namen ein (mindestens 2 Zeichen)"
       },
       "success": {
         "title": "Wunderbar! 🎉",
@@ -387,14 +427,35 @@
         "shareTitle": "Gefällt dir die Idee?",
         "shareSub": "Teile es mit jemandem, der eine Feier plant:",
         "close": "Schließen"
+      },
+      "errors": {
+        "justTaken": "Oh nein — jemand hat dieses Geschenk gerade reserviert. Wähle ein anderes?",
+        "expired": "Dieses Ereignis ist bereits vorbei; die Geschenkliste ist geschlossen.",
+        "offline": "Du scheinst offline zu sein. Zum Reservieren ist eine Verbindung nötig."
       }
     }
   },
   "eventTypes": {
-    "wedding": "Hochzeit 💒",
-    "birthday": "Geburtstag 🎂",
-    "baptism": "Taufe 👶",
-    "patrons_day": "Namenstag 🕯️",
-    "other": "Andere ✨"
+    "wedding": "Hochzeit",
+    "birthday": "Geburtstag",
+    "baptism": "Taufe",
+    "patrons_day": "Namenstag",
+    "other": "Andere",
+    "baby_shower": "Babyparty",
+    "anniversary": "Jubiläum",
+    "house_warming": "Einweihungsfeier",
+    "graduation": "Abschlussfeier",
+    "christmas": "Weihnachten"
+  },
+  "time": {
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "yesterday": "Gestern",
+    "inDays": "In {n, plural, one {# Tag} other {# Tagen}}",
+    "daysAgo": "Vor {n, plural, one {# Tag} other {# Tagen}}",
+    "inMonths": "In {n, plural, one {# Monat} other {# Monaten}}",
+    "monthsAgo": "Vor {n, plural, one {# Monat} other {# Monaten}}",
+    "inYears": "In {n, plural, one {# Jahr} other {# Jahren}}",
+    "yearsAgo": "Vor {n, plural, one {# Jahr} other {# Jahren}}"
   }
 }

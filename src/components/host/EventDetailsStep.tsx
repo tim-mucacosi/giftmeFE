@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslate } from '@tolgee/react'
 import { Input } from '@/components/shared/Input'
 import { Textarea } from '@/components/shared/Textarea'
 import { Button } from '@/components/shared/Button'
+import { validateImageFile } from '@/lib/utils/imageUpload'
 import { cn } from '@/lib/utils/cn'
 import type { EventType, EventGender } from '@/types/event'
 
@@ -20,6 +22,10 @@ const TYPES: { key: EventType; icon: string }[] = [
   { key: 'wedding', icon: '💒' },
   { key: 'birthday', icon: '🎂' },
   { key: 'baptism', icon: '👶' },
+  { key: 'baby_shower', icon: '🍼' },
+  { key: 'anniversary', icon: '💞' },
+  { key: 'house_warming', icon: '🏡' },
+  { key: 'graduation', icon: '🎓' },
   { key: 'patrons_day', icon: '🕯️' },
   { key: 'other', icon: '✨' },
 ]
@@ -34,6 +40,7 @@ interface Props {
 
 export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, errors }: Props) {
   const { t } = useTranslate()
+  const [imageError, setImageError] = useState<string | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -136,6 +143,8 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
           className="relative flex min-h-[200px] max-h-[300px] cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-gray-light bg-white transition-colors hover:border-coral hover:bg-coral/5"
         >
           {value.backgroundImageUrl ? (
+            // Local blob/data-URL preview; next/image cannot optimize these.
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={value.backgroundImageUrl}
               alt="Preview"
@@ -152,17 +161,46 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
           <input
             id="bg-image"
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             className="sr-only"
             onChange={(e) => {
               const file = e.target.files?.[0]
               if (!file) return
+              const problem = validateImageFile(file)
+              if (problem) {
+                setImageError(
+                  problem === 'type'
+                    ? t('host.create.step1.imageErrorType')
+                    : t('host.create.step1.imageErrorSize'),
+                )
+                e.target.value = ''
+                return
+              }
+              setImageError(null)
               const url = URL.createObjectURL(file)
               onChange({ ...value, backgroundImageUrl: url })
               onImageFileChange?.(file)
             }}
           />
         </label>
+        {imageError ? (
+          <p className="text-sm font-medium text-coral" role="alert">
+            {imageError}
+          </p>
+        ) : null}
+        {value.backgroundImageUrl ? (
+          <button
+            type="button"
+            onClick={() => {
+              onChange({ ...value, backgroundImageUrl: undefined })
+              onImageFileChange?.(undefined)
+              setImageError(null)
+            }}
+            className="self-start rounded-full border-2 border-gray-light px-3 py-1 text-xs font-semibold text-dark-light transition-colors hover:border-coral hover:text-coral"
+          >
+            🗑 {t('host.create.step1.imageRemove')}
+          </button>
+        ) : null}
       </div>
 
       <div className="flex justify-end">

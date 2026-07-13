@@ -11,7 +11,7 @@ import { createEvent, updateEvent, EventApiError, getEventById } from '@/lib/api
 import { useToast } from '@/components/shared/Toast'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
-import { fileToBase64 } from '@/lib/utils/imageUpload'
+import { compressImageToDataUrl } from '@/lib/utils/imageUpload'
 
 interface Draft {
   step: number
@@ -48,6 +48,22 @@ export default function CreatePage() {
         const event = await getEventById(eventId, session?.accessToken)
 
         if (event) {
+          const toDraftGift =
+            (category: 'want' | 'nice' | 'avoid') =>
+            (gift: (typeof event.gifts.want)[number], idx: number): DraftGift => ({
+              // Keep the backend id so edits preserve existing reservations.
+              id: gift.id || `tmp_${Math.random().toString(36).slice(2, 8)}`,
+              eventId: 'draft',
+              name: gift.name,
+              description: gift.description,
+              category,
+              type: gift.type,
+              quantity: gift.quantity,
+              reservedQuantity: gift.reservedQuantity,
+              suggestedAmounts: gift.suggestedAmounts,
+              store: gift.whereToBuy,
+              order: idx,
+            })
           setDraft({
             step: 2,
             details: {
@@ -59,42 +75,12 @@ export default function CreatePage() {
               backgroundImageUrl: event.backgroundImageUrl,
             },
             gifts: [
-              ...event.gifts.want.map((gift, idx) => ({
-                id: `tmp_${Math.random().toString(36).slice(2, 8)}`,
-                eventId: 'draft' as const,
-                name: gift.name,
-                description: gift.description,
-                category: 'want' as const,
-                type: 'item' as const,
-                quantity: gift.quantity,
-                reservedQuantity: 0,
-                order: idx,
-              })),
-              ...event.gifts.nice.map((gift, idx) => ({
-                id: `tmp_${Math.random().toString(36).slice(2, 8)}`,
-                eventId: 'draft' as const,
-                name: gift.name,
-                description: gift.description,
-                category: 'nice' as const,
-                type: 'item' as const,
-                quantity: gift.quantity,
-                reservedQuantity: 0,
-                order: idx,
-              })),
-              ...event.gifts.avoid.map((gift, idx) => ({
-                id: `tmp_${Math.random().toString(36).slice(2, 8)}`,
-                eventId: 'draft' as const,
-                name: gift.name,
-                description: gift.description,
-                category: 'avoid' as const,
-                type: 'item' as const,
-                quantity: gift.quantity,
-                reservedQuantity: 0,
-                order: idx,
-              })),
+              ...event.gifts.want.map(toDraftGift('want')),
+              ...event.gifts.nice.map(toDraftGift('nice')),
+              ...event.gifts.avoid.map(toDraftGift('avoid')),
             ],
           })
-          setCreatedEventId(eventId)
+          setCreatedEventId(event.slug)
         }
       } catch (err) {
         toast.error(t('common.errors.generic'))
@@ -146,7 +132,8 @@ export default function CreatePage() {
       let backgroundImageUrl: string | undefined
 
       if (draft.imageFile) {
-        backgroundImageUrl = await fileToBase64(draft.imageFile)
+        // Downscale/re-encode so the payload stays within the API's cap.
+        backgroundImageUrl = await compressImageToDataUrl(draft.imageFile)
       }
 
       const eventPayload = {
@@ -155,32 +142,18 @@ export default function CreatePage() {
         gender: draft.details.gender,
         userId: user.id,
         message: draft.details.message,
-        backgroundImageUrl,
+        backgroundImageUrl: backgroundImageUrl ?? draft.details.backgroundImageUrl,
         date: draft.details.date,
-        gifts: draft.gifts,
+        // Carry the backend gift id (when editing) so reservations survive.
+        gifts: draft.gifts.map((g) => ({ ...g, serverId: g.id })),
       }
 
-      const response = eventId
+      const saved = eventId
         ? await updateEvent(eventId, eventPayload, session.accessToken)
         : await createEvent(eventPayload, session.accessToken)
 
-      const created = response as
-        | { data?: { _id?: string; id?: string } }
-        | { event?: { _id?: string; id?: string } }
-        | { _id?: string; id?: string }
-        | null
-      const inner =
-        (created && 'data' in created && created.data) ||
-        (created && 'event' in created && created.event) ||
-        (created as { _id?: string; id?: string } | null) ||
-        null
-      const responseEventId = inner?._id ?? inner?.id ?? null
-      // For editing, keep the original eventId; for creating, use the response ID
-      if (!eventId) {
-        setCreatedEventId(responseEventId)
-      } else {
-        setCreatedEventId(eventId)
-      }
+      // The share URL uses the public slug, never the internal id.
+      setCreatedEventId(saved?.slug ?? eventId ?? null)
       toast.success(
         eventId
           ? t('host.create.step3.successTitle', 'Event updated!')

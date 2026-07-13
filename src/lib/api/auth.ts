@@ -97,22 +97,15 @@ export async function registerUser(input: RegisterInput): Promise<AuthResponse> 
     await mockDelay()
     return mockAuthResponse(input, input.name)
   }
-  try {
-    // Normalize token field name
-    const raw = await authRequest<AuthResponse & { token?: string }>('/auth/register', { body: input })
-    if (!raw.accessToken && raw.token) {
-      raw.accessToken = raw.token
-    }
-    if (!raw.refreshToken) {
-      raw.refreshToken = ''
-    }
-    return raw
-  } catch (err) {
-    if (err instanceof AuthError && err.code === 'NETWORK') {
-      return mockAuthResponse(input, input.name)
-    }
-    throw err
+  // Normalize token field name
+  const raw = await authRequest<AuthResponse & { token?: string }>('/auth/register', { body: input })
+  if (!raw.accessToken && raw.token) {
+    raw.accessToken = raw.token
   }
+  if (!raw.refreshToken) {
+    raw.refreshToken = ''
+  }
+  return raw
 }
 
 // ---------------------------------------------------------------------------
@@ -135,22 +128,15 @@ export async function loginUser(input: LoginInput): Promise<AuthResponse> {
     await mockDelay()
     return mockAuthResponse(input)
   }
-  try {
-    // Normalize token field name
-    const raw = await authRequest<AuthResponse & { token?: string }>('/auth/login', { body: input })
-    if (!raw.accessToken && raw.token) {
-      raw.accessToken = raw.token
-    }
-    if (!raw.refreshToken) {
-      raw.refreshToken = ''
-    }
-    return raw
-  } catch (err) {
-    if (err instanceof AuthError && err.code === 'NETWORK') {
-      return mockAuthResponse(input)
-    }
-    throw err
+  // Normalize token field name
+  const raw = await authRequest<AuthResponse & { token?: string }>('/auth/login', { body: input })
+  if (!raw.accessToken && raw.token) {
+    raw.accessToken = raw.token
   }
+  if (!raw.refreshToken) {
+    raw.refreshToken = ''
+  }
+  return raw
 }
 
 // Google OAuth login

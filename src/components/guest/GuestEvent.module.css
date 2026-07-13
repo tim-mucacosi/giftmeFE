@@ -2,33 +2,27 @@
   position: absolute;
   inset: 0;
   z-index: 0;
+  /* Fallback when the host has no cover image. */
   background:
-    radial-gradient(ellipse at 30% 20%, #ffd1ba 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 60%, #ffb8b8 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, #ffc9a8 0%, transparent 40%),
-    linear-gradient(135deg, #e8917e 0%, #d4756b 25%, #c9836f 50%, #d4977a 75%, #e8a88e 100%);
+    radial-gradient(ellipse at 22% 12%, rgba(255, 217, 61, 0.45) 0%, transparent 45%),
+    radial-gradient(ellipse at 82% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 40%),
+    radial-gradient(ellipse at 55% 95%, rgba(255, 120, 120, 0.4) 0%, transparent 55%),
+    linear-gradient(160deg, #ffb199 0%, #ff7d70 35%, #ff6b6b 60%, #e05e73 85%, #cf5470 100%);
   background-size: cover;
   background-position: center;
-}
-
-.heroBg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(255, 180, 150, 0.2) 0%, transparent 35%);
 }
 
 .heroOverlay {
   position: absolute;
   inset: 0;
   z-index: 1;
+  /* Dark rose scrim: contrast for the white hero text over both the
+     fallback gradient and host-uploaded cover photos. */
   background: linear-gradient(
     to top,
-    rgba(30, 20, 15, 0.75) 0%,
-    rgba(30, 20, 15, 0.3) 40%,
-    rgba(30, 20, 15, 0.05) 100%
+    rgba(70, 15, 40, 0.5) 0%,
+    rgba(70, 15, 40, 0.12) 45%,
+    rgba(70, 15, 40, 0) 100%
   );
 }
 

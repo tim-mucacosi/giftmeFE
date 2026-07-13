@@ -20,4 +20,5 @@ export const apiClient = {
   delete: <T>(p: string, o?: RequestOptions) => request<T>(p, { ...o, method: 'DELETE' }),
 }
 
-export const USE_MOCKS = (process.env.NEXT_PUBLIC_USE_MOCKS ?? 'true') !== 'false'
+// Opt-in only: mock data must never activate in a misconfigured prod build.
+export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === 'true'

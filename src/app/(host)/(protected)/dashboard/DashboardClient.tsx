@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useTranslate } from '@tolgee/react'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
 import { useToast } from '@/components/shared/Toast'
-import { getEventsByUser } from '@/lib/api/events'
+import { Modal } from '@/components/shared/Modal'
+import { Button } from '@/components/shared/Button'
+import { getMyEvents, deleteEvent, EventApiError } from '@/lib/api/events'
+import { getEventEmoji } from '@/lib/utils/eventEmoji'
 import { cn } from '@/lib/utils/cn'
 import type { Event, EventType } from '@/types/event'
 
@@ -16,23 +19,6 @@ const TODAY = new Date()
 // Types
 // ---------------------------------------------------------------------------
 type StatusFilter = 'all' | 'active' | 'past'
-
-function getEventEmoji(type: EventType, gender?: string): string {
-  if (type === 'birthday') {
-    return gender === 'girl' ? '🎂👧' : gender === 'boy' ? '🎂👦' : '🎂'
-  }
-  if (type === 'baptism') {
-    return gender === 'girl' ? '⛪👧' : gender === 'boy' ? '⛪👦' : '⛪'
-  }
-  const TYPE_EMOJIS: Record<EventType, string> = {
-    wedding:     '💒',
-    birthday:    '🎂',
-    baptism:     '⛪',
-    patrons_day: '🕯️',
-    other:       '✨',
-  }
-  return TYPE_EMOJIS[type] ?? '✨'
-}
 
 // Calendar-aware {years, months, days} diff. `from` and `to` should already
 // be normalized to local-midnight to avoid time-of-day rounding errors.
@@ -52,27 +38,25 @@ function diffYMD(from: Date, to: Date) {
   return { y, m, d }
 }
 
-function pluralize(n: number, one: string, many: string) {
-  return `${n} ${n === 1 ? one : many}`
-}
-
-function formatTimeUntil(target: Date, now: Date): string {
+// Localizable descriptor for "how far away is this date", reduced to the
+// largest unit. The time.* translation keys carry the ICU plural forms.
+function timeUntilDescriptor(
+  target: Date,
+  now: Date,
+): { key: string; params?: { n: number } } {
   const startOf = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth(), date.getDate())
   const t = startOf(target)
   const n = startOf(now)
-  if (+t === +n) return 'Today'
+  if (+t === +n) return { key: 'time.today' }
 
   const past = t < n
   const { y, m, d } = diffYMD(past ? t : n, past ? n : t)
-  if (y === 0 && m === 0 && d === 1) return past ? 'Yesterday' : 'Tomorrow'
+  if (y === 0 && m === 0 && d === 1) return { key: past ? 'time.yesterday' : 'time.tomorrow' }
 
-  const parts: string[] = []
-  if (y > 0) parts.push(pluralize(y, 'year', 'years'))
-  if (m > 0) parts.push(pluralize(m, 'month', 'months'))
-  if (d > 0) parts.push(pluralize(d, 'day', 'days'))
-  const phrase = parts.join(', ')
-  return past ? `${phrase} ago` : `In ${phrase}`
+  if (y > 0) return { key: past ? 'time.yearsAgo' : 'time.inYears', params: { n: y } }
+  if (m > 0) return { key: past ? 'time.monthsAgo' : 'time.inMonths', params: { n: m } }
+  return { key: past ? 'time.daysAgo' : 'time.inDays', params: { n: Math.max(1, d) } }
 }
 
 // ---------------------------------------------------------------------------
@@ -90,10 +74,26 @@ export function DashboardClient() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Event | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') setOrigin(window.location.origin)
   }, [])
+
+  const fetchEvents = useCallback(() => {
+    const session = loadSession()
+    const token = session?.accessToken ?? ''
+    setLoading(true)
+    setErrorMessage(null)
+    return getMyEvents(token)
+      .then(setEvents)
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : t('common.errors.generic')
+        setErrorMessage(message)
+      })
+      .finally(() => setLoading(false))
+  }, [t])
 
   useEffect(() => {
     if (!ready) return
@@ -102,31 +102,27 @@ export function DashboardClient() {
       setLoading(false)
       return
     }
+    fetchEvents()
+  }, [ready, user, fetchEvents])
+
+  const confirmDelete = async () => {
+    if (!deleteTarget || deleting) return
     const session = loadSession()
-    const token = session?.accessToken ?? ''
-
-    let cancelled = false
-    setLoading(true)
-    setErrorMessage(null)
-
-    getEventsByUser(user.id, token)
-      .then((list) => {
-        if (!cancelled) setEvents(list)
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        const message = err instanceof Error ? err.message : t('common.errors.generic')
-        setErrorMessage(message)
-        toast.error(message)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-
-    return () => {
-      cancelled = true
+    if (!session?.accessToken) return
+    setDeleting(true)
+    try {
+      await deleteEvent(deleteTarget.id, session.accessToken)
+      setEvents((prev) => prev.filter((e) => e.id !== deleteTarget.id))
+      setDeleteTarget(null)
+      toast.success(t('host.dashboard.deleteSuccess'))
+    } catch (err) {
+      const message =
+        err instanceof EventApiError ? err.message : t('common.errors.generic')
+      toast.error(message)
+    } finally {
+      setDeleting(false)
     }
-  }, [ready, user, t, toast])
+  }
 
   const availableTypes = useMemo(
     () => Array.from(new Set(events.map((e) => e.type))),
@@ -247,22 +243,7 @@ export function DashboardClient() {
           <p className="px-6 text-sm text-dark">{errorMessage}</p>
           <button
             type="button"
-            onClick={() => {
-              if (user) {
-                const session = loadSession()
-                setLoading(true)
-                setErrorMessage(null)
-                getEventsByUser(user.id, session?.accessToken ?? '')
-                  .then(setEvents)
-                  .catch((err: unknown) => {
-                    const message =
-                      err instanceof Error ? err.message : t('common.errors.generic')
-                    setErrorMessage(message)
-                    toast.error(message)
-                  })
-                  .finally(() => setLoading(false))
-              }
-            }}
+            onClick={() => fetchEvents()}
             className="rounded-full bg-coral px-4 py-1.5 text-sm font-semibold text-white hover:bg-coral-dark"
           >
             {t('common.buttons.retry')}
@@ -283,10 +264,53 @@ export function DashboardClient() {
       ) : (
         <ul className="flex flex-col gap-3">
           {filtered.map((event) => (
-            <EventCard key={event.id} event={event} origin={origin} />
+            <EventCard
+              key={event.id}
+              event={event}
+              origin={origin}
+              onDelete={() => setDeleteTarget(event)}
+            />
           ))}
         </ul>
       )}
+
+      {/* Delete confirmation */}
+      <Modal
+        open={!!deleteTarget}
+        onClose={() => {
+          if (!deleting) setDeleteTarget(null)
+        }}
+        title={t('host.dashboard.deleteTitle')}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-dark">
+            {t('host.dashboard.deleteConfirm')}{' '}
+            <strong className="break-words">{deleteTarget?.name}</strong>?
+          </p>
+          <p className="rounded-xl bg-red-soft/15 px-3 py-2 text-xs text-dark">
+            ⚠️ {t('host.dashboard.deleteWarning')}
+          </p>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              {t('common.buttons.cancel')}
+            </Button>
+            <Button
+              type="button"
+              variant="dark"
+              onClick={confirmDelete}
+              loading={deleting}
+              disabled={deleting}
+            >
+              🗑 {t('common.buttons.delete')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
@@ -294,14 +318,25 @@ export function DashboardClient() {
 // ---------------------------------------------------------------------------
 // EventCard sub-component
 // ---------------------------------------------------------------------------
-function EventCard({ event, origin }: { event: Event; origin: string }) {
+function EventCard({
+  event,
+  origin,
+  onDelete,
+}: {
+  event: Event
+  origin: string
+  onDelete: () => void
+}) {
   const { t } = useTranslate()
   const toast = useToast()
   const eventDate = new Date(event.date)
   const isPast = eventDate < TODAY
-  const dateLabel = formatTimeUntil(eventDate, TODAY)
+  const { key: dateKey, params: dateParams } = timeUntilDescriptor(eventDate, TODAY)
+  const dateLabel = dateParams ? t(dateKey, dateParams) : t(dateKey)
 
   const eventUrl = origin ? `${origin}/event/${event.slug}` : `/event/${event.slug}`
+  const reserved = event.stats?.reserved ?? 0
+  const desired = event.stats?.desired ?? 0
 
   const copyLink = async () => {
     try {
@@ -310,6 +345,21 @@ function EventCard({ event, origin }: { event: Event; origin: string }) {
     } catch {
       toast.error(t('common.errors.generic'))
     }
+  }
+
+  const shareLink = async () => {
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+      try {
+        await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
+          title: event.name,
+          url: eventUrl,
+        })
+        return
+      } catch {
+        // User dismissed, fall back to copy
+      }
+    }
+    await copyLink()
   }
 
   return (
@@ -322,7 +372,7 @@ function EventCard({ event, origin }: { event: Event; origin: string }) {
       {/* Stretched link makes the whole card the primary manage target.
           Sits behind interactive children (z-[1]) so buttons and links still work. */}
       <Link
-        href={`/event/${event.slug}/edit`}
+        href={`/event/${event.id}/edit`}
         aria-label={`${t('host.dashboard.actions.manage')} - ${event.name}`}
         className="absolute inset-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
       >
@@ -362,6 +412,28 @@ function EventCard({ event, origin }: { event: Event; origin: string }) {
           <span className="capitalize">{t(`eventTypes.${event.type}`)}</span>
         </div>
 
+        {/* Reservation progress */}
+        {desired > 0 ? (
+          <div className="mt-2 flex items-center gap-2">
+            <div
+              className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-light/60"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={desired}
+              aria-valuenow={reserved}
+              aria-label={t('host.event.progress.reserved')}
+            >
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-coral to-gold transition-all"
+                style={{ width: `${Math.min(100, (reserved / desired) * 100)}%` }}
+              />
+            </div>
+            <span className="shrink-0 text-xs font-semibold text-dark-light">
+              🎁 {reserved}/{desired}
+            </span>
+          </div>
+        ) : null}
+
         {/* Event link */}
         <div className="mt-2.5 flex flex-col gap-2">
           <span
@@ -370,25 +442,42 @@ function EventCard({ event, origin }: { event: Event; origin: string }) {
           >
             {eventUrl}
           </span>
-          <button
-            type="button"
-            onClick={copyLink}
-            className="relative z-[1] block w-full rounded-full bg-coral/10 px-3 py-1.5 text-xs font-semibold text-coral transition-colors hover:bg-coral/20"
-          >
-            📋 {t('host.dashboard.actions.copyLink')}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={copyLink}
+              className="relative z-[1] block flex-1 rounded-full bg-coral/10 px-3 py-1.5 text-xs font-semibold text-coral transition-colors hover:bg-coral/20"
+            >
+              📋 {t('host.dashboard.actions.copyLink')}
+            </button>
+            <button
+              type="button"
+              onClick={shareLink}
+              className="relative z-[1] block flex-1 rounded-full bg-coral px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-coral-dark"
+            >
+              📤 {t('host.event.share')}
+            </button>
+          </div>
         </div>
 
-        {/* Secondary action: public guest view */}
-        <div className="mt-2 flex flex-wrap gap-2">
+        {/* Secondary actions */}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <Link
             href={`/event/${event.slug}`}
             className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-gray-light/60 px-3 py-1 text-xs font-semibold text-dark-light transition-colors hover:bg-gray-light hover:text-dark"
           >
             👁️ {t('host.dashboard.actions.view')}
           </Link>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-red-soft/20 px-3 py-1 text-xs font-semibold text-dark transition-colors hover:bg-red-soft/40"
+            aria-label={`${t('common.buttons.delete')} - ${event.name}`}
+          >
+            🗑 {t('common.buttons.delete')}
+          </button>
           <Link
-            href={`/create?eventId=${event.slug}`}
+            href={`/create?eventId=${event.id}`}
             className="relative z-[1] ml-auto inline-flex items-center gap-1 rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white shadow-sm transition-transform hover:translate-x-0.5"
           >
             ✏️ {t('host.dashboard.actions.manage')} →

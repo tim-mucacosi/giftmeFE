@@ -4,38 +4,30 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
+import { Input } from '@/components/shared/Input'
 import { useToast } from '@/components/shared/Toast'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
 import { EventApiError, getEventById, reserveGift, type EventDetail, type DetailGift } from '@/lib/api/events'
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
+import { getEventEmoji } from '@/lib/utils/eventEmoji'
+import { isGiftAvailable } from '@/lib/utils/giftAvailability'
 import { cn } from '@/lib/utils/cn'
-import type { EventType } from '@/types/event'
 import styles from './GuestEvent.module.css'
-
-function getEventEmoji(type: EventType, gender?: string): string {
-  if (type === 'birthday') {
-    return gender === 'girl' ? '🎂👧' : gender === 'boy' ? '🎂👦' : '🎂'
-  }
-  if (type === 'baptism') {
-    return gender === 'girl' ? '⛪👧' : gender === 'boy' ? '⛪👦' : '⛪'
-  }
-  const TYPE_EMOJIS: Record<EventType, string> = {
-    wedding: '💒',
-    birthday: '🎂',
-    baptism: '⛪',
-    patrons_day: '🕯️',
-    other: '✨',
-  }
-  return TYPE_EMOJIS[type] ?? '✨'
-}
 
 type Section = 'want' | 'nice'
 
 interface PendingChoice {
-  category: Section
-  index: number
-  name: string
+  gift: DetailGift
+  /** Idempotency token, stable across retries of this one submission. */
+  requestToken: string
+}
+
+const GUEST_NAME_KEY = 'poklonimi.guestName'
+
+function newRequestToken(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
+  return `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`
 }
 
 interface Props {
@@ -81,13 +73,23 @@ export function GuestEventClient({ slug }: Props) {
 
   const [reservations, setReservations] = useState<Reservations>({})
   const [pending, setPending] = useState<PendingChoice | null>(null)
+  const [guestName, setGuestName] = useState('')
+  const [guestNameError, setGuestNameError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
   const [avoidOpen, setAvoidOpen] = useState(false)
   const cardsRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') setOrigin(window.location.origin)
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin)
+      try {
+        setGuestName(localStorage.getItem(GUEST_NAME_KEY) ?? '')
+      } catch {
+        // storage unavailable
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -100,7 +102,6 @@ export function GuestEventClient({ slug }: Props) {
     getEventById(slug, session?.accessToken)
       .then((detail) => {
         if (cancelled) return
-        console.log('Event detail:', detail) // Debug: check what fields are returned
         setEvent(detail)
         setReservations(readReservations(slug))
       })
@@ -147,29 +148,57 @@ export function GuestEventClient({ slug }: Props) {
     [origin, slug],
   )
 
-  const reserveKey = (cat: Section, index: number) => `${cat}:${index}`
-
-  const openConfirm = (category: Section, index: number, name: string) => {
-    setPending({ category, index, name })
+  const openConfirm = (gift: DetailGift) => {
+    setGuestNameError(null)
+    // One token per confirm dialog: double taps and retries of this
+    // submission all reuse it, so the backend records at most one reservation.
+    setPending({ gift, requestToken: newRequestToken() })
   }
 
-  const closeConfirm = () => setPending(null)
+  const closeConfirm = () => {
+    if (submitting) return
+    setPending(null)
+  }
+
+  const refetchEvent = async () => {
+    try {
+      const fresh = await getEventById(slug)
+      if (fresh) setEvent(fresh)
+    } catch {
+      // keep the current view; user can reload
+    }
+  }
 
   const confirmChoice = async () => {
-    if (!pending) return
+    if (!pending || submitting) return
+    const trimmedName = guestName.trim()
+    if (trimmedName.length < 2) {
+      setGuestNameError(t('host.guest.modal.nameError'))
+      return
+    }
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      toast.error(t('host.guest.errors.offline'))
+      return
+    }
+    setGuestNameError(null)
+    setSubmitting(true)
     try {
-      // Call backend to reserve gift and decrement quantity
-      const updatedEvent = await reserveGift(slug, pending.category, pending.index)
-      setEvent(updatedEvent)
+      const result = await reserveGift(slug, pending.gift.id, trimmedName, pending.requestToken)
+      if (result.event) setEvent(result.event)
 
-      // Also update local reservations
-      const key = reserveKey(pending.category, pending.index)
+      try {
+        localStorage.setItem(GUEST_NAME_KEY, trimmedName)
+      } catch {
+        // storage unavailable
+      }
+
+      // Track locally which gifts this guest picked (per browser session).
       const updated = { ...reservations }
-      updated[key] = (updated[key] ?? 0) + 1
+      updated[pending.gift.id] = (updated[pending.gift.id] ?? 0) + 1
       setReservations(updated)
       writeReservations(slug, updated)
 
-      setSuccess(pending.name)
+      setSuccess(pending.gift.name)
       setPending(null)
 
       // Confetti effect
@@ -180,8 +209,27 @@ export function GuestEventClient({ slug }: Props) {
         setSuccess(null)
       }, 5000)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to reserve gift'
+      if (err instanceof EventApiError) {
+        if (err.status === 409) {
+          toast.error(t('host.guest.errors.justTaken'))
+          setPending(null)
+          await refetchEvent()
+          return
+        }
+        if (err.status === 410) {
+          toast.error(t('host.guest.errors.expired'))
+          setPending(null)
+          return
+        }
+        if (err.code === 'NETWORK') {
+          toast.error(t('host.guest.errors.offline'))
+          return
+        }
+      }
+      const message = err instanceof Error ? err.message : t('common.errors.generic')
       toast.error(message)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -298,12 +346,8 @@ export function GuestEventClient({ slug }: Props) {
     )
   }
 
-  const wantAvailableCount = event.gifts.want.filter(
-    (gift) => gift.quantity > 0,
-  ).length
-  const niceAvailableCount = event.gifts.nice.filter(
-    (gift) => gift.quantity > 0,
-  ).length
+  const wantAvailableCount = event.gifts.want.filter(isGiftAvailable).length
+  const niceAvailableCount = event.gifts.nice.filter(isGiftAvailable).length
   const totalReserved = Object.values(reservations).reduce((sum, count) => sum + count, 0)
 
   return (
@@ -349,7 +393,7 @@ export function GuestEventClient({ slug }: Props) {
 
         {/* Welcome message */}
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 lg:px-8">
-          <div className="relative z-[3] -mt-8 rounded-[20px] border border-white/40 bg-white/75 p-6 shadow-card backdrop-blur-md sm:p-8">
+          <div className="relative z-[3] -mt-8 rounded-[20px] border border-white/60 bg-white/90 p-6 shadow-card backdrop-blur-md sm:p-8">
             <p className="text-base leading-relaxed text-dark sm:text-lg">
               {event.message || t('host.guest.welcome')}
             </p>
@@ -360,62 +404,63 @@ export function GuestEventClient({ slug }: Props) {
         <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
           <div ref={cardsRef} className="mt-8 flex flex-col gap-8">
             {/* Want section */}
-            <SectionBlock
-              icon="❤️"
-              title={t('host.create.step2.categories.want')}
-              tagline={t('host.create.step2.categories.wantTagline')}
-              childCount={wantAvailableCount}
-              category="want"
-            >
-              {event.gifts.want.map((gift, idx) => {
-                const reserved = reservations[reserveKey('want', idx)] ?? 0
-                const isReserved = gift.quantity <= 0 || reserved >= gift.quantity
-                return (
+            {event.gifts.want.length > 0 ? (
+              <SectionBlock
+                icon="❤️"
+                title={t('host.create.step2.categories.want')}
+                tagline={t('host.create.step2.categories.wantTagline')}
+                childCount={wantAvailableCount}
+                category="want"
+              >
+                {event.gifts.want.map((gift, idx) => (
                   <GiftCard
-                    key={idx}
-                    name={gift.name}
-                    description={gift.description}
-                    isReserved={isReserved}
+                    key={gift.id || idx}
+                    gift={gift}
+                    isReserved={!isGiftAvailable(gift)}
+                    pickedByMe={(reservations[gift.id] ?? 0) > 0}
                     reservedLabel={t('host.guest.giftCard.reserved')}
                     badge={t('host.guest.giftCard.topWish')}
                     category="want"
-                    onChoose={() => openConfirm('want', idx, gift.name)}
+                    onChoose={() => openConfirm(gift)}
                   />
-                )
-              })}
-            </SectionBlock>
+                ))}
+              </SectionBlock>
+            ) : null}
 
-            <SectionSeparator label={t('host.guest.sep.gold')} />
-
-            {/* Nice section */}
-            <SectionBlock
-              icon="💛"
-              title={t('host.create.step2.categories.nice')}
-              tagline={t('host.create.step2.categories.niceTagline')}
-              childCount={niceAvailableCount}
-              category="nice"
-            >
-              {event.gifts.nice.map((gift, idx) => {
-                const reserved = reservations[reserveKey('nice', idx)] ?? 0
-                const isReserved = gift.quantity <= 0 || reserved >= gift.quantity
-                return (
-                  <GiftCard
-                    key={idx}
-                    name={gift.name}
-                    description={gift.description}
-                    isReserved={isReserved}
-                    reservedLabel={t('host.guest.giftCard.reserved')}
-                    badge={t('host.guest.giftCard.welcomeToo')}
-                    category="nice"
-                    onChoose={() => openConfirm('nice', idx, gift.name)}
-                  />
-                )
-              })}
-            </SectionBlock>
+            {/* Nice section (separator only when both neighbours exist) */}
+            {event.gifts.nice.length > 0 ? (
+              <>
+                {event.gifts.want.length > 0 ? (
+                  <SectionSeparator label={t('host.guest.sep.gold')} />
+                ) : null}
+                <SectionBlock
+                  icon="💛"
+                  title={t('host.create.step2.categories.nice')}
+                  tagline={t('host.create.step2.categories.niceTagline')}
+                  childCount={niceAvailableCount}
+                  category="nice"
+                >
+                  {event.gifts.nice.map((gift, idx) => (
+                    <GiftCard
+                      key={gift.id || idx}
+                      gift={gift}
+                      isReserved={!isGiftAvailable(gift)}
+                      pickedByMe={(reservations[gift.id] ?? 0) > 0}
+                      reservedLabel={t('host.guest.giftCard.reserved')}
+                      badge={t('host.guest.giftCard.welcomeToo')}
+                      category="nice"
+                      onChoose={() => openConfirm(gift)}
+                    />
+                  ))}
+                </SectionBlock>
+              </>
+            ) : null}
 
             {event.gifts.avoid.length > 0 ? (
               <>
-                <SectionSeparator label={t('host.guest.sep.avoid')} />
+                {event.gifts.want.length + event.gifts.nice.length > 0 ? (
+                  <SectionSeparator label={t('host.guest.sep.avoid')} />
+                ) : null}
                 <AvoidSection
                   items={event.gifts.avoid}
                   title={t('host.create.step2.categories.avoid')}
@@ -424,6 +469,13 @@ export function GuestEventClient({ slug }: Props) {
                   onToggle={() => setAvoidOpen((o) => !o)}
                 />
               </>
+            ) : null}
+
+            {event.gifts.want.length + event.gifts.nice.length + event.gifts.avoid.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-gray-light bg-white py-14 text-center">
+                <span className="text-4xl" aria-hidden="true">🎁</span>
+                <p className="px-6 text-sm text-dark-light">{t('host.guest.empty.want')}</p>
+              </div>
             ) : null}
           </div>
 
@@ -440,15 +492,15 @@ export function GuestEventClient({ slug }: Props) {
       </div>
 
       {/* Floating reserved badge */}
-      <div
-        className={cn(
-          'fixed bottom-8 right-8 z-[900] rounded-full border-2 border-coral bg-white px-4 py-2 text-sm font-semibold text-coral shadow-lg',
-          totalReserved > 0 && styles.show,
-        )}
-      >
-        <span className={cn('h-2 w-2 rounded-full bg-success', styles.badgeDot)} />
-        {t('host.guest.floating.label')}: {totalReserved}
-      </div>
+      {totalReserved > 0 ? (
+        <div
+          className="fixed bottom-6 right-4 z-[900] flex items-center gap-2 rounded-full border-2 border-coral bg-white px-4 py-2 text-sm font-semibold text-coral shadow-lg sm:bottom-8 sm:right-8"
+          role="status"
+        >
+          <span className={cn('h-2 w-2 rounded-full bg-success', styles.badgeDot)} />
+          {t('host.guest.floating.label')}: {totalReserved}
+        </div>
+      ) : null}
 
       {/* Confirmation modal */}
       <div
@@ -471,26 +523,54 @@ export function GuestEventClient({ slug }: Props) {
           <h3 className="mb-2 text-center text-xl font-bold text-dark">
             {t('host.guest.modal.title')}
           </h3>
-          <p className="mb-7 text-center text-base font-semibold text-coral">
-            {pending?.name}
+          <p className="mb-5 text-center text-base font-semibold text-coral">
+            {pending?.gift.name}
           </p>
 
-          <Button
-            onClick={confirmChoice}
-            size="lg"
-            fullWidth
-            className="mb-3"
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              confirmChoice()
+            }}
           >
-            {t('host.guest.modal.confirm')}
-          </Button>
-          <Button
-            onClick={closeConfirm}
-            variant="outline"
-            size="lg"
-            fullWidth
-          >
-            {t('host.guest.modal.cancel')}
-          </Button>
+            <Input
+              label={t('host.guest.modal.nameLabel')}
+              placeholder={t('host.guest.modal.namePlaceholder')}
+              value={guestName}
+              onChange={(e) => {
+                setGuestName(e.target.value)
+                if (guestNameError) setGuestNameError(null)
+              }}
+              error={guestNameError ?? undefined}
+              autoComplete="name"
+              maxLength={100}
+              containerClassName="mb-2"
+            />
+            <p className="mb-5 text-xs text-dark-light">
+              {t('host.guest.modal.nameHint')}
+            </p>
+
+            <Button
+              type="submit"
+              size="lg"
+              fullWidth
+              className="mb-3"
+              loading={submitting}
+              disabled={submitting}
+            >
+              {t('host.guest.modal.confirm')}
+            </Button>
+            <Button
+              type="button"
+              onClick={closeConfirm}
+              variant="outline"
+              size="lg"
+              fullWidth
+              disabled={submitting}
+            >
+              {t('host.guest.modal.cancel')}
+            </Button>
+          </form>
         </div>
       </div>
 
@@ -643,18 +723,20 @@ function SectionBlock({ icon, title, tagline, childCount, children, category }: 
 }
 
 interface GiftCardProps {
-  name: string
-  description?: string
+  gift: DetailGift
   isReserved: boolean
+  pickedByMe?: boolean
   reservedLabel: string
   badge: string
   category?: SectionCategory
   onChoose: () => void
 }
 
-function GiftCard({ name, description, isReserved, reservedLabel, badge, category, onChoose }: GiftCardProps) {
+function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, category, onChoose }: GiftCardProps) {
   const { t } = useTranslate()
   const isNice = category === 'nice'
+  const isEnvelope = gift.type === 'envelope'
+  const remaining = Math.max(0, gift.quantity - gift.reservedQuantity)
 
   if (isReserved) {
     return (
@@ -666,9 +748,12 @@ function GiftCard({ name, description, isReserved, reservedLabel, badge, categor
       >
         <div className="flex items-center gap-2 text-base font-bold text-dark-light line-through">
           <span aria-hidden="true">✅</span>
-          <span className="break-words">{name}</span>
+          <span className="break-words">{gift.name}</span>
         </div>
-        <p className="mt-1 text-xs font-medium text-gray">{reservedLabel}</p>
+        <p className="mt-1 text-xs font-medium text-gray">
+          {reservedLabel}
+          {pickedByMe ? ` · ${t('host.guest.giftCard.pickedByYou')}` : ''}
+        </p>
       </div>
     )
   }
@@ -678,9 +763,11 @@ function GiftCard({ name, description, isReserved, reservedLabel, badge, categor
       onClick={onChoose}
       className={cn(
         'group relative flex min-h-[100px] flex-col justify-between rounded-2xl border-2 p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 sm:p-5',
-        isNice
-          ? 'border-gold/40 bg-gradient-to-br from-gold/10 to-gold/5 hover:border-gold hover:shadow-lg focus-visible:ring-gold'
-          : 'border-coral/30 bg-gradient-to-br from-coral/10 to-gold/10 hover:border-coral hover:shadow-lg focus-visible:ring-coral',
+        isEnvelope
+          ? 'border-dark/20 bg-gradient-to-br from-gold/15 to-white hover:border-dark/50 hover:shadow-lg focus-visible:ring-dark'
+          : isNice
+            ? 'border-gold/40 bg-gradient-to-br from-gold/10 to-gold/5 hover:border-gold hover:shadow-lg focus-visible:ring-gold'
+            : 'border-coral/30 bg-gradient-to-br from-coral/10 to-gold/10 hover:border-coral hover:shadow-lg focus-visible:ring-coral',
         styles.giftCard,
       )}
     >
@@ -688,28 +775,46 @@ function GiftCard({ name, description, isReserved, reservedLabel, badge, categor
         <span
           className={cn(
             'mb-2 inline-flex rounded-full px-2 py-0.5 text-xs font-bold',
-            isNice ? 'bg-gold/20 text-gold-dark' : 'bg-coral/20 text-coral',
+            isEnvelope
+              ? 'bg-dark/10 text-dark'
+              : isNice
+                ? 'bg-gold/20 text-gold-dark'
+                : 'bg-coral/20 text-coral',
             styles.badge,
           )}
         >
-          {badge}
+          {isEnvelope ? `💌 ${t('host.guest.giftCard.unlimited')}` : badge}
         </span>
-        <span className="mb-3 mt-1 break-words text-lg font-bold text-dark sm:text-xl">
-          {name}
+        <span className="mb-3 mt-1 block break-words text-lg font-bold text-dark sm:text-xl">
+          {gift.name}
         </span>
-        {description && (
-          <p className="text-xs text-dark-light">{description}</p>
+        {gift.description && (
+          <p className="text-xs text-dark-light">{gift.description}</p>
+        )}
+        {isEnvelope && gift.suggestedAmounts && gift.suggestedAmounts.length > 0 && (
+          <p className="mt-1 text-xs text-dark-light">
+            {t('host.guest.giftCard.suggestedAmounts')}: {gift.suggestedAmounts.join('€, ')}€
+          </p>
+        )}
+        {!isEnvelope && gift.quantity > 1 && (
+          <p className="mt-1 text-xs font-medium text-dark-light">
+            {t('host.guest.giftCard.remaining')}: {remaining}/{gift.quantity}
+          </p>
         )}
       </div>
 
       <span
         className={cn(
-          'inline-flex rounded-full px-4 py-2 text-sm font-semibold text-white transition-all',
-          isNice ? 'bg-gold hover:bg-gold-dark' : 'bg-coral hover:bg-coral-dark',
+          'mt-3 inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold text-white transition-all',
+          isEnvelope
+            ? 'bg-dark hover:bg-dark/80'
+            : isNice
+              ? 'bg-gold hover:bg-gold-dark'
+              : 'bg-coral hover:bg-coral-dark',
           styles.cta,
         )}
       >
-        {t('host.guest.giftCard.cta')}
+        {isEnvelope ? t('host.guest.giftCard.ctaEnvelope') : t('host.guest.giftCard.cta')}
       </span>
     </button>
   )

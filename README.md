@@ -1,6 +1,11 @@
-# Pokloni Mi 🎁
+# Pokloni Mi 🎁 (GiftMe)
 
-A Next.js gift-registry app with multi-language support via [Tolgee](https://tolgee.io).
+A mobile-first PWA gift registry. Hosts create a celebration (wedding, birthday, baptism, …), add gift suggestions in three categories (*nice to have*, *ok to have*, *do not want*), and share a public link. Guests reserve gifts **without an account**; the host tracks reservations in a private dashboard.
+
+- **Frontend** (this repo): Next.js 14 App Router, TypeScript, Tailwind CSS, Tolgee i18n.
+- **Backend**: separate Express + MongoDB API (`giftmeBE` repo) — see its README for setup.
+
+Requires **Node.js 18.18+** (developed on Node 22).
 
 ## Getting Started
 
@@ -12,7 +17,11 @@ Copy the example file and fill in your values:
 cp .env.development.local.example .env.development.local
 ```
 
-See the [Tolgee setup](#tolgee-setup) section below for what each variable means.
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Base URL of the backend API, e.g. `http://localhost:3002/api`. |
+| `NEXT_PUBLIC_USE_MOCKS` | Set to `true` to run the UI against in-memory mock data (no backend). Defaults to off. |
+| `NEXT_PUBLIC_TOLGEE_*` | Optional; see [Tolgee setup](#tolgee-setup). |
 
 ### 2. Install dependencies
 
@@ -20,13 +29,39 @@ See the [Tolgee setup](#tolgee-setup) section below for what each variable means
 npm install
 ```
 
-### 3. Run the development server
+### 3. Run the backend, then the development server
 
 ```bash
+# in ../../giftmeBE (or wherever the API lives):  npm start
 npm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Commands
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Development server |
+| `npm run build` / `npm start` | Production build / serve |
+| `npm run lint` | ESLint |
+| `npm run type-check` | TypeScript check |
+| `npm test` | Vitest unit tests |
+
+## Reservation & quantity behavior
+
+- Every **item gift** has a desired quantity; the backend atomically consumes one unit per guest reservation. At zero remaining, the gift shows as *reserved* and cannot be selected. The backend is the source of truth — the UI never decides availability.
+- The **money envelope** gift (`type: "envelope"`) is unlimited: any number of guests can select it, and it never shows an out-of-stock state.
+- **Do-not-want** items are informational only — visible to guests, never reservable.
+- Reservations send a client-generated `requestToken`; retries/double-taps of the same submission are idempotent on the server.
+- Guests enter only a display name; it is shown **only to the host**, never to other guests.
+
+## PWA
+
+- `public/manifest.webmanifest` + icons in `public/icons/` make the app installable (standalone display, maskable icon).
+- `public/sw.js` caches the app shell and static assets, serves `public/offline.html` when navigation fails offline, and **never caches API responses** (availability must be live; private host data must not be cached). Registered by `src/components/shared/PwaRegister.tsx` in production builds only.
+- Reserving a gift requires a network connection; the UI says so when offline.
+- To ship a breaking SW change, bump `CACHE_VERSION` in `public/sw.js`.
 
 ---
 
@@ -118,8 +153,9 @@ messages/             # Translation JSON files (sr, en, de)
 
 ## Tech stack
 
-- [Next.js 15](https://nextjs.org) (App Router)
+- [Next.js 14](https://nextjs.org) (App Router, TypeScript)
 - [Tailwind CSS](https://tailwindcss.com)
 - [Tolgee](https://tolgee.io) — i18n & in-context translation
 - [Zod](https://zod.dev) + [React Hook Form](https://react-hook-form.com) — form validation
-- [Supabase](https://supabase.com) — auth callback (Google OAuth)
+- [Vitest](https://vitest.dev) — unit tests
+- Auth: JWT issued by the Express backend (email+password, Google/Facebook OAuth redirect flow)
