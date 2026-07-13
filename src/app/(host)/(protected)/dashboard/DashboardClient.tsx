@@ -369,15 +369,15 @@ function EventCard({
         className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-coral via-coral-light to-gold"
       />
 
-      {/* Stretched link makes the whole card the primary manage target.
+      {/* Stretched link opens the host overview (stats, reservations).
           Sits behind interactive children (z-[1]) so buttons and links still work. */}
       <Link
-        href={`/event/${event.id}/edit`}
-        aria-label={`${t('host.dashboard.actions.manage')} - ${event.name}`}
+        href={`/event/${event.id}/overview`}
+        aria-label={`${t('host.event.viewTitle', 'Event details')} - ${event.name}`}
         className="absolute inset-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
       >
         <span className="sr-only">
-          {t('host.dashboard.actions.manage')} - {event.name}
+          {t('host.event.viewTitle', 'Event details')} - {event.name}
         </span>
       </Link>
 

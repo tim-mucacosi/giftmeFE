@@ -1,10 +1,6 @@
-import { AuthGuard } from '@/components/shared/AuthGuard'
-import { EventDetailClient } from '../EventDetailClient'
+import { redirect } from 'next/navigation'
 
-export default function EventEditPage({ params }: { params: { slug: string } }) {
-  return (
-    <AuthGuard>
-      <EventDetailClient slug={params.slug} mode="edit" />
-    </AuthGuard>
-  )
+// Editing moved to the create wizard; keep old bookmarks working.
+export default function EventEditRedirect({ params }: { params: { slug: string } }) {
+  redirect(`/create?eventId=${params.slug}`)
 }
