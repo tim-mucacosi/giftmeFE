@@ -160,7 +160,10 @@ export async function loginWithGoogle(): Promise<AuthResponse | null> {
       },
     }
   }
-  window.location.href = `${API_URL}/auth/google`
+  // Tell the backend which frontend to come back to after the OAuth
+  // handshake; it validates the origin against its allowlist.
+  const origin = encodeURIComponent(window.location.origin)
+  window.location.href = `${API_URL}/auth/google?origin=${origin}`
   return null
 }
 
