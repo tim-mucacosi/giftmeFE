@@ -277,6 +277,10 @@
           "editSubmit": "Sačuvaj izmene",
           "envelopeTitleLabel": "Naziv (opciono)",
           "envelopeDefaultName": "Koverta"
+        },
+        "collectNames": {
+          "label": "Pitaj goste za ime",
+          "hint": "Gost unosi svoje ime pre rezervacije; vidiš ga samo ti."
         }
       },
       "step3": {
@@ -354,7 +358,9 @@
         "reservationsTitle": "Rezervacije gostiju",
         "noReservations": "Još nema rezervacija. Podelite link sa gostima!",
         "showAll": "Prikaži sve",
-        "showLess": "Prikaži manje"
+        "showLess": "Prikaži manje",
+        "anonymous": "Anonimni gost",
+        "total": "Ukupno"
       },
       "progress": {
         "reserved": "Rezervisani pokloni"
@@ -416,7 +422,9 @@
         "nameLabel": "Vaše ime",
         "namePlaceholder": "npr. Ana",
         "nameHint": "Vaše ime vidi samo domaćin, da zna ko je izabrao poklon.",
-        "nameError": "Unesite svoje ime (najmanje 2 slova)"
+        "nameError": "Unesite svoje ime (najmanje 2 slova)",
+        "amountLabel": "Iznos (opciono)",
+        "amountHint": "Iznos vidi samo domaćin; ostali gosti nikada."
       },
       "success": {
         "title": "Divno! 🎉",

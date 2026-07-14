@@ -18,11 +18,20 @@ const CATEGORY_META: { key: GiftCategory; icon: string; palette: string }[] = [
 interface Props {
   gifts: DraftGift[]
   onChange: (gifts: DraftGift[]) => void
+  collectGuestNames: boolean
+  onCollectGuestNamesChange: (value: boolean) => void
   onNext: () => void
   onBack: () => void
 }
 
-export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
+export function GiftListStep({
+  gifts,
+  onChange,
+  collectGuestNames,
+  onCollectGuestNamesChange,
+  onNext,
+  onBack,
+}: Props) {
   const { t } = useTranslate()
   const [addingInto, setAddingInto] = useState<GiftCategory | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -197,6 +206,24 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
           />
         )
       })() : null}
+
+      {/* Reservation settings */}
+      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-light bg-white p-4 shadow-card">
+        <input
+          type="checkbox"
+          checked={collectGuestNames}
+          onChange={(e) => onCollectGuestNamesChange(e.target.checked)}
+          className="mt-0.5 h-5 w-5 shrink-0 accent-coral"
+        />
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold text-dark">
+            🙋 {t('host.create.step2.collectNames.label')}
+          </span>
+          <span className="mt-0.5 block text-xs text-dark-light">
+            {t('host.create.step2.collectNames.hint')}
+          </span>
+        </span>
+      </label>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <Button variant="outline" onClick={onBack} fullWidth className="sm:w-auto">

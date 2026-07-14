@@ -277,6 +277,10 @@
           "editSubmit": "Änderungen speichern",
           "envelopeTitleLabel": "Titel (optional)",
           "envelopeDefaultName": "Geldumschlag"
+        },
+        "collectNames": {
+          "label": "Gäste nach ihrem Namen fragen",
+          "hint": "Gäste geben vor dem Reservieren ihren Namen an; nur du siehst ihn."
         }
       },
       "step3": {
@@ -354,7 +358,9 @@
         "reservationsTitle": "Gästereservierungen",
         "noReservations": "Noch keine Reservierungen. Teile den Link mit deinen Gästen!",
         "showAll": "Alle anzeigen",
-        "showLess": "Weniger anzeigen"
+        "showLess": "Weniger anzeigen",
+        "anonymous": "Anonymer Gast",
+        "total": "Gesamt"
       },
       "progress": {
         "reserved": "Reservierte Geschenke"
@@ -416,7 +422,9 @@
         "nameLabel": "Dein Name",
         "namePlaceholder": "z. B. Ana",
         "nameHint": "Nur der Gastgeber sieht deinen Namen, damit er weiß, wer das Geschenk gewählt hat.",
-        "nameError": "Bitte gib deinen Namen ein (mindestens 2 Zeichen)"
+        "nameError": "Bitte gib deinen Namen ein (mindestens 2 Zeichen)",
+        "amountLabel": "Betrag (optional)",
+        "amountHint": "Den Betrag sieht nur der Gastgeber; andere Gäste nie."
       },
       "success": {
         "title": "Wunderbar! 🎉",

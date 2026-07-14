@@ -75,6 +75,7 @@ export function GuestEventClient({ slug }: Props) {
   const [pending, setPending] = useState<PendingChoice | null>(null)
   const [guestName, setGuestName] = useState('')
   const [guestNameError, setGuestNameError] = useState<string | null>(null)
+  const [amount, setAmount] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
   const [avoidOpen, setAvoidOpen] = useState(false)
@@ -150,6 +151,7 @@ export function GuestEventClient({ slug }: Props) {
 
   const openConfirm = (gift: DetailGift) => {
     setGuestNameError(null)
+    setAmount('')
     // One token per confirm dialog: double taps and retries of this
     // submission all reuse it, so the backend records at most one reservation.
     setPending({ gift, requestToken: newRequestToken() })
@@ -171,8 +173,9 @@ export function GuestEventClient({ slug }: Props) {
 
   const confirmChoice = async () => {
     if (!pending || submitting) return
+    const askName = event?.collectGuestNames !== false
     const trimmedName = guestName.trim()
-    if (trimmedName.length < 2) {
+    if (askName && trimmedName.length < 2) {
       setGuestNameError(t('host.guest.modal.nameError'))
       return
     }
@@ -180,16 +183,25 @@ export function GuestEventClient({ slug }: Props) {
       toast.error(t('host.guest.errors.offline'))
       return
     }
+    const parsedAmount =
+      pending.gift.type === 'envelope' && amount.trim() !== '' ? Number(amount) : undefined
     setGuestNameError(null)
     setSubmitting(true)
     try {
-      const result = await reserveGift(slug, pending.gift.id, trimmedName, pending.requestToken)
+      const result = await reserveGift(slug, pending.gift.id, pending.requestToken, {
+        ...(askName ? { guestName: trimmedName } : {}),
+        ...(parsedAmount !== undefined && Number.isFinite(parsedAmount) && parsedAmount > 0
+          ? { amount: parsedAmount }
+          : {}),
+      })
       if (result.event) setEvent(result.event)
 
-      try {
-        localStorage.setItem(GUEST_NAME_KEY, trimmedName)
-      } catch {
-        // storage unavailable
+      if (askName) {
+        try {
+          localStorage.setItem(GUEST_NAME_KEY, trimmedName)
+        } catch {
+          // storage unavailable
+        }
       }
 
       // Track locally which gifts this guest picked (per browser session).
@@ -533,22 +545,64 @@ export function GuestEventClient({ slug }: Props) {
               confirmChoice()
             }}
           >
-            <Input
-              label={t('host.guest.modal.nameLabel')}
-              placeholder={t('host.guest.modal.namePlaceholder')}
-              value={guestName}
-              onChange={(e) => {
-                setGuestName(e.target.value)
-                if (guestNameError) setGuestNameError(null)
-              }}
-              error={guestNameError ?? undefined}
-              autoComplete="name"
-              maxLength={100}
-              containerClassName="mb-2"
-            />
-            <p className="mb-5 text-xs text-dark-light">
-              {t('host.guest.modal.nameHint')}
-            </p>
+            {event?.collectGuestNames !== false ? (
+              <>
+                <Input
+                  label={t('host.guest.modal.nameLabel')}
+                  placeholder={t('host.guest.modal.namePlaceholder')}
+                  value={guestName}
+                  onChange={(e) => {
+                    setGuestName(e.target.value)
+                    if (guestNameError) setGuestNameError(null)
+                  }}
+                  error={guestNameError ?? undefined}
+                  autoComplete="name"
+                  maxLength={100}
+                  containerClassName="mb-2"
+                />
+                <p className="mb-5 text-xs text-dark-light">
+                  {t('host.guest.modal.nameHint')}
+                </p>
+              </>
+            ) : null}
+
+            {pending?.gift.type === 'envelope' ? (
+              <>
+                <Input
+                  type="number"
+                  min={1}
+                  step="any"
+                  inputMode="decimal"
+                  label={t('host.guest.modal.amountLabel')}
+                  placeholder={pending.gift.suggestedAmounts?.[0]?.toString() ?? '50'}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  containerClassName="mb-2"
+                />
+                {pending.gift.suggestedAmounts && pending.gift.suggestedAmounts.length > 0 ? (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    {pending.gift.suggestedAmounts.map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setAmount(String(amt))}
+                        className={cn(
+                          'rounded-full border-2 px-3 py-1 text-xs font-semibold transition-colors',
+                          amount === String(amt)
+                            ? 'border-gold bg-gold/20 text-dark'
+                            : 'border-gray-light text-dark-light hover:border-gold hover:text-dark',
+                        )}
+                      >
+                        {amt}€
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                <p className="mb-5 text-xs text-dark-light">
+                  {t('host.guest.modal.amountHint')}
+                </p>
+              </>
+            ) : null}
 
             <Button
               type="submit"

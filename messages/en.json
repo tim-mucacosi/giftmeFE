@@ -277,6 +277,10 @@
           "editSubmit": "Save changes",
           "envelopeTitleLabel": "Title (optional)",
           "envelopeDefaultName": "Money in an envelope"
+        },
+        "collectNames": {
+          "label": "Ask guests for their name",
+          "hint": "Guests enter their name before reserving a gift; only you can see it."
         }
       },
       "step3": {
@@ -354,7 +358,9 @@
         "reservationsTitle": "Guest reservations",
         "noReservations": "No reservations yet. Share the link with your guests!",
         "showAll": "Show all",
-        "showLess": "Show less"
+        "showLess": "Show less",
+        "anonymous": "Anonymous guest",
+        "total": "Total"
       },
       "progress": {
         "reserved": "Gifts reserved"
@@ -416,7 +422,9 @@
         "nameLabel": "Your name",
         "namePlaceholder": "e.g. Ana",
         "nameHint": "Only the host will see your name, so they know who picked the gift.",
-        "nameError": "Please enter your name (at least 2 characters)"
+        "nameError": "Please enter your name (at least 2 characters)",
+        "amountLabel": "Amount (optional)",
+        "amountHint": "Only the host can see the amount; other guests never do."
       },
       "success": {
         "title": "Wonderful! 🎉",

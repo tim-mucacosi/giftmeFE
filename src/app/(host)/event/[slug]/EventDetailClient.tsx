@@ -276,6 +276,7 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
   const totalDesired = itemGifts.reduce((acc, g) => acc + g.quantity, 0)
   const totalReserved = itemGifts.reduce((acc, g) => acc + g.reservedQuantity, 0)
   const envelopeCount = envelopes.reduce((acc, g) => acc + g.reservedQuantity, 0)
+  const envelopeTotal = reservations.reduce((acc, r) => acc + (r.amount ?? 0), 0)
 
   const visibleReservations = showAllReservations ? reservations : reservations.slice(0, 5)
 
@@ -302,6 +303,11 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
           <dd className="mt-0.5 text-xl font-extrabold text-gold-dark">
             {envelopes.length > 0 ? envelopeCount : '—'}
           </dd>
+          {envelopeTotal > 0 ? (
+            <p className="text-[11px] font-semibold text-dark-light">
+              {t('host.event.status.total')}: {envelopeTotal}€
+            </p>
+          ) : null}
         </div>
         <div className="rounded-2xl bg-gray-light/40 px-2 py-3">
           <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
@@ -382,9 +388,12 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
                 key={r.id}
                 className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 rounded-xl bg-bg px-3 py-2 text-sm"
               >
-                <span className="font-semibold text-dark">{r.guestName}</span>
+                <span className={cn('font-semibold', r.guestName ? 'text-dark' : 'italic text-dark-light')}>
+                  {r.guestName || t('host.event.status.anonymous')}
+                </span>
                 <span className="min-w-0 flex-1 truncate text-dark-light">
                   → {r.giftName}
+                  {typeof r.amount === 'number' ? ` · ${r.amount}€` : ''}
                 </span>
                 <span className="shrink-0 text-xs text-gray">
                   {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}

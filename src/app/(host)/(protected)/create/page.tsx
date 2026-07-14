@@ -17,6 +17,7 @@ interface Draft {
   step: number
   details: EventDetailsData
   gifts: DraftGift[]
+  collectGuestNames: boolean
   imageFile?: File
 }
 
@@ -24,6 +25,7 @@ const emptyDraft: Draft = {
   step: 1,
   details: { type: 'wedding', name: '', date: '', message: '' },
   gifts: [],
+  collectGuestNames: true,
   imageFile: undefined,
 }
 
@@ -79,6 +81,7 @@ export default function CreatePage() {
               ...event.gifts.nice.map(toDraftGift('nice')),
               ...event.gifts.avoid.map(toDraftGift('avoid')),
             ],
+            collectGuestNames: event.collectGuestNames,
           })
           setCreatedEventId(event.slug)
         }
@@ -144,6 +147,7 @@ export default function CreatePage() {
         message: draft.details.message,
         backgroundImageUrl: backgroundImageUrl ?? draft.details.backgroundImageUrl,
         date: draft.details.date,
+        collectGuestNames: draft.collectGuestNames,
         // Carry the backend gift id (when editing) so reservations survive.
         gifts: draft.gifts.map((g) => ({ ...g, serverId: g.id })),
       }
@@ -202,6 +206,10 @@ export default function CreatePage() {
           <GiftListStep
             gifts={draft.gifts}
             onChange={setGifts}
+            collectGuestNames={draft.collectGuestNames}
+            onCollectGuestNamesChange={(value) =>
+              setDraft((d) => ({ ...d, collectGuestNames: value }))
+            }
             onNext={goNext}
             onBack={goBack}
           />
