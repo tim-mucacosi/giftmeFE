@@ -124,7 +124,7 @@
       "noAccount": "Nemaš nalog?",
       "signIn": "Prijavi se",
       "signUp": "Registruj se",
-      "successToast": "Dobrodošli u PokloniMi!"
+      "successToast": "Uspešno ste se registrovali na PokloniMi!"
     },
     "errors": {
       "nameTooShort": "Ime mora imati najmanje 2 karaktera",

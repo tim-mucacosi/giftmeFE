@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "PokloniMi",
+    "appName": "SchenkMir",
     "buttons": {
       "back": "Zurück",
       "next": "Weiter",
@@ -36,7 +36,7 @@
   },
   "landing": {
     "meta": {
-      "title": "PokloniMi — Feiern ohne unerwünschte Geschenke",
+      "title": "SchenkMir — Feiern ohne unerwünschte Geschenke",
       "description": "Erstelle eine Wunschliste, teile sie mit Gästen, alle sind glücklich."
     },
     "hero": {
@@ -62,7 +62,7 @@
       }
     },
     "why": {
-      "title": "Warum PokloniMi?",
+      "title": "Warum SchenkMir?",
       "item1": {
         "title": "Kein Aufwand für Gäste",
         "desc": "Keine Registrierung, keine App. Nur ein Link und 3 Taps."
@@ -98,7 +98,7 @@
       "button": "Kostenlos starten"
     },
     "footer": {
-      "copyright": "PokloniMi © 2026",
+      "copyright": "SchenkMir © 2026",
       "about": "Über uns",
       "terms": "AGB",
       "privacy": "Datenschutz",
@@ -124,7 +124,7 @@
       "noAccount": "Noch kein Konto?",
       "signIn": "Anmelden",
       "signUp": "Registrieren",
-      "successToast": "Willkommen bei PokloniMi!"
+      "successToast": "Erfolgreich bei SchenkMir registriert!"
     },
     "errors": {
       "nameTooShort": "Name muss mindestens 2 Zeichen lang sein",
@@ -291,7 +291,7 @@
         "successTitle": "Dein Event ist live!",
         "successDesc": "Teile den Link mit deinen Gästen — fertig.",
         "updateTitle": "Event aktualisiert!",
-        "referral": "Kennst du jemanden, dem das helfen würde? Teile PokloniMi.",
+        "referral": "Kennst du jemanden, dem das helfen würde? Teile SchenkMir.",
         "update": "Event aktualisieren"
       }
     },
@@ -403,7 +403,7 @@
         }
       },
       "footer": {
-        "brand": "Powered by PokloniMi 🎁",
+        "brand": "Powered by SchenkMir 🎁",
         "tagline": "Einfache Geschenke für glückliche Feiern."
       },
       "hostedBy": "Von gehostet",

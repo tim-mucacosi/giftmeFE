@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "PokloniMi",
+    "appName": "GiftMe",
     "buttons": {
       "back": "Back",
       "next": "Next",
@@ -36,7 +36,7 @@
   },
   "landing": {
     "meta": {
-      "title": "PokloniMi — Celebrations without unwanted gifts",
+      "title": "GiftMe — Celebrations without unwanted gifts",
       "description": "Create a wishlist, share with guests, everyone wins. Guests don't need to register."
     },
     "hero": {
@@ -62,7 +62,7 @@
       }
     },
     "why": {
-      "title": "Why PokloniMi?",
+      "title": "Why GiftMe?",
       "item1": {
         "title": "Zero friction for guests",
         "desc": "No signup, no app. Just a link and 3 taps."
@@ -98,7 +98,7 @@
       "button": "Start for free"
     },
     "footer": {
-      "copyright": "PokloniMi © 2026",
+      "copyright": "GiftMe © 2026",
       "about": "About",
       "terms": "Terms",
       "privacy": "Privacy",
@@ -124,7 +124,7 @@
       "noAccount": "Don't have an account?",
       "signIn": "Sign in",
       "signUp": "Sign up",
-      "successToast": "Welcome to PokloniMi!"
+      "successToast": "Successfully registered to GiftMe!"
     },
     "errors": {
       "nameTooShort": "Name must be at least 2 characters",
@@ -291,7 +291,7 @@
         "successTitle": "Your event is live!",
         "successDesc": "Share the link with your guests and you're done.",
         "updateTitle": "Event updated!",
-        "referral": "Know someone who'd enjoy this? Share PokloniMi.",
+        "referral": "Know someone who'd enjoy this? Share GiftMe.",
         "update": "Update event"
       }
     },
@@ -403,7 +403,7 @@
         }
       },
       "footer": {
-        "brand": "Powered by PokloniMi 🎁",
+        "brand": "Powered by GiftMe 🎁",
         "tagline": "Simple gifts for happy celebrations."
       },
       "hostedBy": "Hosted by",
