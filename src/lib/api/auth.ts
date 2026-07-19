@@ -200,7 +200,9 @@ export async function changePassword(input: ChangePasswordInput, token: string):
     await mockDelay()
     return
   }
-  await authRequest<unknown>('/auth/change-password', { method: 'PUT', body: input, token })
+  // The bare /auth/change-password route only handles passwordResetToken resets;
+  // the logged-in flow must use the protected /authenticated variant.
+  await authRequest<unknown>('/auth/change-password/authenticated', { method: 'PUT', body: input, token })
 }
 
 // ---------------------------------------------------------------------------
