@@ -1,4 +1,5 @@
-import { DevTools, Tolgee, FormatSimple, BackendFetch } from '@tolgee/web'
+import { DevTools, Tolgee, BackendFetch } from '@tolgee/web'
+import { FormatIcu } from '@tolgee/format-icu'
 import type { TolgeeStaticData } from '@tolgee/react'
 
 const apiKey = process.env.NEXT_PUBLIC_TOLGEE_API_KEY
@@ -21,7 +22,7 @@ export async function getStaticData(languages: readonly string[]): Promise<Tolge
 
 export function TolgeeBase() {
   return Tolgee()
-    .use(FormatSimple())
+    .use(FormatIcu())
     .use(DevTools())
     .use(BackendFetch({
       prefix: process.env.NEXT_PUBLIC_TOLGEE_CDN_URL,

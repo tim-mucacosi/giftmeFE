@@ -6,23 +6,38 @@ import { ToastProvider } from '@/components/shared/Toast'
 import { PwaRegister } from '@/components/shared/PwaRegister'
 import { Metadata, Viewport } from "next";
 
-export const metadata: Metadata = {
-  title: 'PokloniMi — Slavlje bez neželjenih poklona',
-  description:
-    'Napravi listu želja, podeli sa gostima, i svi su srećni. Bez registracije za goste.',
-  manifest: '/manifest.webmanifest',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'PokloniMi',
-  },
-  icons: {
-    icon: [
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
-  },
+interface SiteMetaMessages {
+  landing: { meta: { title: string; description: string } }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLanguage()
+  const messages = ((await import(`../../messages/${locale}.json`)).default) as SiteMetaMessages
+  const { title, description } = messages.landing.meta
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      siteName: 'PokloniMi',
+      type: 'website',
+    },
+    manifest: '/manifest.webmanifest',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: 'PokloniMi',
+    },
+    icons: {
+      icon: [
+        { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+      apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    },
+  }
 }
 
 export const viewport: Viewport = {
