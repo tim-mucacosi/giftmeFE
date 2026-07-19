@@ -19,8 +19,8 @@ export interface AuthResponse {
 }
 
 export interface VerifyEmailResponse {
-  code: number,
-  description: string
+  success: boolean
+  message?: string
 }
 
 export interface AuthSession {

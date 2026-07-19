@@ -25,7 +25,7 @@ export default function VerifyEmailPage() {
       try {
         const response = await verifyEmail(token)
         if (cancelled) return
-        setStatus(response.code === 200 ? 'success' : 'error')
+        setStatus(response.success !== false ? 'success' : 'error')
       } catch {
         if (!cancelled) setStatus('error')
       }

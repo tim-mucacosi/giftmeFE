@@ -114,7 +114,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResponse> 
 export async function verifyEmail(token: string): Promise<VerifyEmailResponse> {
   if (USE_MOCKS) {
     await mockDelay()
-    return { code: 200, description: 'Email verified successfully' }
+    return { success: true, message: 'Email verified successfully' }
   }
   return await authRequest<VerifyEmailResponse>('/auth/verify-email', { body: { token } });
 }
