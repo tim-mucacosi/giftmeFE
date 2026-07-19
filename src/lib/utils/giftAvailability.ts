@@ -11,6 +11,19 @@ export function isGiftAvailable(gift: Pick<DetailGift, 'id' | 'type' | 'availabl
   return gift.available > 0
 }
 
+/**
+ * Total units guests can still reserve across a list of gifts.
+ * Item gifts contribute their remaining units; envelope gifts are unlimited,
+ * so each counts as one so the section never reads "all reserved".
+ */
+export function availableUnits(gifts: Pick<DetailGift, 'id' | 'type' | 'available'>[]): number {
+  return gifts.reduce(
+    (sum, gift) =>
+      sum + (isGiftAvailable(gift) ? (gift.type === 'envelope' ? 1 : gift.available) : 0),
+    0,
+  )
+}
+
 /** Remaining units as a display value; null for unlimited (envelope). */
 export function remainingLabel(gift: Pick<DetailGift, 'type' | 'quantity' | 'reservedQuantity'>): number | null {
   if (gift.type === 'envelope') return null

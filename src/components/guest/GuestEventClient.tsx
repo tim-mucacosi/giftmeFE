@@ -11,7 +11,7 @@ import { loadSession } from '@/lib/auth/session'
 import { EventApiError, getEventById, reserveGift, type EventDetail, type DetailGift } from '@/lib/api/events'
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
-import { isGiftAvailable } from '@/lib/utils/giftAvailability'
+import { availableUnits, isGiftAvailable } from '@/lib/utils/giftAvailability'
 import { cn } from '@/lib/utils/cn'
 import styles from './GuestEvent.module.css'
 
@@ -358,8 +358,8 @@ export function GuestEventClient({ slug }: Props) {
     )
   }
 
-  const wantAvailableCount = event.gifts.want.filter(isGiftAvailable).length
-  const niceAvailableCount = event.gifts.nice.filter(isGiftAvailable).length
+  const wantAvailableCount = availableUnits(event.gifts.want)
+  const niceAvailableCount = availableUnits(event.gifts.nice)
   const totalReserved = Object.values(reservations).reduce((sum, count) => sum + count, 0)
 
   return (
@@ -719,7 +719,8 @@ interface SectionBlockProps {
 
 function SectionBlock({ icon, title, tagline, childCount, children, category }: SectionBlockProps) {
   const { t } = useTranslate()
-  const hasChildren = !!children && (Array.isArray(children) ? children.length > 0 : true)
+  const cardCount = Array.isArray(children) ? children.length : children ? 1 : 0
+  const hasChildren = cardCount > 0
 
   if (!hasChildren) return null
 
@@ -766,7 +767,7 @@ function SectionBlock({ icon, title, tagline, childCount, children, category }: 
         <p className="mt-1 w-full text-xs italic text-dark-light">{tagline}</p>
       </header>
       {hasChildren ? (
-        <div className={cn('grid grid-cols-1 gap-3', childCount > 1 && 'lg:grid-cols-2')}>{children}</div>
+        <div className={cn('grid grid-cols-1 gap-3', cardCount > 1 && 'lg:grid-cols-2')}>{children}</div>
       ) : (
         <div className={cn('rounded-2xl bg-white py-8 text-center text-sm text-dark-light', styles.empty)}>
           {t('host.guest.empty.want')}
