@@ -28,7 +28,8 @@ export function GiftAddForm({ open, onClose, onSubmit, category, envelopeAllowed
   const [name, setName] = useState(initial?.name ?? '')
   const [description, setDescription] = useState(initial?.description ?? '')
   const [price, setPrice] = useState<string>(initial?.price?.toString() ?? '')
-  const [quantity, setQuantity] = useState<number>(initial?.quantity ?? 1)
+  // Kept as a string so the field can be emptied while typing; coerced on submit.
+  const [quantity, setQuantity] = useState<string>(String(initial?.quantity ?? 1))
   const [color, setColor] = useState(initial?.color ?? '')
   const [store, setStore] = useState(initial?.store ?? '')
   const [suggestedAmounts, setSuggestedAmounts] =
@@ -55,7 +56,7 @@ export function GiftAddForm({ open, onClose, onSubmit, category, envelopeAllowed
           name: name.trim(),
           description: description.trim() || undefined,
           price: price ? Number(price) : undefined,
-          quantity: Math.max(1, quantity),
+          quantity: Math.max(1, Math.floor(Number(quantity)) || 1),
           color: color.trim() || undefined,
           store: store.trim() || undefined,
         }
@@ -129,7 +130,11 @@ export function GiftAddForm({ open, onClose, onSubmit, category, envelopeAllowed
                     min={1}
                     label={t('host.create.step2.form.quantity')}
                     value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value || 1))}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    onBlur={() => {
+                      const n = Math.floor(Number(quantity))
+                      setQuantity(String(n >= 1 ? n : 1))
+                    }}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
