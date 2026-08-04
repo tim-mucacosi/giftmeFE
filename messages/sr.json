@@ -39,6 +39,11 @@
       "title": "PokloniMi — Slavlje bez neželjenih poklona",
       "description": "Napravi listu želja, podeli sa gostima, i svi su srećni. Bez registracije za goste."
     },
+    "beta": {
+      "badge": "Beta",
+      "text": "PokloniMi je još u beta fazi, svakog dana doterujemo iskustvo. Ako naiđete na sitnicu koja još nije savršena, hvala na strpljenju; bićemo sve bolji. 💛",
+      "dismiss": "Zatvori"
+    },
     "hero": {
       "headline": "Slavlje bez neželjenih poklona",
       "subheadline": "Napravi listu želja, podeli sa gostima, i svi su srećni.",
@@ -82,7 +87,10 @@
     },
     "mockup": {
       "title": "Kako to izgleda za tvoje goste",
-      "tagline": "Gost otvori link → vidi listu → izabere poklon → gotovo. Pod 30 sekundi."
+      "tagline": "Gost otvori link → vidi listu → izabere poklon → gotovo. Pod 30 sekundi.",
+      "eventName": "Svadba Marka i Ane",
+      "gift1": "Sudo mašina",
+      "gift2": "Čaše za vino"
     },
     "testimonials": {
       "title": "Šta kažu korisnici",
@@ -249,12 +257,13 @@
         "genderGirl": "Devojčica",
         "imageErrorType": "Izaberite JPG, PNG, WebP ili GIF sliku.",
         "imageErrorSize": "Slika je prevelika (najviše 10 MB).",
-        "imageRemove": "Ukloni sliku"
+        "imageRemove": "Ukloni sliku",
+        "dateErrorPast": "Datum ne može biti u prošlosti"
       },
       "step2": {
         "title": "Šta bi voleo da dobiješ? 🎁",
         "desc": "Dodaj poklone i rasporedi ih po prioritetu",
-        "addGift": "+ Dodaj poklon",
+        "addGift": "Dodaj poklon",
         "categories": {
           "want": "Baš mi treba",
           "wantTagline": "Ovo im najviše znači",
@@ -264,23 +273,24 @@
           "avoidTagline": "Molimo izbegavajte"
         },
         "form": {
-          "typeItem": "Poklon",
-          "typeEnvelope": "Koverta",
           "name": "Naziv",
           "description": "Opis (opciono)",
-          "price": "Cena (opciono)",
+          "descriptionPlaceholder": "brend, boja, veličina, gde kupiti…",
           "quantity": "Količina",
-          "color": "Boja (opciono)",
-          "store": "Prodavnica (opciono)",
-          "suggestedAmounts": "Predloženi iznosi",
+          "quantityError": "Unesite ceo broj veći od 0",
+          "unlimited": "Neograničeno",
+          "unlimitedHint": "Označi ovu opciju ako je količina neograničena.",
+          "link": "Link (opciono)",
+          "linkPlaceholder": "npr. www.prodavnica.rs/proizvod",
+          "linkError": "Unesite ispravan link (npr. https://…)",
           "submit": "Dodaj",
-          "editSubmit": "Sačuvaj izmene",
-          "envelopeTitleLabel": "Naziv (opciono)",
-          "envelopeDefaultName": "Koverta"
+          "editSubmit": "Sačuvaj izmene"
         },
-        "collectNames": {
-          "label": "Pitaj goste za ime",
-          "hint": "Gost unosi svoje ime pre rezervacije; vidiš ga samo ti."
+        "moveUp": "Pomeri gore",
+        "moveDown": "Pomeri dole",
+        "deleteConfirm": {
+          "title": "Ukloniti ovaj poklon?",
+          "text": "Biće uklonjen sa tvoje liste i gosti ga više neće videti."
         }
       },
       "step3": {
@@ -352,15 +362,13 @@
       "status": {
         "title": "Status poklona",
         "reserved": "Rezervisano",
-        "envelopes": "Koverte",
         "guests": "Rezervacije",
         "unlimited": "Neograničeno",
         "reservationsTitle": "Rezervacije gostiju",
         "noReservations": "Još nema rezervacija. Podelite link sa gostima!",
         "showAll": "Prikaži sve",
         "showLess": "Prikaži manje",
-        "anonymous": "Anonimni gost",
-        "total": "Ukupno"
+        "anonymous": "Anonimni gost"
       },
       "progress": {
         "reserved": "Rezervisani pokloni"
@@ -388,8 +396,6 @@
         "topWish": "Glavni želja",
         "welcomeToo": "Dobrodošlo i ovo",
         "unlimited": "Uvek dostupno",
-        "ctaEnvelope": "Donosim kovertu",
-        "suggestedAmounts": "Predloženi iznosi",
         "remaining": "Preostalo",
         "pickedByYou": "vaš izbor"
       },
@@ -418,13 +424,7 @@
       "modal": {
         "title": "Potvrdi izbor",
         "confirm": "Da, ja ću ovo doneti ✓",
-        "cancel": "Ne, vrati me nazad",
-        "nameLabel": "Vaše ime",
-        "namePlaceholder": "npr. Ana",
-        "nameHint": "Vaše ime vidi samo domaćin, da zna ko je izabrao poklon.",
-        "nameError": "Unesite svoje ime (najmanje 2 slova)",
-        "amountLabel": "Iznos (opciono)",
-        "amountHint": "Iznos vidi samo domaćin; ostali gosti nikada."
+        "cancel": "Ne, vrati me nazad"
       },
       "success": {
         "title": "Divno! 🎉",

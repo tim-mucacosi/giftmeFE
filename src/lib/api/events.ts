@@ -6,10 +6,9 @@ import type { Gift, GiftCategory } from '@/types/gift'
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://giftmebe.onrender.com/api'
 
 export interface CreateEventGiftInput
-  extends Pick<Gift, 'name' | 'category' | 'description' | 'quantity' | 'price' | 'priceRange' | 'store' | 'type'> {
+  extends Pick<Gift, 'name' | 'category' | 'description' | 'quantity' | 'unlimited' | 'link' | 'type'> {
   /** Backend subdocument id, present when editing an existing gift. */
   serverId?: string
-  suggestedAmounts?: number[]
 }
 
 export interface CreateEventInput {
@@ -21,8 +20,6 @@ export interface CreateEventInput {
   backgroundImageUrl?: string
   /** ISO date string for when the celebration happens. */
   date?: string
-  /** Whether guests must enter their name when reserving. */
-  collectGuestNames?: boolean
   gifts: CreateEventGiftInput[]
 }
 
@@ -43,11 +40,10 @@ interface ApiGift {
   name?: string
   description?: string
   whereToBuy?: string
-  priceInRange?: string
   type?: string
   quantity?: number
+  unlimited?: boolean
   reservedQuantity?: number
-  suggestedAmounts?: number[]
 }
 
 interface ApiReservation {
@@ -57,7 +53,6 @@ interface ApiReservation {
   category?: string
   giftName?: string
   guestName?: string
-  amount?: number
   message?: string
   createdAt?: string
 }
@@ -79,7 +74,6 @@ interface ApiEventDto {
   expirationDate?: string
   createdAt?: string
   updatedAt?: string
-  collectGuestNames?: boolean
   iWant?: ApiGift[]
   iAmOkWithIt?: ApiGift[]
   iDontWant?: ApiGift[]
@@ -92,23 +86,21 @@ export interface DetailGift {
   name: string
   description?: string
   whereToBuy?: string
-  priceInRange?: string
   type: 'item' | 'envelope'
   quantity: number
+  /** Reservable any number of times (envelope gifts and unlimited items). */
+  unlimited: boolean
   reservedQuantity: number
-  /** Remaining units. Envelope gifts are always available. */
+  /** Remaining units. Unlimited gifts are always available. */
   available: number
-  suggestedAmounts?: number[]
 }
 
 export interface HostReservation {
   id: string
   giftId: string
   giftName: string
-  /** Empty when the event does not collect guest names. */
+  /** Present only on legacy reservations made while names were collected. */
   guestName: string
-  /** Envelope amount the guest plans to give; host-only. */
-  amount?: number
   message?: string
   createdAt: string
 }
@@ -127,8 +119,6 @@ export interface EventDetail {
   /** ISO date string of the celebration. Falls back to createdAt for legacy events. */
   date: string
   createdAt: string
-  /** Whether the reservation flow asks guests for their name. */
-  collectGuestNames: boolean
   gifts: {
     want: DetailGift[]
     nice: DetailGift[]
@@ -153,17 +143,17 @@ export function mapGift(g: ApiGift): DetailGift {
   const type = g.type === 'envelope' ? 'envelope' : 'item'
   const quantity = typeof g.quantity === 'number' && g.quantity > 0 ? g.quantity : 1
   const reservedQuantity = typeof g.reservedQuantity === 'number' ? g.reservedQuantity : 0
+  const unlimited = type === 'envelope' || g.unlimited === true
   return {
     id: g._id ?? g.id ?? '',
     name: (g.name ?? '').trim(),
     description: g.description,
     whereToBuy: g.whereToBuy,
-    priceInRange: g.priceInRange,
     type,
     quantity,
+    unlimited,
     reservedQuantity,
-    available: type === 'envelope' ? Number.POSITIVE_INFINITY : Math.max(0, quantity - reservedQuantity),
-    suggestedAmounts: g.suggestedAmounts,
+    available: unlimited ? Number.POSITIVE_INFINITY : Math.max(0, quantity - reservedQuantity),
   }
 }
 
@@ -185,8 +175,9 @@ export function mapApiEvent(dto: ApiEventDto): Event {
   // the backend; expires the list for guests after that day). Fall back to
   // createdAt for legacy events that predate the field.
   const eventDate = dto.expirationDate ?? created
+  // Unlimited gifts carry no inventory, so they stay out of the counters.
   const items = [...mapGiftArr(dto.iWant), ...mapGiftArr(dto.iAmOkWithIt)].filter(
-    (g) => g.type === 'item',
+    (g) => g.type === 'item' && !g.unlimited,
   )
   return {
     id,
@@ -221,7 +212,6 @@ export function mapApiEventDetail(dto: ApiEventDto): EventDetail {
     backgroundImageUrl: dto.backgroundImageUrl,
     date: base.date,
     createdAt: base.createdAt,
-    collectGuestNames: dto.collectGuestNames !== false,
     gifts: {
       want: mapGiftArr(dto.iWant),
       nice: mapGiftArr(dto.iAmOkWithIt),
@@ -233,7 +223,6 @@ export function mapApiEventDetail(dto: ApiEventDto): EventDetail {
           giftId: r.giftId ?? '',
           giftName: r.giftName ?? '',
           guestName: r.guestName ?? '',
-          amount: typeof r.amount === 'number' ? r.amount : undefined,
           message: r.message,
           createdAt: r.createdAt ?? '',
         }))
@@ -281,6 +270,7 @@ function mockDetail(idOrSlug: string): EventDetail | null {
   const gift = (partial: Partial<DetailGift> & { id: string; name: string }): DetailGift => ({
     type: 'item',
     quantity: 1,
+    unlimited: false,
     reservedQuantity: 0,
     available: 1,
     ...partial,
@@ -296,11 +286,10 @@ function mockDetail(idOrSlug: string): EventDetail | null {
     backgroundImageUrl: ev.backgroundImageUrl,
     date: ev.date,
     createdAt: ev.createdAt,
-    collectGuestNames: true,
     gifts: {
       want: [
         gift({ id: 'mock-wine', name: 'Bottle of red wine', quantity: 2, available: 2, description: 'A nice red wine' }),
-        gift({ id: 'mock-envelope', name: 'Money in an envelope', type: 'envelope', available: Number.POSITIVE_INFINITY }),
+        gift({ id: 'mock-dish-washer', name: 'Dish washer', type: 'envelope', unlimited: true, available: Number.POSITIVE_INFINITY }),
       ],
       nice: [gift({ id: 'mock-linen', name: 'Linen tablecloth set', description: 'Natural linen' })],
       avoid: [gift({ id: 'mock-cards', name: 'Generic gift cards' })],
@@ -369,14 +358,12 @@ export function buildEventPayload(input: CreateEventInput) {
       .map((g) => {
         const isEnvelope = g.type === 'envelope'
         const gift: Record<string, unknown> = isEnvelope
-          ? { name: g.name.trim() || 'Money in an envelope', type: 'envelope' }
+          ? { name: g.name.trim(), type: 'envelope' }
           : { name: g.name.trim(), quantity: g.quantity ?? 1 }
+        if (!isEnvelope && g.unlimited) gift.unlimited = true
         if (g.serverId && /^[0-9a-f]{24}$/i.test(g.serverId)) gift._id = g.serverId
         if (g.description?.trim()) gift.description = g.description.trim()
-        if (g.priceRange) gift.priceInRange = `${g.priceRange[0]}-${g.priceRange[1]}`
-        else if (g.price) gift.priceInRange = String(g.price)
-        if (g.store?.trim()) gift.whereToBuy = g.store.trim()
-        if (isEnvelope && g.suggestedAmounts?.length) gift.suggestedAmounts = g.suggestedAmounts
+        if (g.link?.trim()) gift.whereToBuy = g.link.trim()
         return gift
       })
       .filter((g) => typeof g.name === 'string' && (g.name as string).length > 0)
@@ -387,7 +374,6 @@ export function buildEventPayload(input: CreateEventInput) {
     ...(input.gender ? { gender: input.gender } : {}),
     message: (input.message ?? '').trim(),
     ...(input.backgroundImageUrl ? { backgroundImageUrl: input.backgroundImageUrl } : {}),
-    ...(typeof input.collectGuestNames === 'boolean' ? { collectGuestNames: input.collectGuestNames } : {}),
     // Send the date as ISO under `expirationDate` (the field also represents
     // when the list expires for guests). Omitted if blank.
     ...(input.date ? { expirationDate: new Date(input.date).toISOString() } : {}),
@@ -458,32 +444,24 @@ export interface ReserveGiftResult {
 }
 
 /**
- * Reserve one unit of a gift as a guest. `requestToken` must stay identical
- * across retries of the same submission; the backend uses it to make the
- * call idempotent.
+ * Reserve one unit of a gift as an anonymous guest. `requestToken` must stay
+ * identical across retries of the same submission; the backend uses it to
+ * make the call idempotent.
  */
 export async function reserveGift(
   eventSlug: string,
   giftId: string,
   requestToken: string,
-  extras: { guestName?: string; amount?: number; message?: string } = {},
 ): Promise<ReserveGiftResult> {
   if (USE_MOCKS) {
     return { event: mockDetail(eventSlug), alreadyReserved: false }
   }
-  const { guestName, amount, message } = extras
   const response = await apiFetch(
     `/events/public/${encodeURIComponent(eventSlug)}/reservations`,
     {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        giftId,
-        requestToken,
-        ...(guestName ? { guestName } : {}),
-        ...(typeof amount === 'number' ? { amount } : {}),
-        ...(message ? { message } : {}),
-      }),
+      body: JSON.stringify({ giftId, requestToken }),
     },
   )
   const data = await readJson(response)

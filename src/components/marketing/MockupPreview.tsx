@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useTranslate } from '@tolgee/react'
 import { FadeUp } from '@/components/shared/FadeUp'
 
@@ -17,34 +16,96 @@ export function MockupPreview() {
         </FadeUp>
 
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-around">
-          <Link
-            href="/event/svadba-marka-i-ane"
-            className="relative block rounded-[42px] bg-dark p-3 shadow-[0_40px_80px_rgba(45,52,54,0.25)] transition-transform hover:-translate-y-2"
+          <div
+            aria-hidden="true"
+            className="relative block rounded-[42px] bg-dark p-3 shadow-[0_40px_80px_rgba(45,52,54,0.25)]"
             style={{ width: 280, aspectRatio: '9/19' }}
           >
-            <div className="flex h-full w-full flex-col gap-3 overflow-hidden rounded-[32px] bg-gradient-to-b from-bg to-coral/15 p-4">
-              <div className="flex items-center gap-2 text-sm font-extrabold">
-                <span aria-hidden="true">💒</span>
-                <span>Svadba Marka i Ane</span>
-              </div>
-              <div className="rounded-xl bg-white px-3 py-2.5 text-xs font-bold shadow-card">
-                <div className="text-coral">❤️ Baš mi treba</div>
-              </div>
-              <div className="space-y-2">
-                <div className="rounded-xl border-l-4 border-coral bg-white p-3 shadow-card">
-                  <div className="text-xs font-bold">Sudo mašina</div>
-                  <div className="mt-1 h-1.5 w-3/4 rounded-full bg-gray-light" />
+            <div className="flex h-full w-full flex-col gap-2.5 overflow-hidden rounded-[32px] bg-bg p-3">
+              {/* Cover hero: same gradient + scrim the real guest page shows
+                  for a wedding without an uploaded photo. */}
+              <div className="relative -mx-3 -mt-3 flex h-24 shrink-0 flex-col items-center justify-end overflow-hidden pb-2.5 text-center">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at 22% 12%, rgba(255, 217, 61, 0.45) 0%, transparent 45%), radial-gradient(ellipse at 82% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 40%), radial-gradient(ellipse at 55% 95%, rgba(255, 120, 120, 0.4) 0%, transparent 55%), linear-gradient(160deg, #ffb199 0%, #ff7d70 35%, #ff6b6b 60%, #e05e73 85%, #cf5470 100%)',
+                  }}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      'linear-gradient(to top, rgba(70, 15, 40, 0.5) 0%, rgba(70, 15, 40, 0.12) 45%, rgba(70, 15, 40, 0) 100%)',
+                  }}
+                />
+                <div className="relative">
+                  <div className="text-2xl leading-none">💒</div>
+                  <div className="mt-1 text-sm font-extrabold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.35)]">
+                    {t('landing.mockup.eventName')}
+                  </div>
                 </div>
-                <div className="rounded-xl border-l-4 border-coral bg-white p-3 shadow-card">
-                  <div className="text-xs font-bold">Koverta</div>
-                  <div className="mt-1 text-[10px] text-dark-light">20€ · 50€ · 100€</div>
+              </div>
+
+              {/* "Really want" section, styled like the real guest page */}
+              <div className="rounded-2xl border-2 border-coral/40 bg-gradient-to-br from-coral/10 to-coral/5 p-2">
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 px-1 pb-1.5">
+                  <span className="text-[11px] font-extrabold">
+                    ❤️ {t('host.create.step2.categories.want')}
+                  </span>
+                  <span className="rounded-full border border-coral/30 bg-coral/10 px-1.5 py-px text-[8px] font-semibold text-coral">
+                    2 {t('host.guest.count.available')}
+                  </span>
+                  <span className="w-full text-[8px] italic text-dark-light">
+                    {t('host.create.step2.categories.wantTagline')}
+                  </span>
+                </div>
+                <div className="rounded-xl bg-white p-2 shadow-card">
+                  <span className="inline-flex rounded-full bg-coral/20 px-1.5 py-px text-[8px] font-bold text-coral">
+                    {t('host.guest.giftCard.topWish')}
+                  </span>
+                  <div className="mt-1 text-xs font-bold">{t('landing.mockup.gift1')}</div>
+                  <div className="mt-0.5 text-[8px] text-dark-light">
+                    {t('host.guest.giftCard.remaining')}: 2/2
+                  </div>
+                  <div className="mt-1.5 w-fit rounded-full bg-coral px-2.5 py-1 text-[9px] font-semibold text-white shadow-cta">
+                    {t('host.guest.giftCard.cta')}
+                  </div>
                 </div>
               </div>
-              <div className="mt-auto rounded-full bg-coral py-2.5 text-center text-xs font-extrabold text-white shadow-cta">
-                Izaberi poklon
+
+              {/* "Nice to have" section */}
+              <div className="rounded-2xl border-2 border-gold/50 bg-gradient-to-br from-gold/10 to-gold/5 p-2">
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 px-1 pb-1.5">
+                  <span className="text-[11px] font-extrabold">
+                    💛 {t('host.create.step2.categories.nice')}
+                  </span>
+                  <span className="rounded-full border border-gold/40 bg-gold/10 px-1.5 py-px text-[8px] font-semibold text-gold-dark">
+                    1 {t('host.guest.count.available')}
+                  </span>
+                </div>
+                <div className="rounded-xl bg-white p-2 shadow-card">
+                  <span className="inline-flex rounded-full bg-gold/20 px-1.5 py-px text-[8px] font-bold text-gold-dark">
+                    {t('host.guest.giftCard.welcomeToo')}
+                  </span>
+                  <div className="mt-1 text-xs font-bold">{t('landing.mockup.gift2')}</div>
+                  <div className="mt-1.5 w-fit rounded-full bg-gold px-2.5 py-1 text-[9px] font-semibold text-dark">
+                    {t('host.guest.giftCard.cta')}
+                  </div>
+                </div>
+              </div>
+
+              {/* Collapsed "Please avoid" strip, like the real page */}
+              <div className="flex items-center justify-between rounded-xl bg-white px-2.5 py-2 shadow-card ring-1 ring-red-soft/50">
+                <span className="text-[10px] font-extrabold">
+                  {t('host.create.step2.categories.avoid')} <span aria-hidden="true">⛔</span>
+                </span>
+                <span aria-hidden="true" className="text-[9px] text-dark-light">
+                  ▼
+                </span>
               </div>
             </div>
-          </Link>
+          </div>
 
           <FadeUp delay={0.2} className="max-w-md text-center lg:text-left">
             <p className="text-xl lg:text-2xl leading-snug text-dark">

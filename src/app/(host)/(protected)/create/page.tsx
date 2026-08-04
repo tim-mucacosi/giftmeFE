@@ -12,12 +12,12 @@ import { useToast } from '@/components/shared/Toast'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
 import { compressImageToDataUrl } from '@/lib/utils/imageUpload'
+import { validateEventDetails } from '@/lib/validations/eventSchema'
 
 interface Draft {
   step: number
   details: EventDetailsData
   gifts: DraftGift[]
-  collectGuestNames: boolean
   imageFile?: File
 }
 
@@ -25,7 +25,6 @@ const emptyDraft: Draft = {
   step: 1,
   details: { type: 'wedding', name: '', date: '', message: '' },
   gifts: [],
-  collectGuestNames: true,
   imageFile: undefined,
 }
 
@@ -40,6 +39,9 @@ export default function CreatePage() {
   const [errors, setErrors] = useState<Partial<Record<keyof EventDetailsData, string>>>({})
   const [createdEventId, setCreatedEventId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(!!eventId)
+  // Date the event had when loaded for editing. Keeping it unchanged is
+  // allowed even if it is in the past; picking a new past date is not.
+  const [initialDate, setInitialDate] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (!eventId) return
@@ -61,18 +63,20 @@ export default function CreatePage() {
               category,
               type: gift.type,
               quantity: gift.quantity,
+              unlimited: gift.unlimited,
               reservedQuantity: gift.reservedQuantity,
-              suggestedAmounts: gift.suggestedAmounts,
-              store: gift.whereToBuy,
+              link: gift.whereToBuy,
               order: idx,
             })
+          // `date` feeds an <input type="date">, which needs YYYY-MM-DD.
+          const eventDate = event.date ? event.date.slice(0, 10) : ''
           setDraft({
             step: 2,
             details: {
               type: event.type,
               gender: event.gender,
               name: event.name,
-              date: event.date,
+              date: eventDate,
               message: event.message,
               backgroundImageUrl: event.backgroundImageUrl,
             },
@@ -81,8 +85,8 @@ export default function CreatePage() {
               ...event.gifts.nice.map(toDraftGift('nice')),
               ...event.gifts.avoid.map(toDraftGift('avoid')),
             ],
-            collectGuestNames: event.collectGuestNames,
           })
+          setInitialDate(eventDate)
           setCreatedEventId(event.slug)
         }
       } catch (err) {
@@ -107,16 +111,20 @@ export default function CreatePage() {
     setDraft((d) => ({ ...d, imageFile }))
 
   const validateStep1 = useCallback(() => {
+    const keys = validateEventDetails(
+      { name: draft.details.name, date: draft.details.date },
+      initialDate,
+    )
     const next: Partial<Record<keyof EventDetailsData, string>> = {}
-    if (!draft.details.name.trim() || draft.details.name.trim().length < 2)
-      next.name = t('common.errors.tooShort')
-    if (!draft.details.date) next.date = t('common.errors.required')
+    if (keys.name) next.name = t(keys.name)
+    if (keys.date) next.date = t(keys.date)
     setErrors(next)
     return Object.keys(next).length === 0
-  }, [draft.details.name, draft.details.date, t])
+  }, [draft.details.name, draft.details.date, initialDate, t])
 
   const goNext = () => {
     if (draft.step === 1 && !validateStep1()) return
+    setErrors({})
     setStep(draft.step + 1)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -130,6 +138,12 @@ export default function CreatePage() {
     if (!user || !session?.accessToken) {
       toast.error(t('common.errors.generic'))
       throw new Error('not-authenticated')
+    }
+    // A past date can only come from restored state (e.g. a stale draft);
+    // publishing must never silently accept a newly picked one.
+    if (!validateStep1()) {
+      setStep(1)
+      throw new Error('invalid-details')
     }
     try {
       let backgroundImageUrl: string | undefined
@@ -147,7 +161,6 @@ export default function CreatePage() {
         message: draft.details.message,
         backgroundImageUrl: backgroundImageUrl ?? draft.details.backgroundImageUrl,
         date: draft.details.date,
-        collectGuestNames: draft.collectGuestNames,
         // Carry the backend gift id (when editing) so reservations survive.
         gifts: draft.gifts.map((g) => ({ ...g, serverId: g.id })),
       }
@@ -206,10 +219,6 @@ export default function CreatePage() {
           <GiftListStep
             gifts={draft.gifts}
             onChange={setGifts}
-            collectGuestNames={draft.collectGuestNames}
-            onCollectGuestNamesChange={(value) =>
-              setDraft((d) => ({ ...d, collectGuestNames: value }))
-            }
             onNext={goNext}
             onBack={goBack}
           />

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { BetaNotice } from '@/components/marketing/BetaNotice'
 import { HeroBanner } from '@/components/marketing/HeroBanner'
 import { HowItWorks } from '@/components/marketing/HowItWorks'
 import { WhyPokloniMi } from '@/components/marketing/WhyPokloniMi'
@@ -18,6 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function LandingPage() {
   return (
     <>
+      <BetaNotice />
       <HeroBanner />
       <HowItWorks />
       <WhyPokloniMi />

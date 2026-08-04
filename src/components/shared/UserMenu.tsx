@@ -4,25 +4,20 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslate } from '@tolgee/react'
+import { cn } from '@/lib/utils/cn'
 import type { User } from '@/types/user'
 
 type Props = { user: User; onLogout: () => void }
-
-function getInitials(user: User): string {
-  if (user.name) {
-    const parts = user.name.trim().split(/\s+/)
-    return parts.length >= 2
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : parts[0][0].toUpperCase()
-  }
-  return user.email[0].toUpperCase()
-}
 
 export function UserMenu({ user, onLogout }: Props) {
   const { t } = useTranslate()
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  // Fall back to initials when the provider photo fails to load (expired
+  // Google/Facebook CDN URLs would otherwise render a broken image).
+  const [imgError, setImgError] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const showImage = !!user.profilePicture && !imgError
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -53,12 +48,52 @@ export function UserMenu({ user, onLogout }: Props) {
         aria-expanded={open}
         aria-haspopup="true"
         aria-label={user.name ?? user.email}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-coral text-sm font-bold text-white transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+        className={cn(
+          'relative flex h-9 w-9 items-center justify-center rounded-full',
+          'bg-gradient-to-br from-coral to-gold text-sm font-bold text-white shadow-card',
+          'ring-2 ring-white transition-all duration-200',
+          'hover:scale-105 hover:shadow-card-hover',
+          'focus-visible:outline-none focus-visible:ring-coral',
+          open && 'ring-coral',
+        )}
       >
-        {user.profilePicture ? (
+        {showImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={user.profilePicture} alt={user.name ?? user.email} className="h-full w-full rounded-full object-cover" />
-        ) : getInitials(user)}
+          <img
+            src={user.profilePicture}
+            alt={user.name ?? user.email}
+            onError={() => setImgError(true)}
+            className="h-full w-full rounded-full object-cover"
+          />
+        ) : (
+          // Head-and-shoulders silhouette, clipped by the circle like a photo.
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-full w-full rounded-full p-1"
+          >
+            <circle cx="12" cy="8.2" r="4" />
+            <path d="M12 13.8c-4.4 0-7.5 2.6-7.5 6.2V22h15v-2c0-3.6-3.1-6.2-7.5-6.2z" />
+          </svg>
+        )}
+        {/* Chevron badge: signals this avatar opens a menu. */}
+        <span
+          aria-hidden="true"
+          className="absolute -bottom-0.5 -right-1 flex h-4 w-4 items-center justify-center rounded-full border border-gray-light bg-white text-dark-light shadow-sm"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className={cn('h-2.5 w-2.5 transition-transform duration-200', open && 'rotate-180')}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
       </button>
 
       {open && (

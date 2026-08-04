@@ -91,7 +91,7 @@ export function EventDetailClient({ slug }: Props) {
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
       try {
         await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
-          title: event?.name ?? 'PokloniMi',
+          title: event?.name ?? t('common.appName'),
           url: eventUrl,
         })
         return
@@ -269,14 +269,12 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
   const [showAllReservations, setShowAllReservations] = useState(false)
 
   const items = [...event.gifts.want, ...event.gifts.nice]
-  const itemGifts = items.filter((g) => g.type === 'item')
-  const envelopes = items.filter((g) => g.type === 'envelope')
+  // Unlimited gifts carry no inventory, so they stay out of the counters.
+  const itemGifts = items.filter((g) => g.type === 'item' && !g.unlimited)
   const reservations = event.reservations ?? []
 
   const totalDesired = itemGifts.reduce((acc, g) => acc + g.quantity, 0)
   const totalReserved = itemGifts.reduce((acc, g) => acc + g.reservedQuantity, 0)
-  const envelopeCount = envelopes.reduce((acc, g) => acc + g.reservedQuantity, 0)
-  const envelopeTotal = reservations.reduce((acc, r) => acc + (r.amount ?? 0), 0)
 
   const visibleReservations = showAllReservations ? reservations : reservations.slice(0, 5)
 
@@ -287,7 +285,7 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
       </h2>
 
       {/* Summary tiles */}
-      <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+      <dl className="mt-4 grid grid-cols-2 gap-2 text-center">
         <div className="rounded-2xl bg-coral/10 px-2 py-3">
           <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
             {t('host.event.status.reserved')}
@@ -295,19 +293,6 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
           <dd className="mt-0.5 text-xl font-extrabold text-coral">
             {totalReserved}/{totalDesired}
           </dd>
-        </div>
-        <div className="rounded-2xl bg-gold/15 px-2 py-3">
-          <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
-            {t('host.event.status.envelopes')}
-          </dt>
-          <dd className="mt-0.5 text-xl font-extrabold text-gold-dark">
-            {envelopes.length > 0 ? envelopeCount : '—'}
-          </dd>
-          {envelopeTotal > 0 ? (
-            <p className="text-[11px] font-semibold text-dark-light">
-              {t('host.event.status.total')}: {envelopeTotal}€
-            </p>
-          ) : null}
         </div>
         <div className="rounded-2xl bg-gray-light/40 px-2 py-3">
           <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-light">
@@ -323,7 +308,7 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
       {items.length > 0 ? (
         <ul className="mt-4 flex flex-col gap-2.5">
           {items.map((gift) => {
-            const soldOut = gift.type === 'item' && gift.reservedQuantity >= gift.quantity
+            const soldOut = !gift.unlimited && gift.reservedQuantity >= gift.quantity
             return (
               <li key={gift.id || gift.name} className="rounded-xl bg-bg px-3 py-2.5">
                 <div className="flex items-center justify-between gap-2">
@@ -334,19 +319,19 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
                   <span
                     className={cn(
                       'shrink-0 rounded-full px-2 py-0.5 text-xs font-bold',
-                      gift.type === 'envelope'
+                      gift.unlimited
                         ? 'bg-gold/20 text-gold-dark'
                         : soldOut
                           ? 'bg-success/15 text-dark'
                           : 'bg-coral/10 text-coral',
                     )}
                   >
-                    {gift.type === 'envelope'
+                    {gift.unlimited
                       ? `${gift.reservedQuantity} · ${t('host.event.status.unlimited')}`
                       : `${gift.reservedQuantity}/${gift.quantity}${soldOut ? ' ✓' : ''}`}
                   </span>
                 </div>
-                {gift.type === 'item' ? (
+                {!gift.unlimited ? (
                   <div
                     className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-gray-light/60"
                     role="progressbar"
@@ -393,7 +378,6 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
                 </span>
                 <span className="min-w-0 flex-1 truncate text-dark-light">
                   → {r.giftName}
-                  {typeof r.amount === 'number' ? ` · ${r.amount}€` : ''}
                 </span>
                 <span className="shrink-0 text-xs text-gray">
                   {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
@@ -531,7 +515,7 @@ function GiftList({ palette, icon, title, tagline, items, emptyLabel }: GiftList
               <span className="min-w-0 flex-1 truncate text-sm font-semibold text-dark">
                 {gift.name}
               </span>
-              {palette !== 'avoid' && gift.type === 'item' && gift.quantity > 1 ? (
+              {palette !== 'avoid' && !gift.unlimited && gift.quantity > 1 ? (
                 <span className="shrink-0 text-xs font-semibold text-dark-light">
                   ×{gift.quantity}
                 </span>

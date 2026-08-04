@@ -7,6 +7,7 @@ import { PwaRegister } from '@/components/shared/PwaRegister'
 import { Metadata, Viewport } from "next";
 
 interface SiteMetaMessages {
+  common: { appName: string }
   landing: { meta: { title: string; description: string } }
 }
 
@@ -14,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLanguage()
   const messages = ((await import(`../../messages/${locale}.json`)).default) as SiteMetaMessages
   const { title, description } = messages.landing.meta
+  const appName = messages.common.appName
 
   return {
     title,
@@ -21,14 +23,14 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      siteName: 'PokloniMi',
+      siteName: appName,
       type: 'website',
     },
     manifest: '/manifest.webmanifest',
     appleWebApp: {
       capable: true,
       statusBarStyle: 'default',
-      title: 'PokloniMi',
+      title: appName,
     },
     icons: {
       icon: [
