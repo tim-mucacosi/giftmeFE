@@ -58,30 +58,53 @@ export function ReviewStep({ details, gifts, id, isEditing, onEdit, onBack, onPu
         </h2>
       </div>
 
-      <section className="rounded-2xl bg-white p-5 shadow-card">
-        <header className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-extrabold tracking-tight text-dark">
-            {t('host.create.step3.details')}
-          </h3>
-          <button
-            type="button"
-            onClick={() => onEdit(1)}
-            className="text-sm font-semibold text-coral hover:text-coral-dark"
-          >
-            {t('common.buttons.edit')}
-          </button>
-        </header>
-        <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-          <Row label={t('host.create.step1.typeLabel')} value={t(`eventTypes.${details.type}`)} />
-          {details.gender && (
-            <Row
-              label={t('host.create.step1.genderLabel')}
-              value={t(`host.create.step1.gender${details.gender.charAt(0).toUpperCase() + details.gender.slice(1)}`)}
-            />
-          )}
-          <Row label={t('host.create.step1.nameLabel')} value={details.name || '—'} />
-          <Row label={t('host.create.step1.dateLabel')} value={details.date ? formatDate(details.date) : '—'} />
-        </dl>
+      <section className="overflow-hidden rounded-2xl bg-white shadow-card">
+        {/* Cover preview: works for both a local blob URL (freshly picked
+            file) and a stored https/data URL on an existing event. */}
+        {details.backgroundImageUrl ? (
+          // Local blob/data-URL preview; next/image cannot optimize these.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={details.backgroundImageUrl}
+            alt=""
+            className="h-40 w-full object-cover sm:h-48"
+          />
+        ) : null}
+        <div className="p-5">
+          <header className="mb-3 flex items-center justify-between">
+            <h3 className="text-base font-extrabold tracking-tight text-dark">
+              {t('host.create.step3.details')}
+            </h3>
+            <button
+              type="button"
+              onClick={() => onEdit(1)}
+              className="text-sm font-semibold text-coral hover:text-coral-dark"
+            >
+              {t('common.buttons.edit')}
+            </button>
+          </header>
+          <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+            <Row label={t('host.create.step1.typeLabel')} value={t(`eventTypes.${details.type}`)} />
+            {details.gender && (
+              <Row
+                label={t('host.create.step1.genderLabel')}
+                value={t(`host.create.step1.gender${details.gender.charAt(0).toUpperCase() + details.gender.slice(1)}`)}
+              />
+            )}
+            <Row label={t('host.create.step1.nameLabel')} value={details.name || '—'} />
+            <Row label={t('host.create.step1.dateLabel')} value={details.date ? formatDate(details.date) : '—'} />
+          </dl>
+          {details.message.trim() ? (
+            <div className="mt-3 border-t border-gray-light pt-3">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-dark-light">
+                {t('host.create.step1.messageLabel')}
+              </dt>
+              <dd className="mt-0.5 whitespace-pre-line break-words text-sm text-dark">
+                {details.message.trim()}
+              </dd>
+            </div>
+          ) : null}
+        </div>
       </section>
 
       <section className="rounded-2xl bg-white p-5 shadow-card">

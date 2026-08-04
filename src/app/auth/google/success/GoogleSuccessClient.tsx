@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getMe } from '@/lib/api/auth'
 import { loadSession, saveSession } from '@/lib/auth/session'
+import { consumeReturnTo } from '@/lib/auth/returnTo'
 import { AuthError } from '@/types/auth'
 
 // Module-level guard: survives React Strict Mode's double-invoke of effects
@@ -24,7 +25,7 @@ export function GoogleSuccessClient() {
     }
 
     if (loadSession()) {
-      window.location.replace('/dashboard')
+      window.location.replace(consumeReturnTo())
       return
     }
 
@@ -40,7 +41,7 @@ export function GoogleSuccessClient() {
           refreshToken: '',
           user,
         })
-        window.location.replace('/dashboard')
+        window.location.replace(consumeReturnTo())
       } catch (err) {
         // Ignore aborted fetches when redirecting
         if (err instanceof DOMException && err.name === 'AbortError') return

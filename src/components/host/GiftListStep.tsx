@@ -40,7 +40,7 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
   const [openMap, setOpenMap] = useState<Record<GiftCategory, boolean>>({
     want: true,
     nice: true,
-    avoid: false,
+    avoid: true,
   })
 
   const addGift = (cat: GiftCategory, draft: GiftDraft) => {

@@ -6,6 +6,7 @@ import { useTranslate } from '@tolgee/react'
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 import { UserMenu } from '@/components/shared/UserMenu'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
+import { withReturnTo } from '@/lib/auth/returnTo'
 import { useEventViewMode } from '@/lib/state/eventViewMode'
 import { cn } from '@/lib/utils/cn'
 import styles from './Navbar.module.css'
@@ -49,6 +50,10 @@ export function Navbar() {
 
   const mobileItems = BASE_ITEMS
 
+  // Coming from a real page, return there after signing in; from the
+  // marketing landing page the dashboard is the more useful destination.
+  const loginHref = withReturnTo('/login', pathname === '/' ? null : pathname)
+
   return (
     <>
       {/* Mobile top bar */}
@@ -59,7 +64,20 @@ export function Navbar() {
         </Link>
         <div className="flex items-center gap-2">
           {showLanguageSwitcher ? <LanguageSwitcher /> : null}
-          {ready && user && <UserMenu user={user} onLogout={logout} />}
+          {!ready ? (
+            <div className="h-9 w-20 animate-pulse rounded-pill bg-gray-light" />
+          ) : user ? (
+            <UserMenu user={user} onLogout={logout} />
+          ) : (
+            // Sits where the avatar appears once signed in, so account
+            // actions always live in the same corner.
+            <Link
+              href={loginHref}
+              className="inline-flex min-h-[36px] shrink-0 items-center rounded-pill border-2 border-coral/30 bg-coral/10 px-4 text-sm font-semibold text-coral transition-colors hover:border-coral hover:bg-coral/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+            >
+              {t('nav.login')}
+            </Link>
+          )}
         </div>
       </header>
 
@@ -93,13 +111,13 @@ export function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href={loginHref}
                   className="hidden rounded-full px-4 py-2 text-sm font-semibold text-dark transition-colors hover:text-coral lg:inline-flex"
                 >
                   {t('nav.login')}
                 </Link>
                 <Link
-                  href="/register"
+                  href={withReturnTo('/register', pathname === '/' ? null : pathname)}
                   className="hidden rounded-full bg-dark px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-dark-light lg:inline-flex"
                 >
                   {t('auth.register.signUp')}

@@ -132,7 +132,16 @@
       "noAccount": "Nemaš nalog?",
       "signIn": "Prijavi se",
       "signUp": "Registruj se",
-      "successToast": "Uspešno ste se registrovali na PokloniMi!"
+      "successToast": "Registracija je uspešna. Proverite svoje sanduče i potvrdite email adresu da biste završili registraciju.",
+      "successNoVerification": "Nalog je kreiran. Možete se prijaviti.",
+      "verifyPending": {
+        "title": "Proverite svoje sanduče",
+        "desc": "Poslali smo link za potvrdu na:",
+        "spamHint": "Ne vidite email? Proverite spam folder — link važi 24 sata.",
+        "resend": "Pošalji link ponovo",
+        "resent": "Email za potvrdu je poslat.",
+        "sendFailed": "Trenutno nismo mogli da pošaljemo email. Zatražite novi link."
+      }
     },
     "errors": {
       "nameTooShort": "Ime mora imati najmanje 2 karaktera",

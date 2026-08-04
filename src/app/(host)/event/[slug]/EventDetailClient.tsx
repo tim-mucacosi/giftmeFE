@@ -14,6 +14,7 @@ import {
 } from '@/lib/api/events'
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
+import { copyToClipboard, getEventUrl, shareOrCopy } from '@/lib/utils/appUrl'
 import { cn } from '@/lib/utils/cn'
 
 interface Props {
@@ -66,10 +67,8 @@ export function EventDetailClient({ slug }: Props) {
   // Share the public slug, never the internal id (this page is opened with
   // the Mongo id, which must not appear in guest-facing links).
   const shareSlug = event?.slug ?? slug
-  const eventUrl = useMemo(
-    () => (origin ? `${origin}/event/${shareSlug}` : `/event/${shareSlug}`),
-    [origin, shareSlug],
-  )
+  // `origin` gates the memo so the URL is recomputed once mounted.
+  const eventUrl = useMemo(() => (origin ? getEventUrl(shareSlug) : `/event/${shareSlug}`), [origin, shareSlug])
 
   const isHost = !!user && !!event && user.id === event.hostId
   const showNotHostBanner = !!event && ready && !isHost
@@ -78,28 +77,19 @@ export function EventDetailClient({ slug }: Props) {
   // While auth/event are still resolving we publish `null` to avoid flicker.
   usePublishEventViewMode(!ready || !event ? null : isHost ? 'editor' : 'viewer')
 
+  // The host shares their own event, so these keep the event-specific URL.
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(eventUrl)
+    if (await copyToClipboard(eventUrl)) {
       toast.success(t('common.buttons.copied'))
-    } catch {
+    } else {
       toast.error(t('common.errors.generic'))
     }
   }
 
   const shareLink = async () => {
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
-      try {
-        await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
-          title: event?.name ?? t('common.appName'),
-          url: eventUrl,
-        })
-        return
-      } catch {
-        // User dismissed, fall back to copy
-      }
-    }
-    await copyLink()
+    const result = await shareOrCopy(eventUrl, event?.name ?? t('common.appName'))
+    if (result === 'copied') toast.success(t('common.buttons.copied'))
+    else if (result === 'failed') toast.error(t('common.errors.generic'))
   }
 
   if (loading) {

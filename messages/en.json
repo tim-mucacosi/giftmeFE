@@ -132,7 +132,16 @@
       "noAccount": "Don't have an account?",
       "signIn": "Sign in",
       "signUp": "Sign up",
-      "successToast": "Successfully registered to GiftMe!"
+      "successToast": "Registration successful. Please check your email inbox and verify your email address to complete the registration.",
+      "successNoVerification": "Account created. You can log in now.",
+      "verifyPending": {
+        "title": "Check your inbox",
+        "desc": "We sent a verification link to:",
+        "spamHint": "Can't find it? Check your spam folder — the link is valid for 24 hours.",
+        "resend": "Send the link again",
+        "resent": "Verification email sent.",
+        "sendFailed": "We couldn't send the email just now. Please request a new link."
+      }
     },
     "errors": {
       "nameTooShort": "Name must be at least 2 characters",

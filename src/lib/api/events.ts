@@ -357,10 +357,15 @@ export function buildEventPayload(input: CreateEventInput) {
       .filter((g) => g.category === cat)
       .map((g) => {
         const isEnvelope = g.type === 'envelope'
+        // "Please avoid" entries are informational and carry no inventory,
+        // so quantity/unlimited are left out of their payload entirely.
+        const tracksInventory = cat !== 'avoid' && !isEnvelope
         const gift: Record<string, unknown> = isEnvelope
           ? { name: g.name.trim(), type: 'envelope' }
-          : { name: g.name.trim(), quantity: g.quantity ?? 1 }
-        if (!isEnvelope && g.unlimited) gift.unlimited = true
+          : tracksInventory
+            ? { name: g.name.trim(), quantity: g.quantity ?? 1 }
+            : { name: g.name.trim() }
+        if (tracksInventory && g.unlimited) gift.unlimited = true
         if (g.serverId && /^[0-9a-f]{24}$/i.test(g.serverId)) gift._id = g.serverId
         if (g.description?.trim()) gift.description = g.description.trim()
         if (g.link?.trim()) gift.whereToBuy = g.link.trim()

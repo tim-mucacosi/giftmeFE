@@ -6,24 +6,31 @@ import { useTranslate } from '@tolgee/react'
 import { cn } from '@/lib/utils/cn'
 import { loginWithGoogle } from '@/lib/api/auth'
 import { saveSession } from '@/lib/auth/session'
+import { rememberReturnTo, safeReturnTo } from '@/lib/auth/returnTo'
 
 type Props = {
+  /** Where to land after a successful sign-in. */
+  next?: string
   onError?: (message: string) => void
   className?: string
 }
 
-export function GoogleAuthButton({ onError, className }: Props) {
+export function GoogleAuthButton({ next, onError, className }: Props) {
   const { t } = useTranslate()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
   const handleClick = async () => {
     setLoading(true)
+    const target = safeReturnTo(next)
+    // The OAuth handshake leaves the app entirely, so the destination is
+    // stashed for the callback page to pick up on the way back.
+    rememberReturnTo(target)
     try {
       const response = await loginWithGoogle()
       if (response) {
         saveSession(response)
-        router.push('/dashboard')
+        router.push(target)
         router.refresh()
       }
     } catch {

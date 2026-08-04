@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslate } from '@tolgee/react'
@@ -11,16 +11,22 @@ import { Input } from '@/components/shared/Input'
 import { useToast } from '@/components/shared/Toast'
 import { GoogleAuthButton } from '@/components/shared/GoogleAuthButton'
 import { registerSchema, type RegisterSchema } from '@/lib/validations/authSchema'
-import { registerUser } from '@/lib/api/auth'
-import { saveSession } from '@/lib/auth/session'
+import { registerUser, resendVerificationEmail } from '@/lib/api/auth'
+import { RETURN_TO_PARAM, safeReturnTo, withReturnTo } from '@/lib/auth/returnTo'
 import { AuthError } from '@/types/auth'
 
 export default function RegisterPage() {
   const { t } = useTranslate()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = safeReturnTo(searchParams.get(RETURN_TO_PARAM))
   const toast = useToast()
   const [showPassword, setShowPassword] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  // Set once the account exists and is awaiting email verification.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null)
+  const [emailSent, setEmailSent] = useState(true)
+  const [resending, setResending] = useState(false)
 
   const {
     register,
@@ -36,15 +42,22 @@ export default function RegisterPage() {
   const onSubmit = async (values: RegisterSchema) => {
     setFormError(null)
     try {
+      const email = values.email.trim()
       const response = await registerUser({
         name: values.name.trim(),
-        email: values.email.trim(),
+        email,
         password: values.password,
       })
-      saveSession(response)
-      toast.success(t('auth.register.successToast'))
-      router.push('/dashboard')
-      router.refresh()
+      if (!response.requiresVerification) {
+        // No mail provider configured: the account is usable right away.
+        toast.success(t('auth.register.successNoVerification'))
+        router.push(withReturnTo('/login', next))
+        return
+      }
+      // Registration does not sign the user in; the emailed link must be
+      // followed first, so show what to do next instead of a dashboard.
+      setPendingEmail(email)
+      setEmailSent(response.emailSent)
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.fieldErrors) {
@@ -67,6 +80,67 @@ export default function RegisterPage() {
     }
   }
 
+  const resend = async () => {
+    if (!pendingEmail || resending) return
+    setResending(true)
+    try {
+      await resendVerificationEmail(pendingEmail)
+      setEmailSent(true)
+      toast.success(t('auth.register.verifyPending.resent'))
+    } catch (err) {
+      const message =
+        err instanceof AuthError && err.code === 'NETWORK'
+          ? t('auth.errors.network')
+          : t('common.errors.generic')
+      toast.error(message)
+    } finally {
+      setResending(false)
+    }
+  }
+
+  if (pendingEmail) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-[420px] rounded-3xl bg-white p-7 text-center shadow-card sm:p-8">
+          <div className="mb-2 text-4xl" aria-hidden="true">
+            📬
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-dark">
+            {t('auth.register.verifyPending.title')}
+          </h1>
+          <p className="mt-2 text-sm text-dark-light">
+            {t('auth.register.verifyPending.desc')}
+          </p>
+          <p className="mt-3 break-all rounded-xl bg-bg px-3 py-2 text-sm font-semibold text-dark">
+            {pendingEmail}
+          </p>
+
+          {!emailSent ? (
+            <div
+              role="alert"
+              className="mt-4 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 text-sm font-medium text-coral"
+            >
+              {t('auth.register.verifyPending.sendFailed')}
+            </div>
+          ) : null}
+
+          <p className="mt-4 text-xs text-dark-light">
+            {t('auth.register.verifyPending.spamHint')}
+          </p>
+
+          <div className="mt-6 flex flex-col gap-2">
+            <Button type="button" variant="outline" onClick={resend} loading={resending} fullWidth>
+              {t('auth.register.verifyPending.resend')}
+            </Button>
+            <Button href={withReturnTo('/login', next)} fullWidth>
+              {t('nav.login')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-[420px] rounded-3xl bg-white p-7 shadow-card sm:p-8">
@@ -81,7 +155,7 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-          <GoogleAuthButton onError={(msg) => setFormError(msg)} />
+          <GoogleAuthButton next={next} onError={(msg) => setFormError(msg)} />
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-light" />
@@ -170,7 +244,10 @@ export default function RegisterPage() {
 
         <div className="mt-6 border-t border-gray-light pt-5 text-center text-sm text-dark-light">
           {t('auth.register.haveAccount')}{' '}
-          <Link href="/login" className="font-semibold text-coral hover:text-coral-dark">
+          <Link
+            href={withReturnTo('/login', next)}
+            className="font-semibold text-coral hover:text-coral-dark"
+          >
             {t('auth.register.signIn')}
           </Link>
         </div>

@@ -23,6 +23,20 @@ export interface VerifyEmailResponse {
   message?: string
 }
 
+/**
+ * Registration does not sign the user in: the account must be verified via
+ * the emailed link first. When no mail provider is configured (local dev)
+ * the backend verifies immediately and `requiresVerification` is false.
+ */
+export interface RegisterResponse {
+  success: boolean
+  message?: string
+  requiresVerification: boolean
+  /** False when the provider rejected the send; offer a resend. */
+  emailSent: boolean
+  user?: Pick<User, 'id' | 'name' | 'email'>
+}
+
 export interface AuthSession {
   accessToken: string
   refreshToken?: string

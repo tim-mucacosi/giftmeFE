@@ -6,6 +6,7 @@ import {
   type ChangePasswordInput,
   type LoginInput,
   type RegisterInput,
+  type RegisterResponse,
 } from '@/types/auth'
 import type { User } from '@/types/user'
 
@@ -92,20 +93,37 @@ function mockDelay(ms = 400) {
 // POST /auth/register
 // ---------------------------------------------------------------------------
 
-export async function registerUser(input: RegisterInput): Promise<AuthResponse> {
+/**
+ * Create an account. This does not sign the user in — the backend returns no
+ * token because the emailed verification link must be followed first.
+ */
+export async function registerUser(input: RegisterInput): Promise<RegisterResponse> {
   if (USE_MOCKS) {
     await mockDelay()
-    return mockAuthResponse(input, input.name)
+    return {
+      success: true,
+      requiresVerification: true,
+      emailSent: true,
+      user: { id: `usr_${Math.random().toString(36).slice(2, 10)}`, name: input.name, email: input.email },
+    }
   }
-  // Normalize token field name
-  const raw = await authRequest<AuthResponse & { token?: string }>('/auth/register', { body: input })
-  if (!raw.accessToken && raw.token) {
-    raw.accessToken = raw.token
+  const raw = await authRequest<RegisterResponse>('/auth/register', { body: input })
+  return {
+    ...raw,
+    // Older backends answered without these flags; assume verification is
+    // needed so the UI never claims an account is ready when it is not.
+    requiresVerification: raw.requiresVerification !== false,
+    emailSent: raw.emailSent !== false,
   }
-  if (!raw.refreshToken) {
-    raw.refreshToken = ''
+}
+
+/** Ask for a fresh verification link. Resolves even for unknown addresses. */
+export async function resendVerificationEmail(email: string): Promise<void> {
+  if (USE_MOCKS) {
+    await mockDelay()
+    return
   }
-  return raw
+  await authRequest<{ success: boolean }>('/auth/resend-verification', { body: { email } })
 }
 
 // ---------------------------------------------------------------------------
