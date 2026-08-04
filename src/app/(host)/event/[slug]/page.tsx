@@ -2,7 +2,7 @@ import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import { GuestEventClient } from '@/components/guest/GuestEventClient'
 import { getEventById } from '@/lib/api/events'
-import { buildEventShareMeta } from '@/lib/utils/eventShareMeta'
+import { buildEventShareMeta, getBrandName } from '@/lib/utils/eventShareMeta'
 import { getLanguage } from '@/tolgee/language'
 
 interface Props {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url,
-      siteName: 'PokloniMi',
+      siteName: getBrandName(lang),
       type: 'website',
     },
   }

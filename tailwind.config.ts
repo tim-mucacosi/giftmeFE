@@ -17,6 +17,7 @@ const config: Config = {
         gold: {
           DEFAULT: '#ffd93d',
           light: '#ffe066',
+          dark: '#b8860b',
         },
         dark: {
           DEFAULT: '#2d3436',
@@ -32,6 +33,9 @@ const config: Config = {
       },
       maxWidth: {
         container: '1280px',
+      },
+      borderRadius: {
+        pill: '9999px',
       },
       boxShadow: {
         cta: '0 4px 14px rgba(255, 107, 107, 0.4)',

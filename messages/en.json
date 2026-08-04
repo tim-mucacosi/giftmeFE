@@ -39,6 +39,11 @@
       "title": "GiftMe — Celebrations without unwanted gifts",
       "description": "Create a wishlist, share with guests, everyone wins. Guests don't need to register."
     },
+    "beta": {
+      "badge": "Beta",
+      "text": "GiftMe is still in beta, we're polishing the experience every day. If you run into a rough edge, thanks for bearing with us; it only gets better from here. 💛",
+      "dismiss": "Dismiss"
+    },
     "hero": {
       "headline": "Celebrations without unwanted gifts",
       "subheadline": "Create a wishlist, share it with your guests, everyone wins.",
@@ -82,7 +87,10 @@
     },
     "mockup": {
       "title": "What your guests will see",
-      "tagline": "Open the link → see the list → pick a gift → done. Under 30 seconds."
+      "tagline": "Open the link → see the list → pick a gift → done. Under 30 seconds.",
+      "eventName": "Anna & Mark's wedding",
+      "gift1": "Dishwasher",
+      "gift2": "Wine glasses"
     },
     "testimonials": {
       "title": "What users say",
@@ -249,12 +257,13 @@
         "genderGirl": "Girl",
         "imageErrorType": "Please choose a JPG, PNG, WebP or GIF image.",
         "imageErrorSize": "Image is too large (max 10 MB).",
-        "imageRemove": "Remove image"
+        "imageRemove": "Remove image",
+        "dateErrorPast": "The date cannot be in the past"
       },
       "step2": {
         "title": "What would you like to receive? 🎁",
         "desc": "Add gifts and sort them by priority",
-        "addGift": "+ Add gift",
+        "addGift": "Add gift",
         "categories": {
           "want": "Really want",
           "wantTagline": "This matters most",
@@ -264,23 +273,24 @@
           "avoidTagline": "Kindly avoid"
         },
         "form": {
-          "typeItem": "Gift",
-          "typeEnvelope": "Envelope",
           "name": "Name",
           "description": "Description (optional)",
-          "price": "Price (optional)",
+          "descriptionPlaceholder": "brand, color, size, where to buy…",
           "quantity": "Quantity",
-          "color": "Color (optional)",
-          "store": "Store (optional)",
-          "suggestedAmounts": "Suggested amounts",
+          "quantityError": "Enter a whole number greater than 0",
+          "unlimited": "Unlimited",
+          "unlimitedHint": "Select this option if the quantity is unlimited.",
+          "link": "Link (optional)",
+          "linkPlaceholder": "e.g. www.store.com/product",
+          "linkError": "Enter a valid link (e.g. https://…)",
           "submit": "Add",
-          "editSubmit": "Save changes",
-          "envelopeTitleLabel": "Title (optional)",
-          "envelopeDefaultName": "Money in an envelope"
+          "editSubmit": "Save changes"
         },
-        "collectNames": {
-          "label": "Ask guests for their name",
-          "hint": "Guests enter their name before reserving a gift; only you can see it."
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "deleteConfirm": {
+          "title": "Remove this gift?",
+          "text": "It will be removed from your list and guests will no longer see it."
         }
       },
       "step3": {
@@ -352,15 +362,13 @@
       "status": {
         "title": "Gift status",
         "reserved": "Reserved",
-        "envelopes": "Envelopes",
         "guests": "Reservations",
         "unlimited": "Unlimited",
         "reservationsTitle": "Guest reservations",
         "noReservations": "No reservations yet. Share the link with your guests!",
         "showAll": "Show all",
         "showLess": "Show less",
-        "anonymous": "Anonymous guest",
-        "total": "Total"
+        "anonymous": "Anonymous guest"
       },
       "progress": {
         "reserved": "Gifts reserved"
@@ -388,8 +396,6 @@
         "topWish": "Top wish",
         "welcomeToo": "Welcome too",
         "unlimited": "Always available",
-        "ctaEnvelope": "I’ll bring an envelope",
-        "suggestedAmounts": "Suggested amounts",
         "remaining": "Remaining",
         "pickedByYou": "your pick"
       },
@@ -418,13 +424,7 @@
       "modal": {
         "title": "Confirm your choice",
         "confirm": "Yes, I'll bring it ✓",
-        "cancel": "No, take me back",
-        "nameLabel": "Your name",
-        "namePlaceholder": "e.g. Ana",
-        "nameHint": "Only the host will see your name, so they know who picked the gift.",
-        "nameError": "Please enter your name (at least 2 characters)",
-        "amountLabel": "Amount (optional)",
-        "amountHint": "Only the host can see the amount; other guests never do."
+        "cancel": "No, take me back"
       },
       "success": {
         "title": "Wonderful! 🎉",

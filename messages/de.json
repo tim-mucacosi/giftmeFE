@@ -39,6 +39,11 @@
       "title": "SchenkMir — Feiern ohne unerwünschte Geschenke",
       "description": "Erstelle eine Wunschliste, teile sie mit Gästen, alle sind glücklich."
     },
+    "beta": {
+      "badge": "Beta",
+      "text": "SchenkMir ist noch in der Beta-Phase, wir feilen jeden Tag an der Erfahrung. Falls noch nicht alles perfekt ist, danke für deine Geduld; es wird täglich besser. 💛",
+      "dismiss": "Schließen"
+    },
     "hero": {
       "headline": "Feiern ohne unerwünschte Geschenke",
       "subheadline": "Erstelle eine Wunschliste, teile sie mit deinen Gästen, alle gewinnen.",
@@ -82,7 +87,10 @@
     },
     "mockup": {
       "title": "So sehen es deine Gäste",
-      "tagline": "Link öffnen → Liste sehen → Geschenk wählen → fertig. Unter 30 Sekunden."
+      "tagline": "Link öffnen → Liste sehen → Geschenk wählen → fertig. Unter 30 Sekunden.",
+      "eventName": "Hochzeit von Anna & Markus",
+      "gift1": "Geschirrspüler",
+      "gift2": "Weingläser"
     },
     "testimonials": {
       "title": "Das sagen Nutzer",
@@ -249,12 +257,13 @@
         "genderGirl": "Mädchen",
         "imageErrorType": "Bitte wähle ein JPG-, PNG-, WebP- oder GIF-Bild.",
         "imageErrorSize": "Bild ist zu groß (max. 10 MB).",
-        "imageRemove": "Bild entfernen"
+        "imageRemove": "Bild entfernen",
+        "dateErrorPast": "Das Datum darf nicht in der Vergangenheit liegen"
       },
       "step2": {
         "title": "Was möchtest du bekommen? 🎁",
         "desc": "Geschenke hinzufügen und nach Priorität sortieren",
-        "addGift": "+ Geschenk hinzufügen",
+        "addGift": "Geschenk hinzufügen",
         "categories": {
           "want": "Wünsche ich mir sehr",
           "wantTagline": "Das bedeutet am meisten",
@@ -264,23 +273,24 @@
           "avoidTagline": "Bitte vermeiden"
         },
         "form": {
-          "typeItem": "Geschenk",
-          "typeEnvelope": "Umschlag",
           "name": "Name",
           "description": "Beschreibung (optional)",
-          "price": "Preis (optional)",
+          "descriptionPlaceholder": "Marke, Farbe, Größe, wo zu kaufen…",
           "quantity": "Anzahl",
-          "color": "Farbe (optional)",
-          "store": "Laden (optional)",
-          "suggestedAmounts": "Vorgeschlagene Beträge",
+          "quantityError": "Geben Sie eine ganze Zahl größer als 0 ein",
+          "unlimited": "Unbegrenzt",
+          "unlimitedHint": "Wähle diese Option, wenn die Menge unbegrenzt ist.",
+          "link": "Link (optional)",
+          "linkPlaceholder": "z. B. www.shop.de/produkt",
+          "linkError": "Geben Sie einen gültigen Link ein (z. B. https://…)",
           "submit": "Hinzufügen",
-          "editSubmit": "Änderungen speichern",
-          "envelopeTitleLabel": "Titel (optional)",
-          "envelopeDefaultName": "Geldumschlag"
+          "editSubmit": "Änderungen speichern"
         },
-        "collectNames": {
-          "label": "Gäste nach ihrem Namen fragen",
-          "hint": "Gäste geben vor dem Reservieren ihren Namen an; nur du siehst ihn."
+        "moveUp": "Nach oben",
+        "moveDown": "Nach unten",
+        "deleteConfirm": {
+          "title": "Dieses Geschenk entfernen?",
+          "text": "Es wird von deiner Liste entfernt und Gäste sehen es dann nicht mehr."
         }
       },
       "step3": {
@@ -352,15 +362,13 @@
       "status": {
         "title": "Geschenkstatus",
         "reserved": "Reserviert",
-        "envelopes": "Umschläge",
         "guests": "Reservierungen",
         "unlimited": "Unbegrenzt",
         "reservationsTitle": "Gästereservierungen",
         "noReservations": "Noch keine Reservierungen. Teile den Link mit deinen Gästen!",
         "showAll": "Alle anzeigen",
         "showLess": "Weniger anzeigen",
-        "anonymous": "Anonymer Gast",
-        "total": "Gesamt"
+        "anonymous": "Anonymer Gast"
       },
       "progress": {
         "reserved": "Reservierte Geschenke"
@@ -388,8 +396,6 @@
         "topWish": "Top-Wunsch",
         "welcomeToo": "Auch willkommen",
         "unlimited": "Immer verfügbar",
-        "ctaEnvelope": "Ich bringe einen Umschlag",
-        "suggestedAmounts": "Vorgeschlagene Beträge",
         "remaining": "Verbleibend",
         "pickedByYou": "deine Wahl"
       },
@@ -418,13 +424,7 @@
       "modal": {
         "title": "Wahl bestätigen",
         "confirm": "Ja, das bringe ich mit ✓",
-        "cancel": "Nein, zurück",
-        "nameLabel": "Dein Name",
-        "namePlaceholder": "z. B. Ana",
-        "nameHint": "Nur der Gastgeber sieht deinen Namen, damit er weiß, wer das Geschenk gewählt hat.",
-        "nameError": "Bitte gib deinen Namen ein (mindestens 2 Zeichen)",
-        "amountLabel": "Betrag (optional)",
-        "amountHint": "Den Betrag sieht nur der Gastgeber; andere Gäste nie."
+        "cancel": "Nein, zurück"
       },
       "success": {
         "title": "Wunderbar! 🎉",

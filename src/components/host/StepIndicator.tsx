@@ -37,11 +37,14 @@ export function StepIndicator({ current, onJump }: StepIndicatorProps) {
                 type="button"
                 onClick={() => isClickable && onJump?.(step)}
                 className={cn(
-                  'flex min-h-[36px] shrink-0 items-center gap-2 rounded-full px-2 py-1.5 text-xs font-semibold transition-colors sm:px-3 sm:text-sm',
-                  state === 'active' && 'bg-coral text-white shadow-cta',
-                  state === 'done' && 'bg-success/25 text-dark',
-                  state === 'future' && 'bg-gray-light text-dark-light',
-                  !isClickable && 'cursor-default',
+                  'flex min-h-[38px] shrink-0 items-center gap-2 rounded-full py-1.5 pl-1.5 pr-2.5 text-xs font-semibold transition-all duration-200 sm:pr-3.5 sm:text-sm',
+                  state === 'active' &&
+                    'scale-105 bg-coral text-white shadow-cta ring-2 ring-coral/25 ring-offset-2',
+                  state === 'done' && 'bg-success text-dark shadow-card',
+                  state === 'future' && 'border-2 border-gray-light bg-white text-dark-light',
+                  isClickable
+                    ? 'hover:shadow-card-hover hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2'
+                    : 'cursor-default',
                 )}
                 disabled={!isClickable}
                 aria-current={state === 'active' ? 'step' : undefined}
@@ -49,10 +52,10 @@ export function StepIndicator({ current, onJump }: StepIndicatorProps) {
               >
                 <span
                   className={cn(
-                    'flex h-6 w-6 items-center justify-center rounded-full text-[11px]',
-                    state === 'active' && 'bg-white/25',
-                    state === 'done' && 'bg-success/70',
-                    state === 'future' && 'bg-white',
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold',
+                    state === 'active' && 'bg-white text-coral',
+                    state === 'done' && 'bg-white/60 text-dark',
+                    state === 'future' && 'bg-gray-light text-dark-light',
                   )}
                 >
                   {state === 'done' ? '✓' : step}
@@ -70,8 +73,8 @@ export function StepIndicator({ current, onJump }: StepIndicatorProps) {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    'h-[2px] flex-1 rounded-full',
-                    step < current ? 'bg-success/60' : 'bg-gray-light',
+                    'h-1 flex-1 rounded-full transition-colors duration-300',
+                    step < current ? 'bg-success' : 'bg-gray-light',
                   )}
                 />
               ) : null}

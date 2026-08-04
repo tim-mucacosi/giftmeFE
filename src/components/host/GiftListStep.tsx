@@ -3,11 +3,21 @@
 import { useState } from 'react'
 import { useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
+import { Modal } from '@/components/shared/Modal'
 import { GiftAddForm, type GiftDraft } from './GiftAddForm'
 import type { Gift, GiftCategory } from '@/types/gift'
 import { cn } from '@/lib/utils/cn'
 
 export type DraftGift = Gift
+
+/** Compact display label for a gift link, e.g. "ikea.rs". */
+function linkLabel(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
 
 const CATEGORY_META: { key: GiftCategory; icon: string; palette: string }[] = [
   { key: 'want', icon: '❤️', palette: 'want' },
@@ -18,23 +28,15 @@ const CATEGORY_META: { key: GiftCategory; icon: string; palette: string }[] = [
 interface Props {
   gifts: DraftGift[]
   onChange: (gifts: DraftGift[]) => void
-  collectGuestNames: boolean
-  onCollectGuestNamesChange: (value: boolean) => void
   onNext: () => void
   onBack: () => void
 }
 
-export function GiftListStep({
-  gifts,
-  onChange,
-  collectGuestNames,
-  onCollectGuestNamesChange,
-  onNext,
-  onBack,
-}: Props) {
+export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
   const { t } = useTranslate()
   const [addingInto, setAddingInto] = useState<GiftCategory | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [openMap, setOpenMap] = useState<Record<GiftCategory, boolean>>({
     want: true,
     nice: true,
@@ -67,6 +69,24 @@ export function GiftListStep({
 
   const removeGift = (id: string) => {
     onChange(gifts.filter((g) => g.id !== id))
+  }
+
+  // Swap a gift with its neighbour within its own category. The overall
+  // array keeps its shape; only the two category slots trade contents, so
+  // the payload (which preserves array order per category) follows along.
+  const moveGift = (id: string, dir: -1 | 1) => {
+    const gift = gifts.find((g) => g.id === id)
+    if (!gift) return
+    const catItems = gifts.filter((g) => g.category === gift.category)
+    const idx = catItems.findIndex((g) => g.id === id)
+    const target = idx + dir
+    if (target < 0 || target >= catItems.length) return
+    const reordered = [...catItems]
+    ;[reordered[idx], reordered[target]] = [reordered[target]!, reordered[idx]!]
+    let i = 0
+    onChange(
+      gifts.map((g) => (g.category === gift.category ? { ...reordered[i]!, order: i++ } : g)),
+    )
   }
 
   return (
@@ -130,21 +150,55 @@ export function GiftListStep({
                 {items.length === 0 ? (
                   <p className="px-2 py-3 text-center text-sm text-dark-light">—</p>
                 ) : (
-                  items.map((g) => (
+                  items.map((g, idx) => (
                     <div
                       key={g.id}
-                      className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm"
+                      className="flex items-center gap-2 rounded-xl bg-white p-3 shadow-sm"
                     >
-                      <span className="text-lg text-dark-light" aria-hidden="true">
-                        ⠿
-                      </span>
+                      <div className="flex flex-col">
+                        <button
+                          type="button"
+                          onClick={() => moveGift(g.id, -1)}
+                          disabled={idx === 0}
+                          aria-label={t('host.create.step2.moveUp')}
+                          className="rounded px-1 text-[10px] leading-4 text-dark-light transition-colors hover:text-coral disabled:opacity-25 disabled:hover:text-dark-light"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveGift(g.id, 1)}
+                          disabled={idx === items.length - 1}
+                          aria-label={t('host.create.step2.moveDown')}
+                          className="rounded px-1 text-[10px] leading-4 text-dark-light transition-colors hover:text-coral disabled:opacity-25 disabled:hover:text-dark-light"
+                        >
+                          ▼
+                        </button>
+                      </div>
                       <div className="flex-1 overflow-hidden">
-                        <div className="truncate text-sm font-bold text-dark">
-                          {g.type === 'envelope' ? '💌 ' : ''}
-                          {g.name}
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate text-sm font-bold text-dark">
+                            {g.type === 'envelope' ? '💌 ' : ''}
+                            {g.name}
+                          </span>
+                          {key !== 'avoid' ? (
+                            <span className="shrink-0 rounded-full bg-gray-light/60 px-1.5 py-0.5 text-[10px] font-bold text-dark-light">
+                              {g.unlimited ? '∞' : `×${g.quantity}`}
+                            </span>
+                          ) : null}
                         </div>
                         {g.description ? (
                           <div className="truncate text-xs text-dark-light">{g.description}</div>
+                        ) : null}
+                        {g.link ? (
+                          <a
+                            href={g.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex max-w-full items-center gap-1 truncate text-xs font-medium text-coral hover:underline"
+                          >
+                            🔗 {linkLabel(g.link)}
+                          </a>
                         ) : null}
                       </div>
                       <button
@@ -157,7 +211,7 @@ export function GiftListStep({
                       </button>
                       <button
                         type="button"
-                        onClick={() => removeGift(g.id)}
+                        onClick={() => setDeletingId(g.id)}
                         className="rounded-full p-2 text-dark-light hover:text-coral"
                         aria-label={t('common.buttons.delete')}
                       >
@@ -166,15 +220,28 @@ export function GiftListStep({
                     </div>
                   ))
                 )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAddingInto(key)}
-                  fullWidth
-                >
-                  {t('host.create.step2.addGift')}
-                </Button>
+                <div className="flex justify-center pt-1 pb-1">
+                  <Button
+                    type="button"
+                    variant={palette === 'nice' ? 'gold' : 'coral'}
+                    size="sm"
+                    onClick={() => setAddingInto(key)}
+                    className="px-6"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                      strokeLinecap="round"
+                    >
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    {t('host.create.step2.addGift')}
+                  </Button>
+                </div>
               </div>
             ) : null}
           </section>
@@ -187,43 +254,59 @@ export function GiftListStep({
           onClose={() => setAddingInto(null)}
           onSubmit={(d) => addGift(addingInto, d)}
           category={addingInto}
-          envelopeAllowed={!gifts.filter((g) => g.category === addingInto).some((g) => g.type === 'envelope')}
         />
       ) : null}
 
       {editingId ? (() => {
         const gift = gifts.find((g) => g.id === editingId)
         if (!gift) return null
-        const envelopeExists = gifts.filter((g) => g.category === gift.category && g.id !== editingId).some((g) => g.type === 'envelope')
         return (
           <GiftAddForm
             open
             onClose={() => setEditingId(null)}
             onSubmit={(d) => updateGift(editingId, d)}
             category={gift.category}
-            envelopeAllowed={!envelopeExists}
             initial={gift}
           />
         )
       })() : null}
 
-      {/* Reservation settings */}
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-light bg-white p-4 shadow-card">
-        <input
-          type="checkbox"
-          checked={collectGuestNames}
-          onChange={(e) => onCollectGuestNamesChange(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 accent-coral"
-        />
-        <span className="min-w-0">
-          <span className="block text-sm font-semibold text-dark">
-            🙋 {t('host.create.step2.collectNames.label')}
-          </span>
-          <span className="mt-0.5 block text-xs text-dark-light">
-            {t('host.create.step2.collectNames.hint')}
-          </span>
-        </span>
-      </label>
+      {/* Delete confirmation */}
+      {deletingId ? (() => {
+        const gift = gifts.find((g) => g.id === deletingId)
+        if (!gift) return null
+        return (
+          <Modal
+            open
+            onClose={() => setDeletingId(null)}
+            title={t('host.create.step2.deleteConfirm.title')}
+          >
+            <div className="flex flex-col gap-4">
+              <p className="rounded-xl bg-bg px-3 py-2.5 text-sm font-bold text-dark">
+                {gift.type === 'envelope' ? '💌 ' : ''}
+                {gift.name}
+              </p>
+              <p className="text-sm text-dark-light">
+                {t('host.create.step2.deleteConfirm.text')}
+              </p>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button variant="outline" type="button" onClick={() => setDeletingId(null)}>
+                  {t('common.buttons.cancel')}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    removeGift(gift.id)
+                    setDeletingId(null)
+                  }}
+                >
+                  {t('common.buttons.delete')}
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )
+      })() : null}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <Button variant="outline" onClick={onBack} fullWidth className="sm:w-auto">

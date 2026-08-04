@@ -8,13 +8,11 @@ export interface Gift {
   category: GiftCategory
   name: string
   description?: string
-  price?: number
-  priceRange?: [number, number]
-  color?: string
   quantity: number
+  /** When true the gift can be reserved any number of times. */
+  unlimited?: boolean
   reservedQuantity: number
-  store?: string
-  productUrl?: string
-  suggestedAmounts?: number[]
+  /** Optional product URL where the gift can be found. */
+  link?: string
   order: number
 }

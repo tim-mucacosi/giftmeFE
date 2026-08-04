@@ -30,21 +30,43 @@ describe('buildEventPayload', () => {
     expect('userId' in payload).toBe(false)
   })
 
-  it('marks envelope gifts and omits quantity for them', () => {
+  it('marks envelope gifts, omits quantity for them and never sends amounts', () => {
     const payload = buildEventPayload({
       ...base,
       gifts: [
         {
-          name: '',
+          name: 'Koverta',
           category: 'want',
           type: 'envelope',
           quantity: 999,
-          suggestedAmounts: [20, 50],
+        },
+      ],
+    })
+    expect(payload.iWant).toEqual([{ name: 'Koverta', type: 'envelope' }])
+    expect(JSON.stringify(payload)).not.toContain('suggestedAmounts')
+  })
+
+  it('sends the unlimited flag and the link as whereToBuy', () => {
+    const payload = buildEventPayload({
+      ...base,
+      gifts: [
+        {
+          name: 'Diapers',
+          category: 'want',
+          type: 'item',
+          quantity: 1,
+          unlimited: true,
+          link: 'https://shop.example/diapers',
         },
       ],
     })
     expect(payload.iWant).toEqual([
-      { name: 'Money in an envelope', type: 'envelope', suggestedAmounts: [20, 50] },
+      {
+        name: 'Diapers',
+        quantity: 1,
+        unlimited: true,
+        whereToBuy: 'https://shop.example/diapers',
+      },
     ])
   })
 
@@ -68,12 +90,20 @@ describe('mapGift', () => {
     const gift = mapGift({ _id: 'g1', name: 'Coffee machine', quantity: 2, reservedQuantity: 1 })
     expect(gift.available).toBe(1)
     expect(gift.type).toBe('item')
+    expect(gift.unlimited).toBe(false)
   })
 
   it('never goes below zero and treats envelopes as unlimited', () => {
     expect(mapGift({ _id: 'g', name: 'X', quantity: 1, reservedQuantity: 5 }).available).toBe(0)
     const env = mapGift({ _id: 'e', name: 'Envelope', type: 'envelope', reservedQuantity: 40 })
     expect(env.available).toBe(Number.POSITIVE_INFINITY)
+    expect(env.unlimited).toBe(true)
+  })
+
+  it('treats unlimited item gifts as always available', () => {
+    const gift = mapGift({ _id: 'g', name: 'Diapers', quantity: 1, reservedQuantity: 7, unlimited: true })
+    expect(gift.unlimited).toBe(true)
+    expect(gift.available).toBe(Number.POSITIVE_INFINITY)
   })
 })
 
@@ -100,6 +130,7 @@ describe('mapApiEventDetail', () => {
   it('maps host reservations when present', () => {
     const detail = mapApiEventDetail(dto)
     expect(detail.reservations).toHaveLength(1)
+    // Legacy reservations keep the name they were recorded with.
     expect(detail.reservations![0]!.guestName).toBe('Ana')
   })
 

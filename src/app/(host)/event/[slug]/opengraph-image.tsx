@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og'
 import { getEventById } from '@/lib/api/events'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
+import { getBrandName } from '@/lib/utils/eventShareMeta'
+import { getLanguage } from '@/tolgee/language'
 
 export const runtime = 'edge'
 export const revalidate = 60
@@ -10,8 +12,9 @@ export const contentType = 'image/png'
 
 export default async function Image({ params }: { params: { slug: string } }) {
   const event = await getEventById(params.slug).catch(() => null)
+  const brand = getBrandName(await getLanguage())
   const emoji = event ? getEventEmoji(event.type, event.gender) : '🎁'
-  const name = event?.name ?? 'PokloniMi'
+  const name = event?.name ?? brand
 
   return new ImageResponse(
     (
@@ -70,7 +73,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
             color: '#ffffff',
           }}
         >
-          🎁 PokloniMi
+          🎁 {brand}
         </div>
       </div>
     ),

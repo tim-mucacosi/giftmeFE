@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslate } from '@tolgee/react'
 import { Input } from '@/components/shared/Input'
 import { Textarea } from '@/components/shared/Textarea'
 import { Button } from '@/components/shared/Button'
 import { validateImageFile } from '@/lib/utils/imageUpload'
+import { todayIsoDate } from '@/lib/validations/eventSchema'
 import { cn } from '@/lib/utils/cn'
 import type { EventType, EventGender } from '@/types/event'
 
@@ -41,6 +42,8 @@ interface Props {
 export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, errors }: Props) {
   const { t } = useTranslate()
   const [imageError, setImageError] = useState<string | null>(null)
+  // Picker floor; manual entry and restored state are re-checked on submit.
+  const minDate = useMemo(() => todayIsoDate(), [])
 
   return (
     <div className="flex flex-col gap-6">
@@ -121,6 +124,7 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
       <Input
         type="date"
         label={t('host.create.step1.dateLabel')}
+        min={minDate}
         value={value.date}
         onChange={(e) => onChange({ ...value, date: e.target.value })}
         error={errors?.date}

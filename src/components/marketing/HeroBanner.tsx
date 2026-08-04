@@ -27,7 +27,7 @@ export function HeroBanner() {
             <div className={styles.phoneScreen}>
               <div className={styles.phoneHeader}>
                 <span>🎁</span>
-                <span className={styles.phoneTitle}>PokloniMi</span>
+                <span className={styles.phoneTitle}>{t('common.appName')}</span>
               </div>
               <div className={styles.phoneCardWant}>
                 <div className={styles.phoneDot} />
