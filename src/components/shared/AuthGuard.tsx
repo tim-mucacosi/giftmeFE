@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession, saveSession, clearSession } from '@/lib/auth/session'
+import { withReturnTo } from '@/lib/auth/returnTo'
 import { getMe } from '@/lib/api/auth'
 import { AuthError } from '@/types/auth'
 
@@ -17,7 +18,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   // Redirect when auth is ready and there's no user.
   useEffect(() => {
     if (ready && !user) {
-      router.replace(`/login?next=${encodeURIComponent(pathname ?? '/dashboard')}`)
+      router.replace(withReturnTo('/login', pathname))
     }
   }, [ready, user, router, pathname])
 
@@ -53,9 +54,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
         if (cancelled) return
         if (err instanceof AuthError && err.status === 401) {
           clearSession()
-          router.replace(
-            `/login?next=${encodeURIComponent(pathname ?? '/dashboard')}`,
-          )
+          router.replace(withReturnTo('/login', pathname))
         }
         // Network errors / 5xx: keep working with the cached user.
       }

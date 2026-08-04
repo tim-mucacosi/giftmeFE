@@ -10,6 +10,7 @@ import {
   GIFT_DESCRIPTION_MAX,
   GIFT_NAME_MAX,
   GIFT_QUANTITY_MAX,
+  usesQuantity,
   validateGiftForm,
   type GiftFormErrors,
 } from '@/lib/validations/giftSchema'
@@ -41,6 +42,8 @@ export function GiftAddForm({ open, onClose, onSubmit, category, initial }: Prop
   const [errors, setErrors] = useState<GiftFormErrors>({})
   // Guards against a second submit racing the close of the modal.
   const submittingRef = useRef(false)
+  // "Please avoid" entries are informational: no inventory to track.
+  const showQuantity = usesQuantity(category, isEnvelope ? 'envelope' : 'item')
 
   const clearError = (field: keyof GiftFormErrors) =>
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev))
@@ -58,6 +61,7 @@ export function GiftAddForm({ open, onClose, onSubmit, category, initial }: Prop
     if (submittingRef.current) return
     const { errors: nextErrors, parsed } = validateGiftForm({
       type: isEnvelope ? 'envelope' : 'item',
+      category,
       name,
       quantity,
       unlimited,
@@ -107,38 +111,40 @@ export function GiftAddForm({ open, onClose, onSubmit, category, initial }: Prop
               required
               autoFocus
             />
-            <div className="flex flex-col gap-1.5">
-              <Input
-                type="number"
-                min={1}
-                max={GIFT_QUANTITY_MAX}
-                step={1}
-                inputMode="numeric"
-                label={t('host.create.step2.form.quantity')}
-                value={quantity}
-                onChange={(e) => {
-                  setQuantity(e.target.value)
-                  clearError('quantity')
-                }}
-                error={errors.quantity ? t(errors.quantity) : undefined}
-                disabled={unlimited}
-                required={!unlimited}
-              />
-              <label className="flex cursor-pointer items-center gap-2 py-1">
-                <input
-                  type="checkbox"
-                  checked={unlimited}
-                  onChange={(e) => toggleUnlimited(e.target.checked)}
-                  className="h-5 w-5 shrink-0 accent-coral"
+            {showQuantity ? (
+              <div className="flex flex-col gap-1.5">
+                <Input
+                  type="number"
+                  min={1}
+                  max={GIFT_QUANTITY_MAX}
+                  step={1}
+                  inputMode="numeric"
+                  label={t('host.create.step2.form.quantity')}
+                  value={quantity}
+                  onChange={(e) => {
+                    setQuantity(e.target.value)
+                    clearError('quantity')
+                  }}
+                  error={errors.quantity ? t(errors.quantity) : undefined}
+                  disabled={unlimited}
+                  required={!unlimited}
                 />
-                <span className="text-sm font-semibold text-dark">
-                  {t('host.create.step2.form.unlimited')}
-                </span>
-                <span className="text-xs text-dark-light">
-                  {t('host.create.step2.form.unlimitedHint')}
-                </span>
-              </label>
-            </div>
+                <label className="flex cursor-pointer items-center gap-2 py-1">
+                  <input
+                    type="checkbox"
+                    checked={unlimited}
+                    onChange={(e) => toggleUnlimited(e.target.checked)}
+                    className="h-5 w-5 shrink-0 accent-coral"
+                  />
+                  <span className="text-sm font-semibold text-dark">
+                    {t('host.create.step2.form.unlimited')}
+                  </span>
+                  <span className="text-xs text-dark-light">
+                    {t('host.create.step2.form.unlimitedHint')}
+                  </span>
+                </label>
+              </div>
+            ) : null}
             <Input
               type="url"
               inputMode="url"

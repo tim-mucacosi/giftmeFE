@@ -6,12 +6,22 @@ export const GIFT_QUANTITY_MAX = 1000
 
 export interface GiftFormValues {
   type: 'item' | 'envelope'
+  /** "avoid" entries are informational, so they carry no inventory. */
+  category: 'want' | 'nice' | 'avoid'
   name: string
   /** Raw input value; validated as a positive whole number unless unlimited. */
   quantity: string
   unlimited: boolean
   link: string
   description: string
+}
+
+/** Whether a gift in this category/type needs a quantity from the host. */
+export function usesQuantity(
+  category: GiftFormValues['category'],
+  type: GiftFormValues['type'],
+): boolean {
+  return category !== 'avoid' && type !== 'envelope'
 }
 
 export type GiftFormErrors = Partial<Record<'name' | 'quantity' | 'link' | 'description', string>>
@@ -66,8 +76,9 @@ export function validateGiftForm(values: GiftFormValues): {
     errors.name = 'common.errors.tooLong'
   }
 
+  const needsQuantity = usesQuantity(values.category, values.type)
   let quantity = 1
-  if (!isEnvelope && !values.unlimited) {
+  if (needsQuantity && !values.unlimited) {
     const raw = values.quantity.trim()
     if (raw.length === 0) {
       errors.quantity = 'common.errors.required'
@@ -98,7 +109,7 @@ export function validateGiftForm(values: GiftFormValues): {
       type: values.type,
       name,
       quantity,
-      unlimited: !isEnvelope && values.unlimited,
+      unlimited: needsQuantity && values.unlimited,
       link: link || undefined,
       description: description || undefined,
     },

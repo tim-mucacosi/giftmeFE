@@ -58,7 +58,8 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         aria-haspopup="listbox"
         aria-label={t('common.language')}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-full bg-white/80 backdrop-blur border border-gray-light px-3 py-2 text-base font-semibold text-dark shadow-sm transition-colors hover:bg-white sm:px-2.5 sm:py-1 sm:text-sm',
+          // Height/text match the nav's Log in pill so the two sit level.
+          'inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-gray-light bg-white/80 px-3 text-sm font-semibold text-dark shadow-sm backdrop-blur transition-colors hover:bg-white',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral',
         )}
       >

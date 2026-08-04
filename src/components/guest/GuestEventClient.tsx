@@ -11,6 +11,7 @@ import { EventApiError, getEventById, reserveGift, type EventDetail, type Detail
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
 import { availableUnits, isGiftAvailable } from '@/lib/utils/giftAvailability'
+import { copyToClipboard, getAppBaseUrl, shareOrCopy } from '@/lib/utils/appUrl'
 import { cn } from '@/lib/utils/cn'
 import styles from './GuestEvent.module.css'
 
@@ -21,6 +22,9 @@ interface PendingChoice {
   /** Idempotency token, stable across retries of this one submission. */
   requestToken: string
 }
+
+/** How long the reservation success modal stays up before auto-dismissing. */
+const SUCCESS_VISIBLE_MS = 5000
 
 function newRequestToken(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
@@ -66,21 +70,23 @@ export function GuestEventClient({ slug }: Props) {
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [errorKind, setErrorKind] = useState<'private' | 'generic' | null>(null)
-  const [origin, setOrigin] = useState('')
 
   const [reservations, setReservations] = useState<Reservations>({})
   const [pending, setPending] = useState<PendingChoice | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
-  const [avoidOpen, setAvoidOpen] = useState(false)
+  const [avoidOpen, setAvoidOpen] = useState(true)
   const cardsRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin)
-    }
-  }, [])
+  // Never leave the auto-dismiss timer running past unmount.
+  useEffect(
+    () => () => {
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!ready) return
@@ -133,11 +139,6 @@ export function GuestEventClient({ slug }: Props) {
     return () => observer.disconnect()
   }, [event])
 
-  const eventUrl = useMemo(
-    () => (origin ? `${origin}/event/${slug}` : `/event/${slug}`),
-    [origin, slug],
-  )
-
   const openConfirm = (gift: DetailGift) => {
     // One token per confirm dialog: double taps and retries of this
     // submission all reuse it, so the backend records at most one reservation.
@@ -181,10 +182,13 @@ export function GuestEventClient({ slug }: Props) {
       // Confetti effect
       launchConfetti()
 
-      // Auto-dismiss after 5 seconds
-      setTimeout(() => {
+      // Keep the modal up for at least SUCCESS_VISIBLE_MS. Only ever one
+      // timer: a previous one is cleared before a new reservation starts it.
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+      successTimerRef.current = setTimeout(() => {
+        successTimerRef.current = null
         setSuccess(null)
-      }, 5000)
+      }, SUCCESS_VISIBLE_MS)
     } catch (err) {
       if (err instanceof EventApiError) {
         if (err.status === 409) {
@@ -210,30 +214,29 @@ export function GuestEventClient({ slug }: Props) {
     }
   }
 
-  const dismissSuccess = () => setSuccess(null)
+  const dismissSuccess = () => {
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+    setSuccess(null)
+  }
 
+  // The success modal promotes the app itself ("make your own list"), so
+  // both actions share the app's base URL rather than this event's link.
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(eventUrl)
+    if (await copyToClipboard(getAppBaseUrl())) {
       toast.success(t('common.buttons.copied'))
-    } catch {
+    } else {
       toast.error(t('common.errors.generic'))
     }
   }
 
   const shareLink = async () => {
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
-      try {
-        await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
-          title: event?.name ?? t('common.appName'),
-          url: eventUrl,
-        })
-        return
-      } catch {
-        // User dismissed, fall back to copy
-      }
-    }
-    await copyLink()
+    const result = await shareOrCopy(getAppBaseUrl(), t('common.appName'))
+    // A cancelled native sheet is a normal outcome and stays silent.
+    if (result === 'copied') toast.success(t('common.buttons.copied'))
+    else if (result === 'failed') toast.error(t('common.errors.generic'))
   }
 
   const launchConfetti = () => {
@@ -822,7 +825,8 @@ function AvoidSection({ items, title, subtitle, open, onToggle }: AvoidSectionPr
       <div
         className={cn(
           'overflow-hidden transition-all duration-300',
-          open ? 'max-h-[500px]' : 'max-h-0',
+          // Cap has to clear the tallest realistic list, or it clips.
+          open ? 'max-h-[2000px]' : 'max-h-0',
         )}
       >
         <div className="flex flex-col gap-2 p-3">

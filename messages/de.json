@@ -132,7 +132,16 @@
       "noAccount": "Noch kein Konto?",
       "signIn": "Anmelden",
       "signUp": "Registrieren",
-      "successToast": "Erfolgreich bei SchenkMir registriert!"
+      "successToast": "Registrierung erfolgreich. Bitte prüfen Sie Ihren Posteingang und bestätigen Sie Ihre E-Mail-Adresse, um die Registrierung abzuschließen.",
+      "successNoVerification": "Konto erstellt. Sie können sich jetzt anmelden.",
+      "verifyPending": {
+        "title": "Prüfen Sie Ihren Posteingang",
+        "desc": "Wir haben einen Bestätigungslink gesendet an:",
+        "spamHint": "Nicht gefunden? Sehen Sie im Spam-Ordner nach — der Link gilt 24 Stunden.",
+        "resend": "Link erneut senden",
+        "resent": "Bestätigungs-E-Mail gesendet.",
+        "sendFailed": "Die E-Mail konnte gerade nicht gesendet werden. Bitte fordern Sie einen neuen Link an."
+      }
     },
     "errors": {
       "nameTooShort": "Name muss mindestens 2 Zeichen lang sein",

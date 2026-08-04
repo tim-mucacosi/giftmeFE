@@ -13,13 +13,14 @@ import { GoogleAuthButton } from '@/components/shared/GoogleAuthButton'
 import { loginSchema, type LoginSchema } from '@/lib/validations/authSchema'
 import { loginUser } from '@/lib/api/auth'
 import { saveSession } from '@/lib/auth/session'
+import { RETURN_TO_PARAM, safeReturnTo, withReturnTo } from '@/lib/auth/returnTo'
 import { AuthError } from '@/types/auth'
 
 export default function LoginPage() {
   const { t } = useTranslate()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') ?? '/dashboard'
+  const next = safeReturnTo(searchParams.get(RETURN_TO_PARAM))
   const toast = useToast()
   const [showPassword, setShowPassword] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -84,7 +85,7 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-          <GoogleAuthButton onError={(msg) => setFormError(msg)} />
+          <GoogleAuthButton next={next} onError={(msg) => setFormError(msg)} />
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-light" />
@@ -161,7 +162,10 @@ export default function LoginPage() {
 
         <div className="mt-6 border-t border-gray-light pt-5 text-center text-sm text-dark-light">
           {t('auth.register.noAccount')}{' '}
-          <Link href="/register" className="font-semibold text-coral hover:text-coral-dark">
+          <Link
+            href={withReturnTo('/register', next)}
+            className="font-semibold text-coral hover:text-coral-dark"
+          >
             {t('auth.register.signUp')}
           </Link>
         </div>
