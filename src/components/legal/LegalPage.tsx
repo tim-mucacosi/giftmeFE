@@ -31,13 +31,6 @@ export function LegalPage({ title, updatedAt, intro, sections }: Props) {
         </p>
       </header>
 
-      <p
-        role="note"
-        className="mt-6 rounded-2xl border-2 border-gold/60 bg-gold/15 px-4 py-3 text-sm font-medium text-dark"
-      >
-        {t('legal.draftNotice')}
-      </p>
-
       <p className="mt-6 text-base leading-relaxed text-dark">{intro}</p>
 
       <nav aria-labelledby="toc-heading" className="mt-8 rounded-2xl bg-bg p-5">
