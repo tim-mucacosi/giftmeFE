@@ -146,9 +146,18 @@ export function EventDetailClient({ slug }: Props) {
       ) : null}
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-gray-light bg-white p-6 shadow-card sm:p-8">
-        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-coral via-coral-light to-gold" />
-        <div className="flex flex-col gap-5">
+      <section className="relative overflow-hidden rounded-3xl border border-gray-light bg-white shadow-card">
+        <div className="absolute inset-x-0 top-0 z-10 h-1.5 bg-gradient-to-r from-coral via-coral-light to-gold" />
+        {event.backgroundImageUrl ? (
+          // Cover chosen on step 1: an uploaded data URL or a bundled preset.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={event.backgroundImageUrl}
+            alt=""
+            className="h-40 w-full object-cover sm:h-52"
+          />
+        ) : null}
+        <div className="flex flex-col gap-5 p-6 sm:p-8">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-coral/15 to-gold/15 text-3xl">
               {getEventEmoji(event.type, event.gender)}
