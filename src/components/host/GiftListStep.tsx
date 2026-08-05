@@ -155,24 +155,28 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
                       key={g.id}
                       className="flex items-center gap-2 rounded-xl bg-white p-3 shadow-sm"
                     >
-                      <div className="flex flex-col">
+                      <div className="flex shrink-0 flex-col gap-1">
                         <button
                           type="button"
                           onClick={() => moveGift(g.id, -1)}
                           disabled={idx === 0}
-                          aria-label={t('host.create.step2.moveUp')}
-                          className="rounded px-1 text-[10px] leading-4 text-dark-light transition-colors hover:text-coral disabled:opacity-25 disabled:hover:text-dark-light"
+                          aria-label={`${t('host.create.step2.moveUp')}: ${g.name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-light bg-white text-dark-light transition-colors hover:border-coral hover:text-coral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral disabled:opacity-30 disabled:hover:border-gray-light disabled:hover:text-dark-light"
                         >
-                          ▲
+                          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 15l-6-6-6 6" />
+                          </svg>
                         </button>
                         <button
                           type="button"
                           onClick={() => moveGift(g.id, 1)}
                           disabled={idx === items.length - 1}
-                          aria-label={t('host.create.step2.moveDown')}
-                          className="rounded px-1 text-[10px] leading-4 text-dark-light transition-colors hover:text-coral disabled:opacity-25 disabled:hover:text-dark-light"
+                          aria-label={`${t('host.create.step2.moveDown')}: ${g.name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-light bg-white text-dark-light transition-colors hover:border-coral hover:text-coral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral disabled:opacity-30 disabled:hover:border-gray-light disabled:hover:text-dark-light"
                         >
-                          ▼
+                          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                          </svg>
                         </button>
                       </div>
                       <div className="flex-1 overflow-hidden">
@@ -308,11 +312,17 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
         )
       })() : null}
 
+      {gifts.length === 0 ? (
+        <p className="rounded-xl bg-bg px-3 py-2.5 text-center text-sm text-dark-light" role="status">
+          {t('host.create.step2.emptyHint')}
+        </p>
+      ) : null}
+
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <Button variant="outline" onClick={onBack} fullWidth className="sm:w-auto">
           ← {t('common.buttons.back')}
         </Button>
-        <Button onClick={onNext} fullWidth className="sm:w-auto">
+        <Button onClick={onNext} disabled={gifts.length === 0} fullWidth className="sm:w-auto">
           {t('common.buttons.next')} →
         </Button>
       </div>

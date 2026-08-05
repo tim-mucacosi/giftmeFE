@@ -22,7 +22,8 @@ describe('buildEventPayload', () => {
     expect(payload.name).toBe('Anna and Mark')
     expect(payload.iWant).toEqual([{ name: 'Coffee machine', quantity: 2 }])
     expect(payload.iAmOkWithIt).toEqual([{ name: 'Towel set', quantity: 1 }])
-    expect(payload.iDontWant).toEqual([{ name: 'Flowers', quantity: 1 }])
+    // "Please avoid" entries are informational: no inventory fields.
+    expect(payload.iDontWant).toEqual([{ name: 'Flowers' }])
     expect(payload.expirationDate).toBe(new Date('2026-09-01').toISOString())
     expect(payload.eventType).toEqual({ name: 'wedding' })
     // Ownership must come from the auth token, never the payload.
@@ -68,6 +69,16 @@ describe('buildEventPayload', () => {
         whereToBuy: 'https://shop.example/diapers',
       },
     ])
+  })
+
+  it('omits quantity and unlimited for "please avoid" entries', () => {
+    const payload = buildEventPayload({
+      ...base,
+      gifts: [
+        { name: 'Figurines', category: 'avoid', type: 'item', quantity: 5, unlimited: true },
+      ],
+    })
+    expect(payload.iDontWant).toEqual([{ name: 'Figurines' }])
   })
 
   it('passes backend ids through so edits preserve reservations', () => {

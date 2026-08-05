@@ -5,7 +5,7 @@ import { useTranslate } from '@tolgee/react'
 import { Input } from '@/components/shared/Input'
 import { Textarea } from '@/components/shared/Textarea'
 import { Button } from '@/components/shared/Button'
-import { validateImageFile } from '@/lib/utils/imageUpload'
+import { ACCEPTED_IMAGE_TYPES, COVER_PRESETS, validateImageFile } from '@/lib/utils/imageUpload'
 import { todayIsoDate } from '@/lib/validations/eventSchema'
 import { cn } from '@/lib/utils/cn'
 import type { EventType, EventGender } from '@/types/event'
@@ -77,42 +77,6 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
         </div>
       </div>
 
-      {(value.type === 'birthday' || value.type === 'baptism') && (
-        <div className="flex flex-col gap-3">
-          <label className="text-sm font-semibold text-dark">
-            {t('host.create.step1.genderLabel')}
-          </label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onChange({ ...value, gender: 'boy' })}
-              className={cn(
-                'flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-semibold transition-all',
-                value.gender === 'boy'
-                  ? 'border-blue-400 bg-blue-50 text-blue-600 shadow-sm'
-                  : 'border-gray-light bg-white text-dark hover:border-blue-400 hover:text-blue-600',
-              )}
-            >
-              <span aria-hidden="true">👦</span>
-              {t('host.create.step1.genderBoy')}
-            </button>
-            <button
-              type="button"
-              onClick={() => onChange({ ...value, gender: 'girl' })}
-              className={cn(
-                'flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-semibold transition-all',
-                value.gender === 'girl'
-                  ? 'border-pink-300 bg-pink-50 text-pink-600 shadow-sm'
-                  : 'border-gray-light bg-white text-dark hover:border-pink-300 hover:text-pink-600',
-              )}
-            >
-              <span aria-hidden="true">👧</span>
-              {t('host.create.step1.genderGirl')}
-            </button>
-          </div>
-        </div>
-      )}
-
       <Input
         label={t('host.create.step1.nameLabel')}
         placeholder={t('host.create.step1.namePlaceholder')}
@@ -142,6 +106,44 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
         <label className="text-sm font-semibold text-dark">
           {t('host.create.step1.imageLabel')}
         </label>
+
+        <div className="grid grid-cols-3 gap-2" role="group" aria-label={t('host.create.step1.presetsLabel')}>
+          {COVER_PRESETS.map((preset) => {
+            const selected = value.backgroundImageUrl === preset.url
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => {
+                  onChange({ ...value, backgroundImageUrl: preset.url })
+                  onImageFileChange?.(undefined)
+                  setImageError(null)
+                }}
+                className={cn(
+                  'relative h-20 overflow-hidden rounded-xl border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 sm:h-24',
+                  selected ? 'border-coral shadow-cta' : 'border-gray-light hover:border-coral/60',
+                )}
+              >
+                {/* Static bundled asset; next/image adds no value here. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={preset.url}
+                  alt={t(`host.create.step1.presets.${preset.id}`)}
+                  className="h-full w-full object-cover"
+                />
+                {selected ? (
+                  <span className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-coral text-[11px] font-bold text-white">
+                    ✓
+                  </span>
+                ) : null}
+              </button>
+            )
+          })}
+        </div>
+
+        <p className="text-xs text-dark-light">{t('host.create.step1.presetsOr')}</p>
+
         <label
           htmlFor="bg-image"
           className="relative flex min-h-[200px] max-h-[300px] cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-gray-light bg-white transition-colors hover:border-coral hover:bg-coral/5"
@@ -165,7 +167,9 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
           <input
             id="bg-image"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            // Limits the OS picker to the formats the backend accepts;
+            // validateImageFile re-checks in case the dialog is bypassed.
+            accept={ACCEPTED_IMAGE_TYPES.join(',')}
             className="sr-only"
             onChange={(e) => {
               const file = e.target.files?.[0]
