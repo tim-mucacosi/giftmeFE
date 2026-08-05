@@ -74,7 +74,7 @@
       },
       "item2": {
         "title": "Guest privacy",
-        "desc": "Guests pick with their name — no public lists, no awkwardness."
+        "desc": "Guests pick anonymously — no public lists, no awkwardness."
       },
       "item3": {
         "title": "Real-time list",
@@ -110,7 +110,8 @@
       "about": "About",
       "terms": "Terms",
       "privacy": "Privacy",
-      "contact": "Contact"
+      "contact": "Contact",
+      "navLabel": "Legal links"
     }
   },
   "auth": {
@@ -127,7 +128,13 @@
       "showPassword": "Show password",
       "hidePassword": "Hide password",
       "submit": "Create account",
-      "terms": "By signing up, you agree to our terms and privacy policy.",
+      "terms": {
+        "prefix": "By registering you accept the",
+        "termsLink": "Terms of Use",
+        "and": "and the",
+        "privacyLink": "Privacy Policy",
+        "suffix": "."
+      },
       "haveAccount": "Already have an account?",
       "noAccount": "Don't have an account?",
       "signIn": "Sign in",
@@ -152,7 +159,8 @@
       "emailInUse": "Email is already in use",
       "invalidCredentials": "Invalid email or password",
       "network": "Cannot reach the server. Please try again.",
-      "googleFailed": "Google sign-in failed. Please try again."
+      "googleFailed": "Google sign-in failed. Please try again.",
+      "termsRequired": "You must accept the Terms of Use and the Privacy Policy to complete registration."
     },
     "forgotPassword": {
       "title": "Forgot your password?",
@@ -261,13 +269,17 @@
         "messagePlaceholder": "Dear guests, these are the gifts that would mean the most to us...",
         "imageLabel": "Background image (optional)",
         "imageHint": "Drop an image here or click to upload",
-        "genderLabel": "Gender",
-        "genderBoy": "Boy",
-        "genderGirl": "Girl",
         "imageErrorType": "Please choose a JPG, PNG, WebP or GIF image.",
         "imageErrorSize": "Image is too large (max 10 MB).",
         "imageRemove": "Remove image",
-        "dateErrorPast": "The date cannot be in the past"
+        "dateErrorPast": "The date cannot be in the past",
+        "presetsLabel": "Suggested covers",
+        "presetsOr": "or upload your own image",
+        "presets": {
+          "celebration": "Warm celebration",
+          "blossom": "Soft blossom",
+          "evening": "Elegant evening"
+        }
       },
       "step2": {
         "title": "What would you like to receive? 🎁",
@@ -300,7 +312,8 @@
         "deleteConfirm": {
           "title": "Remove this gift?",
           "text": "It will be removed from your list and guests will no longer see it."
-        }
+        },
+        "emptyHint": "Add at least one gift to continue."
       },
       "step3": {
         "title": "Review",
@@ -474,5 +487,129 @@
     "monthsAgo": "{n, plural, one {# month} other {# months}} ago",
     "inYears": "In {n, plural, one {# year} other {# years}}",
     "yearsAgo": "{n, plural, one {# year} other {# years}} ago"
+  },
+  "legal": {
+    "lastUpdated": "Last updated",
+    "tableOfContents": "Contents",
+    "draftNotice": "This text is a working draft and must be reviewed and approved by a legal professional before publication.",
+    "about": {
+      "title": "About us",
+      "p1": "GiftMe helps people choose, organize and reserve gifts for celebrations, without duplicates and without the awkward \"what should I get you?\" conversation.",
+      "p2": "A host builds a wish list for a birthday, wedding, baptism, baby shower, anniversary or house warming, then shares a link with guests. Guests pick a gift and the list updates immediately so nothing is bought twice.",
+      "p3": "Guests need no account and are never asked for their name; the link they received is enough.",
+      "contact": "Questions or suggestions? Write to us at podrska@poklonimi.rs."
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "intro": "These Terms of Use govern your use of the GiftMe application. By using the application you accept these terms in full.",
+      "sections": {
+        "svrha": {
+          "heading": "Purpose of the GiftMe platform",
+          "body": "GiftMe is an online tool for creating and sharing gift lists for celebrations such as birthdays, weddings, baptisms, baby showers, anniversaries and house warmings. The platform exists solely to organize gifts; it does not take part in purchasing, payment or delivery."
+        },
+        "nalog": {
+          "heading": "Account registration and user responsibilities",
+          "body": "Creating a gift list requires an account with a valid email address, which you confirm by following the link in the verification message. You are responsible for keeping your credentials safe and for all activity on your account. Accounts may not be transferred to third parties."
+        },
+        "liste": {
+          "heading": "Creating and managing celebrations and gift lists",
+          "body": "As a host you decide the celebration name, date, description, cover image and the contents of the list. You are responsible for the accuracy and appropriateness of that information. Lists can be edited or deleted, except that a gift already reserved by guests cannot be removed, nor its quantity reduced below the number of reservations."
+        },
+        "rezervacije": {
+          "heading": "Gift reservations",
+          "body": "Guests reserve gifts anonymously through the link the host shares. A reservation is informational: it signals an intention to bring a gift and is not a purchase, a contract or a payment obligation. GiftMe does not guarantee that a reserved gift will actually be brought."
+        },
+        "odgovornosti": {
+          "heading": "Responsibilities of list creators and guests",
+          "body": "The host is responsible for the content of their list and for whom they share the link with. Guests are responsible for the reservations they make and for respecting the host’s wishes. Any arrangement about gifts is strictly between host and guests; GiftMe is not a party to it."
+        },
+        "zabranjeno": {
+          "heading": "Prohibited use of the application",
+          "body": "You may not publish unlawful, offensive or misleading content, use the application for spam or fraud, attempt unauthorized access to other accounts or lists, or scrape data and overload the service in an automated way."
+        },
+        "dostupnost": {
+          "heading": "Availability and modification of the service",
+          "body": "We aim to keep the application continuously available but do not guarantee uninterrupted operation. The application is currently in beta, so errors, interruptions and changes to functionality are possible. We may change, add or discontinue features."
+        },
+        "odgovornost": {
+          "heading": "Limitation of liability",
+          "body": "You use the application at your own risk. To the fullest extent permitted by law, we are not liable for indirect or consequential damage, lost profit, or unmet expectations regarding gifts, including gifts that were not brought or were brought twice."
+        },
+        "intelektualna-svojina": {
+          "heading": "Intellectual property",
+          "body": "The GiftMe name, logo, design and source code are our intellectual property. Content you enter remains yours, with your permission for us to display it within the application in order to provide the service."
+        },
+        "ukidanje": {
+          "heading": "Account suspension or deletion",
+          "body": "You may delete your account at any time. We reserve the right to temporarily restrict or terminate an account that breaches these terms or endangers other users and the security of the service."
+        },
+        "izmene": {
+          "heading": "Changes to the Terms of Use",
+          "body": "We may update these terms from time to time. We will announce material changes in the application or by email. Continuing to use the application after a change constitutes acceptance of the new terms."
+        },
+        "kontakt": {
+          "heading": "Contact",
+          "body": "For any questions about these terms, write to us at podrska@poklonimi.rs."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "intro": "This Privacy Policy explains what data GiftMe collects, why it is collected, and what rights you have regarding your data.",
+      "sections": {
+        "podaci": {
+          "heading": "What personal data we collect",
+          "body": "We collect the data you enter yourself: your name, email address and password (stored hashed), the content of your celebrations and gift lists, and a record of your acceptance of the Terms of Use and Privacy Policy. If you sign in with Google, we receive the basic profile details Google passes to us."
+        },
+        "svrha": {
+          "heading": "Why the data is collected",
+          "body": "We use the data to operate the application: creating accounts, confirming email addresses, displaying and sharing gift lists, recording reservations, and communicating about your account. We do not sell data to third parties."
+        },
+        "nalog": {
+          "heading": "Account and profile information",
+          "body": "Your name and email address identify your account and are used for sign-in and for verification and password-reset messages. Passwords are stored only in cryptographically hashed form and are never visible to us."
+        },
+        "proslave": {
+          "heading": "Celebration and gift-list information",
+          "body": "The celebration name, date, description, chosen image and the gifts on the list are stored so the list can be shown to you and your guests. You can change or delete this information at any time."
+        },
+        "gosti": {
+          "heading": "Information shared with invited guests",
+          "body": "Anyone with your celebration link can see the name, date, message, image and gift list, including which gifts are already reserved. Guests reserve anonymously: we ask for neither their name nor their email address. Your email address is never shown to guests."
+        },
+        "kolacici": {
+          "heading": "Cookies and analytics",
+          "body": "We use essential cookies and browser storage to keep you signed in, remember your chosen language, and remember which gifts you picked as a guest during that session. We do not use advertising cookies."
+        },
+        "cuvanje": {
+          "heading": "Data retention",
+          "body": "We keep data for as long as your account exists, as long as it is needed to provide the service, or as long as legal obligations require. After account deletion, data is removed within a reasonable period."
+        },
+        "bezbednost": {
+          "heading": "Data security",
+          "body": "We apply reasonable technical and organizational safeguards: encrypted transport (HTTPS), password hashing and access control. No system is completely secure, so absolute safety cannot be guaranteed."
+        },
+        "prava": {
+          "heading": "Your rights",
+          "body": "You have the right to access, correct, delete and restrict the processing of your data, as well as the right to object and to data portability. Requests can be sent to the contact address in this document."
+        },
+        "brisanje": {
+          "heading": "Account and data deletion",
+          "body": "You can delete your account and all associated celebrations and lists at any time. Deleting the account also removes the gift lists you created, so guests will no longer be able to open a previously shared link."
+        },
+        "trece-strane": {
+          "heading": "Third-party services",
+          "body": "We rely on providers for hosting, database, email delivery and Google sign-in. These providers process data solely on our behalf and only to the extent needed to deliver the service."
+        },
+        "izmene": {
+          "heading": "Changes to the Privacy Policy",
+          "body": "We may update this policy from time to time. The date of the latest update is shown at the top of the page, and we will announce significant changes in the application or by email."
+        },
+        "kontakt": {
+          "heading": "Contact",
+          "body": "For questions about data processing and exercising your rights, write to us at podrska@poklonimi.rs."
+        }
+      }
+    }
   }
 }

@@ -74,7 +74,7 @@
       },
       "item2": {
         "title": "Privatsphäre der Gäste",
-        "desc": "Gäste wählen mit ihrem Namen — keine öffentlichen Listen."
+        "desc": "Gäste wählen anonym — keine öffentlichen Listen."
       },
       "item3": {
         "title": "Live-Liste",
@@ -110,7 +110,8 @@
       "about": "Über uns",
       "terms": "AGB",
       "privacy": "Datenschutz",
-      "contact": "Kontakt"
+      "contact": "Kontakt",
+      "navLabel": "Rechtliche Links"
     }
   },
   "auth": {
@@ -127,7 +128,13 @@
       "showPassword": "Passwort anzeigen",
       "hidePassword": "Passwort verbergen",
       "submit": "Konto erstellen",
-      "terms": "Mit der Registrierung akzeptierst du die Nutzungs- und Datenschutzbedingungen.",
+      "terms": {
+        "prefix": "Mit der Registrierung akzeptieren Sie die",
+        "termsLink": "Nutzungsbedingungen",
+        "and": "und die",
+        "privacyLink": "Datenschutzerklärung",
+        "suffix": "."
+      },
       "haveAccount": "Bereits ein Konto?",
       "noAccount": "Noch kein Konto?",
       "signIn": "Anmelden",
@@ -152,7 +159,8 @@
       "emailInUse": "E-Mail wird bereits verwendet",
       "invalidCredentials": "Ungültige E-Mail oder Passwort",
       "network": "Server nicht erreichbar. Bitte erneut versuchen.",
-      "googleFailed": "Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+      "googleFailed": "Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
+      "termsRequired": "Sie müssen die Nutzungsbedingungen und die Datenschutzerklärung akzeptieren, um die Registrierung abzuschließen."
     },
     "forgotPassword": {
       "title": "Passwort vergessen?",
@@ -261,13 +269,17 @@
         "messagePlaceholder": "Liebe Gäste, das sind die Geschenke, die uns viel bedeuten würden...",
         "imageLabel": "Hintergrundbild (optional)",
         "imageHint": "Bild hierhin ziehen oder klicken",
-        "genderLabel": "Geschlecht",
-        "genderBoy": "Junge",
-        "genderGirl": "Mädchen",
         "imageErrorType": "Bitte wähle ein JPG-, PNG-, WebP- oder GIF-Bild.",
         "imageErrorSize": "Bild ist zu groß (max. 10 MB).",
         "imageRemove": "Bild entfernen",
-        "dateErrorPast": "Das Datum darf nicht in der Vergangenheit liegen"
+        "dateErrorPast": "Das Datum darf nicht in der Vergangenheit liegen",
+        "presetsLabel": "Vorgeschlagene Titelbilder",
+        "presetsOr": "oder eigenes Bild hochladen",
+        "presets": {
+          "celebration": "Warme Feier",
+          "blossom": "Zarte Blüte",
+          "evening": "Eleganter Abend"
+        }
       },
       "step2": {
         "title": "Was möchtest du bekommen? 🎁",
@@ -300,7 +312,8 @@
         "deleteConfirm": {
           "title": "Dieses Geschenk entfernen?",
           "text": "Es wird von deiner Liste entfernt und Gäste sehen es dann nicht mehr."
-        }
+        },
+        "emptyHint": "Fügen Sie mindestens ein Geschenk hinzu, um fortzufahren."
       },
       "step3": {
         "title": "Übersicht",
@@ -474,5 +487,129 @@
     "monthsAgo": "Vor {n, plural, one {# Monat} other {# Monaten}}",
     "inYears": "In {n, plural, one {# Jahr} other {# Jahren}}",
     "yearsAgo": "Vor {n, plural, one {# Jahr} other {# Jahren}}"
+  },
+  "legal": {
+    "lastUpdated": "Zuletzt aktualisiert",
+    "tableOfContents": "Inhalt",
+    "draftNotice": "Dieser Text ist ein Arbeitsentwurf und muss vor der Veröffentlichung von einer juristischen Fachperson geprüft und freigegeben werden.",
+    "about": {
+      "title": "Über uns",
+      "p1": "SchenkMir hilft dabei, Geschenke für Feiern auszuwählen, zu organisieren und zu reservieren, ohne Dubletten und ohne die unangenehme Frage „Was wünschst du dir?“.",
+      "p2": "Gastgeber erstellen eine Wunschliste für Geburtstag, Hochzeit, Taufe, Babyparty, Jubiläum oder Einzug und teilen dann einen Link mit ihren Gästen. Gäste wählen ein Geschenk, und die Liste aktualisiert sich sofort, damit nichts doppelt gekauft wird.",
+      "p3": "Gäste brauchen kein Konto und werden nie nach ihrem Namen gefragt; der erhaltene Link genügt.",
+      "contact": "Fragen oder Anregungen? Schreiben Sie uns an podrska@poklonimi.rs."
+    },
+    "terms": {
+      "title": "Nutzungsbedingungen",
+      "intro": "Diese Nutzungsbedingungen regeln die Nutzung der Anwendung SchenkMir. Mit der Nutzung der Anwendung akzeptieren Sie diese Bedingungen vollständig.",
+      "sections": {
+        "svrha": {
+          "heading": "Zweck der Plattform SchenkMir",
+          "body": "SchenkMir ist ein Online-Werkzeug zum Erstellen und Teilen von Geschenklisten für Feiern wie Geburtstage, Hochzeiten, Taufen, Babypartys, Jubiläen und Einzugsfeiern. Die Plattform dient ausschließlich der Organisation von Geschenken und ist an Kauf, Zahlung oder Lieferung nicht beteiligt."
+        },
+        "nalog": {
+          "heading": "Registrierung und Pflichten der Nutzer",
+          "body": "Für das Erstellen einer Geschenkliste ist ein Konto mit einer gültigen E-Mail-Adresse erforderlich, die Sie über den Link in der Bestätigungsnachricht verifizieren. Sie sind für den Schutz Ihrer Zugangsdaten und für alle Aktivitäten in Ihrem Konto verantwortlich. Konten dürfen nicht an Dritte übertragen werden."
+        },
+        "liste": {
+          "heading": "Erstellen und Verwalten von Feiern und Geschenklisten",
+          "body": "Als Gastgeber bestimmen Sie Name, Datum, Beschreibung, Titelbild und Inhalt der Liste. Sie sind für Richtigkeit und Angemessenheit dieser Angaben verantwortlich. Listen können bearbeitet oder gelöscht werden; ein bereits reserviertes Geschenk kann jedoch nicht entfernt und seine Menge nicht unter die Zahl der Reservierungen gesenkt werden."
+        },
+        "rezervacije": {
+          "heading": "Geschenkreservierungen",
+          "body": "Gäste reservieren Geschenke anonym über den vom Gastgeber geteilten Link. Eine Reservierung ist informativ: Sie zeigt die Absicht, ein Geschenk mitzubringen, und stellt weder Kauf noch Vertrag oder Zahlungsverpflichtung dar. SchenkMir garantiert nicht, dass ein reserviertes Geschenk tatsächlich mitgebracht wird."
+        },
+        "odgovornosti": {
+          "heading": "Pflichten von Listenerstellern und Gästen",
+          "body": "Der Gastgeber ist für den Inhalt seiner Liste und dafür verantwortlich, mit wem er den Link teilt. Gäste sind für ihre Reservierungen und die Beachtung der Wünsche des Gastgebers verantwortlich. Absprachen über Geschenke bestehen ausschließlich zwischen Gastgeber und Gästen; SchenkMir ist daran nicht beteiligt."
+        },
+        "zabranjeno": {
+          "heading": "Verbotene Nutzung der Anwendung",
+          "body": "Untersagt sind rechtswidrige, beleidigende oder irreführende Inhalte, die Nutzung für Spam oder Betrug, Versuche unbefugten Zugriffs auf fremde Konten und Listen sowie automatisiertes Auslesen von Daten oder Überlastung des Dienstes."
+        },
+        "dostupnost": {
+          "heading": "Verfügbarkeit und Änderung des Dienstes",
+          "body": "Wir bemühen uns um durchgehende Verfügbarkeit, garantieren einen unterbrechungsfreien Betrieb jedoch nicht. Die Anwendung befindet sich derzeit in der Beta-Phase; Fehler, Unterbrechungen und Funktionsänderungen sind möglich. Wir können Funktionen ändern, ergänzen oder einstellen."
+        },
+        "odgovornost": {
+          "heading": "Haftungsbeschränkung",
+          "body": "Die Nutzung erfolgt auf eigenes Risiko. Soweit gesetzlich zulässig, haften wir nicht für mittelbare Schäden oder Folgeschäden, entgangenen Gewinn oder enttäuschte Erwartungen rund um Geschenke, einschließlich nicht oder doppelt mitgebrachter Geschenke."
+        },
+        "intelektualna-svojina": {
+          "heading": "Geistiges Eigentum",
+          "body": "Name, Logo, Design und Quellcode von SchenkMir sind unser geistiges Eigentum. Von Ihnen eingegebene Inhalte bleiben Ihre; Sie gestatten uns, sie zur Erbringung des Dienstes in der Anwendung anzuzeigen."
+        },
+        "ukidanje": {
+          "heading": "Sperrung oder Löschung des Kontos",
+          "body": "Sie können Ihr Konto jederzeit löschen. Wir behalten uns vor, ein Konto vorübergehend einzuschränken oder zu beenden, wenn es gegen diese Bedingungen verstößt oder andere Nutzer und die Sicherheit des Dienstes gefährdet."
+        },
+        "izmene": {
+          "heading": "Änderungen der Nutzungsbedingungen",
+          "body": "Wir können diese Bedingungen gelegentlich anpassen. Über wesentliche Änderungen informieren wir in der Anwendung oder per E-Mail. Die weitere Nutzung nach einer Änderung gilt als Zustimmung zu den neuen Bedingungen."
+        },
+        "kontakt": {
+          "heading": "Kontakt",
+          "body": "Bei Fragen zu diesen Bedingungen schreiben Sie uns an podrska@poklonimi.rs."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Datenschutzerklärung",
+      "intro": "Diese Datenschutzerklärung erläutert, welche Daten SchenkMir erhebt, warum sie erhoben werden und welche Rechte Sie in Bezug auf Ihre Daten haben.",
+      "sections": {
+        "podaci": {
+          "heading": "Welche personenbezogenen Daten wir erheben",
+          "body": "Wir erheben die von Ihnen eingegebenen Daten: Name, E-Mail-Adresse und Passwort (gehasht gespeichert), die Inhalte Ihrer Feiern und Geschenklisten sowie die Aufzeichnung Ihrer Zustimmung zu Nutzungsbedingungen und Datenschutzerklärung. Bei der Anmeldung mit Google erhalten wir die von Google übermittelten Basis-Profildaten."
+        },
+        "svrha": {
+          "heading": "Warum wir die Daten erheben",
+          "body": "Wir verwenden die Daten für den Betrieb der Anwendung: Kontoerstellung, Bestätigung der E-Mail-Adresse, Anzeige und Teilen von Geschenklisten, Erfassung von Reservierungen und Kommunikation zu Ihrem Konto. Wir verkaufen keine Daten an Dritte."
+        },
+        "nalog": {
+          "heading": "Konto- und Profildaten",
+          "body": "Name und E-Mail-Adresse identifizieren Ihr Konto und dienen der Anmeldung sowie dem Versand von Bestätigungs- und Passwort-Zurücksetzen-Nachrichten. Passwörter werden ausschließlich kryptografisch gehasht gespeichert und sind für uns nicht einsehbar."
+        },
+        "proslave": {
+          "heading": "Daten zu Feiern und Geschenklisten",
+          "body": "Name, Datum, Beschreibung, gewähltes Bild und die Geschenke der Liste werden gespeichert, damit die Liste Ihnen und Ihren Gästen angezeigt werden kann. Sie können diese Daten jederzeit ändern oder löschen."
+        },
+        "gosti": {
+          "heading": "Mit eingeladenen Gästen geteilte Daten",
+          "body": "Wer den Link zu Ihrer Feier hat, sieht Name, Datum, Nachricht, Bild und Geschenkliste einschließlich der bereits reservierten Geschenke. Gäste reservieren anonym: wir fragen weder Namen noch E-Mail-Adresse ab. Ihre E-Mail-Adresse wird Gästen nie angezeigt."
+        },
+        "kolacici": {
+          "heading": "Cookies und Analyse",
+          "body": "Wir verwenden notwendige Cookies und Browser-Speicher, um Sie angemeldet zu halten, die gewählte Sprache zu merken und festzuhalten, welche Geschenke Sie als Gast in dieser Sitzung ausgewählt haben. Werbe-Cookies setzen wir nicht ein."
+        },
+        "cuvanje": {
+          "heading": "Speicherdauer",
+          "body": "Wir speichern Daten, solange Ihr Konto besteht, solange sie zur Erbringung des Dienstes erforderlich sind oder solange gesetzliche Pflichten dies verlangen. Nach Löschung des Kontos werden die Daten in angemessener Frist entfernt."
+        },
+        "bezbednost": {
+          "heading": "Datensicherheit",
+          "body": "Wir treffen angemessene technische und organisatorische Schutzmaßnahmen: verschlüsselte Übertragung (HTTPS), Passwort-Hashing und Zugriffskontrolle. Kein System ist vollständig sicher, daher kann absolute Sicherheit nicht garantiert werden."
+        },
+        "prava": {
+          "heading": "Ihre Rechte",
+          "body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer Daten sowie das Recht auf Widerspruch und Datenübertragbarkeit. Anfragen richten Sie an die in diesem Dokument genannte Kontaktadresse."
+        },
+        "brisanje": {
+          "heading": "Löschung von Konto und Daten",
+          "body": "Sie können Ihr Konto samt aller zugehörigen Feiern und Listen jederzeit löschen. Mit dem Konto werden auch die von Ihnen erstellten Geschenklisten entfernt, sodass Gäste einen zuvor geteilten Link nicht mehr öffnen können."
+        },
+        "trece-strane": {
+          "heading": "Dienste Dritter",
+          "body": "Für den Betrieb nutzen wir Anbieter für Hosting, Datenbank, E-Mail-Versand und Google-Anmeldung. Diese Anbieter verarbeiten Daten ausschließlich in unserem Auftrag und nur im erforderlichen Umfang."
+        },
+        "izmene": {
+          "heading": "Änderungen der Datenschutzerklärung",
+          "body": "Wir können diese Erklärung gelegentlich aktualisieren. Das Datum der letzten Änderung steht oben auf der Seite; über wesentliche Änderungen informieren wir in der Anwendung oder per E-Mail."
+        },
+        "kontakt": {
+          "heading": "Kontakt",
+          "body": "Bei Fragen zur Datenverarbeitung und zur Ausübung Ihrer Rechte schreiben Sie uns an podrska@poklonimi.rs."
+        }
+      }
+    }
   }
 }

@@ -23,9 +23,6 @@ interface PendingChoice {
   requestToken: string
 }
 
-/** How long the reservation success modal stays up before auto-dismissing. */
-const SUCCESS_VISIBLE_MS = 5000
-
 function newRequestToken(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
   return `tok_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -78,15 +75,6 @@ export function GuestEventClient({ slug }: Props) {
   const [avoidOpen, setAvoidOpen] = useState(true)
   const cardsRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
-  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Never leave the auto-dismiss timer running past unmount.
-  useEffect(
-    () => () => {
-      if (successTimerRef.current) clearTimeout(successTimerRef.current)
-    },
-    [],
-  )
 
   useEffect(() => {
     if (!ready) return
@@ -181,14 +169,6 @@ export function GuestEventClient({ slug }: Props) {
 
       // Confetti effect
       launchConfetti()
-
-      // Keep the modal up for at least SUCCESS_VISIBLE_MS. Only ever one
-      // timer: a previous one is cleared before a new reservation starts it.
-      if (successTimerRef.current) clearTimeout(successTimerRef.current)
-      successTimerRef.current = setTimeout(() => {
-        successTimerRef.current = null
-        setSuccess(null)
-      }, SUCCESS_VISIBLE_MS)
     } catch (err) {
       if (err instanceof EventApiError) {
         if (err.status === 409) {
@@ -214,13 +194,8 @@ export function GuestEventClient({ slug }: Props) {
     }
   }
 
-  const dismissSuccess = () => {
-    if (successTimerRef.current) {
-      clearTimeout(successTimerRef.current)
-      successTimerRef.current = null
-    }
-    setSuccess(null)
-  }
+  // Closing is manual: the share actions must not vanish mid-tap.
+  const dismissSuccess = () => setSuccess(null)
 
   // The success modal promotes the app itself ("make your own list"), so
   // both actions share the app's base URL rather than this event's link.

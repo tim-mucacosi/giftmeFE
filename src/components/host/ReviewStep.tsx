@@ -85,12 +85,6 @@ export function ReviewStep({ details, gifts, id, isEditing, onEdit, onBack, onPu
           </header>
           <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
             <Row label={t('host.create.step1.typeLabel')} value={t(`eventTypes.${details.type}`)} />
-            {details.gender && (
-              <Row
-                label={t('host.create.step1.genderLabel')}
-                value={t(`host.create.step1.gender${details.gender.charAt(0).toUpperCase() + details.gender.slice(1)}`)}
-              />
-            )}
             <Row label={t('host.create.step1.nameLabel')} value={details.name || '—'} />
             <Row label={t('host.create.step1.dateLabel')} value={details.date ? formatDate(details.date) : '—'} />
           </dl>

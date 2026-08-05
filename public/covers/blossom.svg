@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Soft blossom cover">
+  <defs>
+    <linearGradient id="blossom" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff3ee"/>
+      <stop offset="45%" stop-color="#ffd9d0"/>
+      <stop offset="100%" stop-color="#f7b8c4"/>
+    </linearGradient>
+    <radialGradient id="blossomGlow" cx="78%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#blossom)"/>
+  <rect width="1200" height="630" fill="url(#blossomGlow)"/>
+  <g opacity="0.5">
+    <path d="M0 470 Q 300 400 600 470 T 1200 470 L1200 630 L0 630 Z" fill="#ffffff" opacity="0.45"/>
+    <path d="M0 530 Q 320 470 640 530 T 1200 520 L1200 630 L0 630 Z" fill="#ffffff" opacity="0.5"/>
+  </g>
+  <g fill="#ff6b6b" opacity="0.22">
+    <circle cx="190" cy="180" r="42"/>
+    <circle cx="250" cy="140" r="24"/>
+    <circle cx="1000" cy="300" r="34"/>
+    <circle cx="1060" cy="248" r="18"/>
+    <circle cx="700" cy="150" r="16"/>
+  </g>
+  <g fill="#ffd93d" opacity="0.55">
+    <circle cx="420" cy="240" r="7"/>
+    <circle cx="880" cy="120" r="9"/>
+    <circle cx="560" cy="330" r="6"/>
+    <circle cx="1130" cy="150" r="8"/>
+  </g>
+</svg>

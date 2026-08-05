@@ -11,6 +11,17 @@ export async function fileToBase64(file: File): Promise<string> {
 }
 
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
+
+export const COVER_PRESETS = [
+  { id: 'celebration', url: '/covers/celebration.svg' },
+  { id: 'blossom', url: '/covers/blossom.svg' },
+  { id: 'evening', url: '/covers/evening.svg' },
+] as const
+
+export function isCoverPreset(url: string | undefined): boolean {
+  return !!url && COVER_PRESETS.some((p) => p.url === url)
+}
 /** Max size of the file the user may pick (before compression). */
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 

@@ -11,6 +11,10 @@ export const registerSchema = z.object({
     .string()
     .min(8, 'auth.errors.passwordTooShort')
     .max(128, 'common.errors.tooLong'),
+  // Boolean rather than literal(true) so the form can start unchecked.
+  acceptedTerms: z
+    .boolean()
+    .refine((v) => v === true, { message: 'auth.errors.termsRequired' }),
 })
 
 export type RegisterSchema = z.infer<typeof registerSchema>

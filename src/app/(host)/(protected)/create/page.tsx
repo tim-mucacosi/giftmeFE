@@ -124,6 +124,11 @@ export default function CreatePage() {
 
   const goNext = () => {
     if (draft.step === 1 && !validateStep1()) return
+    // A list with no gifts gives guests nothing to reserve.
+    if (draft.step === 2 && draft.gifts.length === 0) {
+      toast.error(t('host.create.step2.emptyHint'))
+      return
+    }
     setErrors({})
     setStep(draft.step + 1)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })

@@ -47,7 +47,7 @@
     "hero": {
       "headline": "Slavlje bez neželjenih poklona",
       "subheadline": "Napravi listu želja, podeli sa gostima, i svi su srećni.",
-      "cta": "Kreiraj svoj event — besplatno",
+      "cta": "Započni odmah — besplatno",
       "note": "Bez registracije za goste. Bez instalacije.",
       "reserved": "Rezervisano"
     },
@@ -55,7 +55,7 @@
       "title": "Kako funkcioniše?",
       "step1": {
         "title": "Napravi listu",
-        "desc": "Dodaj poklone koje zaista želiš i rasporedi ih po prioritetu."
+        "desc": "Rasporedi poklone koje želiš, one koje možda želiš, i one koje nikako ne bi želeo da dobiješ."
       },
       "step2": {
         "title": "Pošalji gostima",
@@ -74,7 +74,7 @@
       },
       "item2": {
         "title": "Privatnost gostiju",
-        "desc": "Gost bira sa imenom — bez javnih listi i nezgodnih situacija."
+        "desc": "Gost bira anonimno — bez javnih listi i nezgodnih situacija."
       },
       "item3": {
         "title": "Lista u realnom vremenu",
@@ -103,14 +103,15 @@
     },
     "finalCta": {
       "title": "Spremni za sledeće slavlje?",
-      "button": "Započni besplatno"
+      "button": "Započni odmah — besplatno"
     },
     "footer": {
       "copyright": "PokloniMi © 2026",
       "about": "O nama",
       "terms": "Uslovi",
       "privacy": "Privatnost",
-      "contact": "Kontakt"
+      "contact": "Kontakt",
+      "navLabel": "Pravne informacije"
     }
   },
   "auth": {
@@ -127,7 +128,13 @@
       "showPassword": "Prikaži lozinku",
       "hidePassword": "Sakrij lozinku",
       "submit": "Napravi nalog",
-      "terms": "Registracijom prihvataš uslove korišćenja i politiku privatnosti.",
+      "terms": {
+        "prefix": "Registracijom prihvataš",
+        "termsLink": "Uslove korišćenja",
+        "and": "i",
+        "privacyLink": "Politiku privatnosti",
+        "suffix": "."
+      },
       "haveAccount": "Već imaš nalog?",
       "noAccount": "Nemaš nalog?",
       "signIn": "Prijavi se",
@@ -152,7 +159,8 @@
       "emailInUse": "Email je već u upotrebi",
       "invalidCredentials": "Neispravan email ili lozinka",
       "network": "Nema konekcije sa serverom. Pokušaj ponovo.",
-      "googleFailed": "Google prijava nije uspela. Pokušaj ponovo."
+      "googleFailed": "Google prijava nije uspela. Pokušaj ponovo.",
+      "termsRequired": "Moraš prihvatiti Uslove korišćenja i Politiku privatnosti da bi završio/la registraciju."
     },
     "forgotPassword": {
       "title": "Zaboravio/la si lozinku?",
@@ -261,13 +269,17 @@
         "messagePlaceholder": "Dragi gosti, ovo su pokloni koji bi nam značili...",
         "imageLabel": "Pozadinska slika (opciono)",
         "imageHint": "Prevuci sliku ovde ili klikni za upload",
-        "genderLabel": "Pol",
-        "genderBoy": "Dečak",
-        "genderGirl": "Devojčica",
         "imageErrorType": "Izaberite JPG, PNG, WebP ili GIF sliku.",
         "imageErrorSize": "Slika je prevelika (najviše 10 MB).",
         "imageRemove": "Ukloni sliku",
-        "dateErrorPast": "Datum ne može biti u prošlosti"
+        "dateErrorPast": "Datum ne može biti u prošlosti",
+        "presetsLabel": "Predložene pozadine",
+        "presetsOr": "ili otpremi svoju sliku",
+        "presets": {
+          "celebration": "Toplo slavlje",
+          "blossom": "Nežni cvet",
+          "evening": "Elegantno veče"
+        }
       },
       "step2": {
         "title": "Šta bi voleo da dobiješ? 🎁",
@@ -300,7 +312,8 @@
         "deleteConfirm": {
           "title": "Ukloniti ovaj poklon?",
           "text": "Biće uklonjen sa tvoje liste i gosti ga više neće videti."
-        }
+        },
+        "emptyHint": "Dodaj bar jedan poklon da bi nastavio/la."
       },
       "step3": {
         "title": "Pregled",
@@ -474,5 +487,129 @@
     "monthsAgo": "Pre {n, plural, one {# mesec} few {# meseca} other {# meseci}}",
     "inYears": "Za {n, plural, one {# godinu} few {# godine} other {# godina}}",
     "yearsAgo": "Pre {n, plural, one {# godinu} few {# godine} other {# godina}}"
+  },
+  "legal": {
+    "lastUpdated": "Poslednje ažuriranje",
+    "tableOfContents": "Sadržaj",
+    "draftNotice": "Ovaj tekst predstavlja radnu verziju i mora biti pregledan i odobren od strane pravnog stručnjaka pre objavljivanja.",
+    "about": {
+      "title": "O nama",
+      "p1": "PokloniMi je aplikacija koja pomaže da se pokloni za proslave izaberu, organizuju i rezervišu, bez neželjenih duplikata i bez neprijatnih pitanja „šta da ti kupim?“.",
+      "p2": "Domaćin pravi listu želja za rođendan, svadbu, krštenje, baby shower, godišnjicu ili useljenje, a zatim deli link sa gostima. Gost bira poklon, a lista se odmah ažurira kako bi se izbeglo dupliranje.",
+      "p3": "Gosti ne moraju da prave nalog niti da ostavljaju svoje ime; dovoljan je link koji su dobili.",
+      "contact": "Imate pitanje ili predlog? Pišite nam na podrska@poklonimi.rs."
+    },
+    "terms": {
+      "title": "Uslovi korišćenja",
+      "intro": "Ovi Uslovi korišćenja uređuju korišćenje aplikacije PokloniMi. Korišćenjem aplikacije prihvatate ove uslove u celosti.",
+      "sections": {
+        "svrha": {
+          "heading": "Svrha platforme PokloniMi",
+          "body": "PokloniMi je onlajn alat za kreiranje i deljenje lista poklona povodom proslava kao što su rođendani, svadbe, krštenja, baby shower proslave, godišnjice i useljenja. Platforma služi isključivo za organizaciju poklona i ne posreduje u kupovini, plaćanju niti isporuci poklona."
+        },
+        "nalog": {
+          "heading": "Registracija naloga i odgovornosti korisnika",
+          "body": "Za kreiranje liste poklona potrebno je otvoriti nalog sa tačnom email adresom koju potvrđujete klikom na link iz verifikacione poruke. Odgovorni ste za čuvanje pristupnih podataka i za sve aktivnosti na svom nalogu. Nalog ne smete ustupati trećim licima."
+        },
+        "liste": {
+          "heading": "Kreiranje i upravljanje listama proslava i poklona",
+          "body": "Kao domaćin sami određujete naziv proslave, datum, opis, sliku i sadržaj liste poklona. Odgovorni ste za tačnost i primerenost tih podataka. Listu možete menjati i brisati, uz ograničenje da poklon koji su gosti već rezervisali ne može biti uklonjen niti mu se količina može smanjiti ispod broja rezervacija."
+        },
+        "rezervacije": {
+          "heading": "Rezervacije poklona",
+          "body": "Gosti rezervišu poklone anonimno, preko linka koji im domaćin pošalje. Rezervacija je informativne prirode: ona označava nameru da se poklon donese i ne predstavlja kupovinu, ugovor niti obavezu plaćanja. PokloniMi ne garantuje da će rezervisani poklon zaista biti donet."
+        },
+        "odgovornosti": {
+          "heading": "Odgovornosti kreatora liste i gostiju",
+          "body": "Domaćin je odgovoran za sadržaj svoje liste i za to kome prosleđuje link. Gost je odgovoran za rezervacije koje napravi i za poštovanje želja domaćina. Svaki dogovor oko poklona je isključivo između domaćina i gostiju; PokloniMi u tome ne učestvuje."
+        },
+        "zabranjeno": {
+          "heading": "Zabranjeno korišćenje aplikacije",
+          "body": "Zabranjeno je objavljivanje nezakonitog, uvredljivog ili obmanjujućeg sadržaja, korišćenje aplikacije za neželjenu poštu ili prevaru, pokušaji neovlašćenog pristupa tuđim nalozima i listama, kao i automatizovano preuzimanje podataka ili preopterećivanje servisa."
+        },
+        "dostupnost": {
+          "heading": "Dostupnost i izmene servisa",
+          "body": "Trudimo se da aplikacija bude dostupna neprekidno, ali ne garantujemo neprekidan rad. Aplikacija je trenutno u beta fazi, pa su moguće greške, prekidi i izmene funkcionalnosti. Zadržavamo pravo da funkcije menjamo, dodajemo ili ukinemo."
+        },
+        "odgovornost": {
+          "heading": "Ograničenje odgovornosti",
+          "body": "Aplikacija se koristi na sopstvenu odgovornost. U najvećoj meri dozvoljenoj zakonom, ne odgovaramo za posrednu ili posledičnu štetu, izgubljenu dobit, niti za neispunjena očekivanja u vezi sa poklonima, uključujući poklone koji nisu doneti ili su donet duplo."
+        },
+        "intelektualna-svojina": {
+          "heading": "Intelektualna svojina",
+          "body": "Naziv PokloniMi, logo, dizajn i programski kod aplikacije predstavljaju našu intelektualnu svojinu. Sadržaj koji unosite ostaje vaš, uz saglasnost da ga prikazujemo u okviru aplikacije radi pružanja usluge."
+        },
+        "ukidanje": {
+          "heading": "Suspenzija ili brisanje naloga",
+          "body": "Nalog možete obrisati u bilo kom trenutku. Zadržavamo pravo da privremeno ograničimo ili ukinemo nalog koji krši ove uslove ili ugrožava druge korisnike i bezbednost servisa."
+        },
+        "izmene": {
+          "heading": "Izmene Uslova korišćenja",
+          "body": "Uslove možemo povremeno menjati. O materijalnim izmenama obavestićemo vas u aplikaciji ili putem email poruke. Nastavak korišćenja aplikacije nakon izmena smatra se prihvatanjem novih uslova."
+        },
+        "kontakt": {
+          "heading": "Kontakt",
+          "body": "Za sva pitanja u vezi sa ovim uslovima pišite nam na podrska@poklonimi.rs."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Politika privatnosti",
+      "intro": "Ova Politika privatnosti objašnjava koje podatke PokloniMi prikuplja, zašto ih prikuplja i koja prava imate u vezi sa svojim podacima.",
+      "sections": {
+        "podaci": {
+          "heading": "Koje podatke prikupljamo",
+          "body": "Prikupljamo podatke koje sami unesete: ime, email adresu i lozinku (u šifrovanom obliku), sadržaj proslava i lista poklona, kao i evidenciju o prihvatanju Uslova korišćenja i Politike privatnosti. Ako se prijavite putem Google naloga, preuzimamo osnovne podatke profila koje nam Google prosledi."
+        },
+        "svrha": {
+          "heading": "Zašto prikupljamo podatke",
+          "body": "Podatke koristimo da omogućimo rad aplikacije: kreiranje naloga, potvrdu email adrese, prikaz i deljenje lista poklona, evidenciju rezervacija i komunikaciju u vezi sa nalogom. Podatke ne prodajemo trećim licima."
+        },
+        "nalog": {
+          "heading": "Podaci o nalogu i profilu",
+          "body": "Ime i email adresa koriste se za identifikaciju naloga, prijavu i slanje poruka o verifikaciji i resetovanju lozinke. Lozinku čuvamo isključivo u kriptografski heširanom obliku i nemamo uvid u nju."
+        },
+        "proslave": {
+          "heading": "Podaci o proslavama i listama poklona",
+          "body": "Naziv proslave, datum, opis, izabrana slika i poklони na listi čuvaju se kako bi lista mogla da se prikaže vama i vašim gostima. Ove podatke u svakom trenutku možete izmeniti ili obrisati."
+        },
+        "gosti": {
+          "heading": "Podaci koji se dele sa pozvanim gostima",
+          "body": "Svako ko ima link vaše proslave može videti naziv, datum, poruku, sliku i listu poklona, kao i koji su pokloni već rezervisani. Gosti rezervišu anonimno: ne tražimo njihovo ime niti email adresu. Vaša email adresa nikada se ne prikazuje gostima."
+        },
+        "kolacici": {
+          "heading": "Kolačići i analitika",
+          "body": "Koristimo neophodne kolačiće i lokalno skladište pregledača za održavanje prijave, pamćenje izabranog jezika i evidenciju poklona koje ste kao gost izabrali u toj sesiji. Ne koristimo kolačiće za oglašavanje."
+        },
+        "cuvanje": {
+          "heading": "Čuvanje podataka",
+          "body": "Podatke čuvamo dok postoji vaš nalog, odnosno dok su potrebni za pružanje usluge ili dok to zahtevaju zakonske obaveze. Nakon brisanja naloga podaci se uklanjaju u razumnom roku."
+        },
+        "bezbednost": {
+          "heading": "Bezbednost podataka",
+          "body": "Primenjujemo razumne tehničke i organizacione mere zaštite: šifrovanu komunikaciju (HTTPS), heširanje lozinki i kontrolu pristupa. Nijedan sistem nije potpuno bezbedan, pa apsolutnu sigurnost ne možemo garantovati."
+        },
+        "prava": {
+          "heading": "Vaša prava",
+          "body": "Imate pravo na pristup svojim podacima, njihovu ispravku, brisanje i ograničenje obrade, kao i pravo na prigovor i prenosivost podataka. Zahtev možete poslati na kontakt adresu navedenu u ovom dokumentu."
+        },
+        "brisanje": {
+          "heading": "Brisanje naloga i podataka",
+          "body": "Nalog i sve povezane proslave i liste možete obrisati u bilo kom trenutku. Brisanjem naloga uklanjaju se i liste poklona koje ste kreirali, pa ih gosti više neće moći otvoriti putem ranije podeljenog linka."
+        },
+        "trece-strane": {
+          "heading": "Usluge trećih strana",
+          "body": "Za rad aplikacije koristimo pružaoce usluga hostinga, baze podataka, slanja email poruka i prijave putem Google naloga. Ovi pružaoci obrađuju podatke isključivo u naše ime i u obimu neophodnom za pružanje usluge."
+        },
+        "izmene": {
+          "heading": "Izmene Politike privatnosti",
+          "body": "Politiku možemo povremeno ažurirati. Datum poslednje izmene naveden je na vrhu strane, a o značajnim izmenama obavestićemo vas u aplikaciji ili email porukom."
+        },
+        "kontakt": {
+          "heading": "Kontakt",
+          "body": "Za pitanja o obradi podataka i ostvarivanje vaših prava pišite nam na podrska@poklonimi.rs."
+        }
+      }
+    }
   }
 }

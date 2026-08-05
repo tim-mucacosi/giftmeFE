@@ -4,6 +4,8 @@ export interface RegisterInput {
   name: string
   email: string
   password: string
+  /** Explicit acceptance of the Terms of Use and Privacy Policy. */
+  acceptedTerms: boolean
 }
 
 export interface LoginInput {

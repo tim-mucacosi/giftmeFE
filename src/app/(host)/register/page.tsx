@@ -36,7 +36,8 @@ export default function RegisterPage() {
   } = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     mode: 'onBlur',
-    defaultValues: { name: '', email: '', password: '' },
+    // acceptedTerms starts false: consent must be given, never assumed.
+    defaultValues: { name: '', email: '', password: '', acceptedTerms: false },
   })
 
   const onSubmit = async (values: RegisterSchema) => {
@@ -47,6 +48,7 @@ export default function RegisterPage() {
         name: values.name.trim(),
         email,
         password: values.password,
+        acceptedTerms: values.acceptedTerms,
       })
       if (!response.requiresVerification) {
         // No mail provider configured: the account is usable right away.
@@ -65,7 +67,8 @@ export default function RegisterPage() {
             setError(field as keyof RegisterSchema, { type: 'server', message })
           }
         }
-        if (err.status === 409) {
+        // Older backends answered 400 for a duplicate address.
+        if (err.status === 409 || err.code === 'EMAIL_IN_USE') {
           setError('email', { type: 'server', message: 'auth.errors.emailInUse' })
           return
         }
@@ -222,6 +225,47 @@ export default function RegisterPage() {
                 {t('auth.register.passwordHint')}
               </p>
             )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="accept-terms" className="flex cursor-pointer items-start gap-2.5">
+              <input
+                id="accept-terms"
+                type="checkbox"
+                aria-invalid={!!errors.acceptedTerms}
+                aria-describedby={errors.acceptedTerms ? 'accept-terms-error' : undefined}
+                className="mt-0.5 h-5 w-5 shrink-0 accent-coral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+                {...register('acceptedTerms')}
+              />
+              <span className="text-sm text-dark">
+                {t('auth.register.terms.prefix')}{' '}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+                >
+                  {t('auth.register.terms.termsLink')}
+                </Link>{' '}
+                {t('auth.register.terms.and')}{' '}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+                >
+                  {t('auth.register.terms.privacyLink')}
+                </Link>
+                {t('auth.register.terms.suffix')}
+              </span>
+            </label>
+            {errors.acceptedTerms?.message ? (
+              <p
+                id="accept-terms-error"
+                role="alert"
+                className="text-xs font-medium text-coral"
+              >
+                {t(errors.acceptedTerms.message)}
+              </p>
+            ) : null}
           </div>
 
           {formError ? (
