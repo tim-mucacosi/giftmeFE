@@ -10,6 +10,7 @@ import { Modal } from '@/components/shared/Modal'
 import { Button } from '@/components/shared/Button'
 import { getMyEvents, deleteEvent, EventApiError } from '@/lib/api/events'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
+import { trackEvent } from '@/lib/analytics/track'
 import { cn } from '@/lib/utils/cn'
 import type { Event, EventType } from '@/types/event'
 
@@ -87,7 +88,10 @@ export function DashboardClient() {
     setLoading(true)
     setErrorMessage(null)
     return getMyEvents(token)
-      .then(setEvents)
+      .then((data) => {
+        setEvents(data)
+        trackEvent('dashboard_view')
+      })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : t('common.errors.generic')
         setErrorMessage(message)

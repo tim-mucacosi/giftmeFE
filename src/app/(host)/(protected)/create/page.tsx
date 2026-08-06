@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useTranslate } from '@tolgee/react'
+import { useTolgee, useTranslate } from '@tolgee/react'
 import { StepIndicator } from '@/components/host/StepIndicator'
 import { EventDetailsStep, type EventDetailsData } from '@/components/host/EventDetailsStep'
 import { GiftListStep, type DraftGift } from '@/components/host/GiftListStep'
@@ -13,6 +13,7 @@ import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
 import { compressImageToDataUrl } from '@/lib/utils/imageUpload'
 import { validateEventDetails } from '@/lib/validations/eventSchema'
+import { trackEvent } from '@/lib/analytics/track'
 
 interface Draft {
   step: number
@@ -30,10 +31,13 @@ const emptyDraft: Draft = {
 
 export default function CreatePage() {
   const { t } = useTranslate()
+  const tolgee = useTolgee(['language'])
   const toast = useToast()
   const { user } = useCurrentUser()
   const searchParams = useSearchParams()
   const eventId = searchParams.get('eventId')
+  // Wall-clock start of a fresh wizard visit, for the event_published duration metric.
+  const startTimeRef = useRef<number | null>(null)
 
   const [draft, setDraft] = useState<Draft>(emptyDraft)
   const [errors, setErrors] = useState<Partial<Record<keyof EventDetailsData, string>>>({})
@@ -42,6 +46,15 @@ export default function CreatePage() {
   // Date the event had when loaded for editing. Keeping it unchanged is
   // allowed even if it is in the past; picking a new past date is not.
   const [initialDate, setInitialDate] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    // Editing an existing event redirects here with ?eventId= — only a bare
+    // /create visit is the start of the creation funnel.
+    if (!eventId) {
+      trackEvent('create_event_start')
+      startTimeRef.current = Date.now()
+    }
+  }, [eventId])
 
   useEffect(() => {
     if (!eventId) return
@@ -130,6 +143,9 @@ export default function CreatePage() {
       return
     }
     setErrors({})
+    trackEvent('create_event_step_complete', {
+      step: draft.step === 1 ? 'details' : 'gift_list',
+    })
     setStep(draft.step + 1)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -176,6 +192,17 @@ export default function CreatePage() {
 
       // The share URL uses the public slug, never the internal id.
       setCreatedEventId(saved?.slug ?? eventId ?? null)
+      if (eventId) {
+        trackEvent('event_edited')
+      } else {
+        const durationSeconds = startTimeRef.current
+          ? Math.round((Date.now() - startTimeRef.current) / 1000)
+          : 0
+        trackEvent('event_published', {
+          duration_seconds: durationSeconds,
+          language: tolgee.getLanguage() ?? 'sr',
+        })
+      }
       toast.success(
         eventId
           ? t('host.create.step3.successTitle', 'Event updated!')

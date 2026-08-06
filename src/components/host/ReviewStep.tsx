@@ -7,6 +7,7 @@ import { Input } from '@/components/shared/Input'
 import { Modal } from '@/components/shared/Modal'
 import { useToast } from '@/components/shared/Toast'
 import { formatDate } from '@/lib/utils/formatDate'
+import { trackEvent } from '@/lib/analytics/track'
 import type { EventDetailsData } from './EventDetailsStep'
 import type { Gift } from '@/types/gift'
 
@@ -44,6 +45,7 @@ export function ReviewStep({ details, gifts, id, isEditing, onEdit, onBack, onPu
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url)
+      trackEvent('event_link_copied', { source: 'host_review' })
       toast.success(t('common.buttons.copied'))
     } catch {
       toast.error(t('common.errors.generic'))

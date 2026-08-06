@@ -15,6 +15,7 @@ import {
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
 import { copyToClipboard, getEventUrl, shareOrCopy } from '@/lib/utils/appUrl'
+import { trackEvent } from '@/lib/analytics/track'
 import { cn } from '@/lib/utils/cn'
 
 interface Props {
@@ -49,6 +50,7 @@ export function EventDetailClient({ slug }: Props) {
       .then((detail) => {
         if (cancelled) return
         setEvent(detail)
+        trackEvent('event_overview_view')
       })
       .catch((err: unknown) => {
         if (cancelled) return
@@ -80,6 +82,7 @@ export function EventDetailClient({ slug }: Props) {
   // The host shares their own event, so these keep the event-specific URL.
   const copyLink = async () => {
     if (await copyToClipboard(eventUrl)) {
+      trackEvent('event_link_copied', { source: 'host_overview' })
       toast.success(t('common.buttons.copied'))
     } else {
       toast.error(t('common.errors.generic'))
@@ -88,6 +91,9 @@ export function EventDetailClient({ slug }: Props) {
 
   const shareLink = async () => {
     const result = await shareOrCopy(eventUrl, event?.name ?? t('common.appName'))
+    if (result === 'shared' || result === 'copied') {
+      trackEvent('event_link_shared', { source: 'host_overview' })
+    }
     if (result === 'copied') toast.success(t('common.buttons.copied'))
     else if (result === 'failed') toast.error(t('common.errors.generic'))
   }

@@ -25,6 +25,11 @@
       "sr": "Srpski",
       "en": "English",
       "de": "Deutsch"
+    },
+    "cookieConsent": {
+      "message": "Wir verwenden Google Analytics, um zu sehen, wie die App genutzt wird. Sie sehen dies, weil Sie aus der EU/dem EWR zugreifen, eine Ablehnung hat keinen Einfluss auf die Funktion der App.",
+      "accept": "Akzeptieren",
+      "decline": "Ablehnen"
     }
   },
   "nav": {

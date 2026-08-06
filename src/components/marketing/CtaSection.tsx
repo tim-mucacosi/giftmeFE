@@ -3,6 +3,7 @@
 import { useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
 import { FadeUp } from '@/components/shared/FadeUp'
+import { trackEvent } from '@/lib/analytics/track'
 
 export function CtaSection() {
   const { t } = useTranslate()
@@ -17,7 +18,11 @@ export function CtaSection() {
           <h2 className="font-extrabold tracking-tight text-dark text-[clamp(28px,5vw,48px)] mb-5">
             {t('landing.finalCta.title')}
           </h2>
-          <Button href="/create" size="lg">
+          <Button
+            href="/create"
+            size="lg"
+            onClick={() => trackEvent('cta_click', { location: 'final_cta' })}
+          >
             {t('landing.finalCta.button')}
           </Button>
         </FadeUp>

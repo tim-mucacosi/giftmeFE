@@ -12,6 +12,7 @@ import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
 import { availableUnits, isGiftAvailable } from '@/lib/utils/giftAvailability'
 import { copyToClipboard, getAppBaseUrl, shareOrCopy } from '@/lib/utils/appUrl'
+import { trackEvent } from '@/lib/analytics/track'
 import { cn } from '@/lib/utils/cn'
 import styles from './GuestEvent.module.css'
 
@@ -88,6 +89,10 @@ export function GuestEventClient({ slug }: Props) {
         if (cancelled) return
         setEvent(detail)
         setReservations(readReservations(slug))
+        if (detail) {
+          const giftCount = detail.gifts.want.length + detail.gifts.nice.length + detail.gifts.avoid.length
+          trackEvent('view_event', { event_type: detail.type, gift_count: giftCount })
+        }
       })
       .catch((err: unknown) => {
         if (cancelled) return
@@ -154,6 +159,7 @@ export function GuestEventClient({ slug }: Props) {
       return
     }
     setSubmitting(true)
+    trackEvent('gift_reserve_start')
     try {
       const result = await reserveGift(slug, pending.gift.id, pending.requestToken)
       if (result.event) setEvent(result.event)
@@ -164,6 +170,7 @@ export function GuestEventClient({ slug }: Props) {
       setReservations(updated)
       writeReservations(slug, updated)
 
+      trackEvent('gift_reserved')
       setSuccess(pending.gift.name)
       setPending(null)
 
@@ -201,6 +208,7 @@ export function GuestEventClient({ slug }: Props) {
   // both actions share the app's base URL rather than this event's link.
   const copyLink = async () => {
     if (await copyToClipboard(getAppBaseUrl())) {
+      trackEvent('event_link_copied', { source: 'guest_page' })
       toast.success(t('common.buttons.copied'))
     } else {
       toast.error(t('common.errors.generic'))
@@ -210,6 +218,9 @@ export function GuestEventClient({ slug }: Props) {
   const shareLink = async () => {
     const result = await shareOrCopy(getAppBaseUrl(), t('common.appName'))
     // A cancelled native sheet is a normal outcome and stays silent.
+    if (result === 'shared' || result === 'copied') {
+      trackEvent('event_link_shared', { source: 'guest_page' })
+    }
     if (result === 'copied') toast.success(t('common.buttons.copied'))
     else if (result === 'failed') toast.error(t('common.errors.generic'))
   }
