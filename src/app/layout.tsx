@@ -82,9 +82,9 @@ export default async function RootLayout({
           <ToastProvider>
             { children }
           </ToastProvider>
+          {GA_MEASUREMENT_ID && <ConsentBanner initialShow={showConsentBanner} />}
         </TolgeeNextProvider>
         <PwaRegister />
-        {GA_MEASUREMENT_ID && <ConsentBanner initialShow={showConsentBanner} />}
       </body>
       {GA_MEASUREMENT_ID && (
         <>
