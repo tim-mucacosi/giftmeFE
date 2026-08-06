@@ -15,6 +15,7 @@ import {
   type GiftFormErrors,
 } from '@/lib/validations/giftSchema'
 import type { Gift, GiftCategory } from '@/types/gift'
+import { trackEvent } from '@/lib/analytics/track'
 
 export type GiftDraft = Omit<Gift, 'id' | 'eventId' | 'reservedQuantity' | 'order'>
 
@@ -90,6 +91,8 @@ export function GiftAddForm({ open, onClose, onSubmit, category, initial }: Prop
           unlimited: parsed.unlimited,
           link: parsed.link,
         }
+    // Only a new gift is a tracking event; editing an existing one is not.
+    if (!initial) trackEvent('gift_added', { category })
     onSubmit(draft)
     onClose()
   }

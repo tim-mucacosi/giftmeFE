@@ -25,6 +25,11 @@
       "sr": "Srpski",
       "en": "English",
       "de": "Deutsch"
+    },
+    "cookieConsent": {
+      "message": "We use Google Analytics to see how the app is used. You're seeing this because you're visiting from the EU/EEA, declining won't affect how the app works.",
+      "accept": "Accept",
+      "decline": "Decline"
     }
   },
   "nav": {

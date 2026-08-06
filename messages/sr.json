@@ -25,6 +25,11 @@
       "sr": "Srpski",
       "en": "English",
       "de": "Deutsch"
+    },
+    "cookieConsent": {
+      "message": "Koristimo Google Analytics da vidimo kako se aplikacija koristi. Ovo vidite jer nas posećujete iz EU/EEA, odbijanje neće uticati na rad aplikacije.",
+      "accept": "Prihvati",
+      "decline": "Odbij"
     }
   },
   "nav": {

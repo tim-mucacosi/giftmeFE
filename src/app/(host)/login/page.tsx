@@ -15,6 +15,7 @@ import { loginUser } from '@/lib/api/auth'
 import { saveSession } from '@/lib/auth/session'
 import { RETURN_TO_PARAM, safeReturnTo, withReturnTo } from '@/lib/auth/returnTo'
 import { AuthError } from '@/types/auth'
+import { trackEvent } from '@/lib/analytics/track'
 
 export default function LoginPage() {
   const { t } = useTranslate()
@@ -44,6 +45,7 @@ export default function LoginPage() {
         password: values.password,
       })
       saveSession(response)
+      trackEvent('login', { method: 'email' })
       toast.success(t('host.login.successToast'));
       router.push(next)
       router.refresh()
@@ -85,7 +87,7 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-          <GoogleAuthButton next={next} onError={(msg) => setFormError(msg)} />
+          <GoogleAuthButton mode="login" next={next} onError={(msg) => setFormError(msg)} />
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-light" />

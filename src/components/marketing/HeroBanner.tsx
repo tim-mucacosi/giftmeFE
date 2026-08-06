@@ -2,6 +2,7 @@
 
 import { useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
+import { trackEvent } from '@/lib/analytics/track'
 import styles from './HeroBanner.module.css'
 
 export function HeroBanner() {
@@ -16,7 +17,13 @@ export function HeroBanner() {
           <h1 className={styles.headline}>{t('landing.hero.headline')}</h1>
           <p className={styles.subheadline}>{t('landing.hero.subheadline')}</p>
           <div className={styles.ctaWrap}>
-            <Button href="/create" size="lg" fullWidth className="sm:w-auto">
+            <Button
+              href="/create"
+              size="lg"
+              fullWidth
+              className="sm:w-auto"
+              onClick={() => trackEvent('cta_click', { location: 'hero_banner' })}
+            >
               {t('landing.hero.cta')}
             </Button>
           </div>
