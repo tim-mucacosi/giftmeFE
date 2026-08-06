@@ -128,13 +128,7 @@
       "showPassword": "Passwort anzeigen",
       "hidePassword": "Passwort verbergen",
       "submit": "Konto erstellen",
-      "terms": {
-        "prefix": "Mit der Registrierung akzeptieren Sie die",
-        "termsLink": "Nutzungsbedingungen",
-        "and": "und die",
-        "privacyLink": "Datenschutzerklärung",
-        "suffix": "."
-      },
+      "terms": "Mit der Registrierung akzeptieren Sie die <terms>Nutzungsbedingungen</terms> und die <privacy>Datenschutzerklärung</privacy>.",
       "haveAccount": "Bereits ein Konto?",
       "noAccount": "Noch kein Konto?",
       "signIn": "Anmelden",

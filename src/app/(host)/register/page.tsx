@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useTranslate } from '@tolgee/react'
+import { T, useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
 import { Input } from '@/components/shared/Input'
 import { useToast } from '@/components/shared/Toast'
@@ -238,23 +238,31 @@ export default function RegisterPage() {
                 {...register('acceptedTerms')}
               />
               <span className="text-sm text-dark">
-                {t('auth.register.terms.prefix')}{' '}
-                <Link
-                  href="/terms"
-                  target="_blank"
-                  className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
-                >
-                  {t('auth.register.terms.termsLink')}
-                </Link>{' '}
-                {t('auth.register.terms.and')}{' '}
-                <Link
-                  href="/privacy"
-                  target="_blank"
-                  className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
-                >
-                  {t('auth.register.terms.privacyLink')}
-                </Link>
-                {t('auth.register.terms.suffix')}
+                {/* One sentence per language: translators keep the wording and
+                    the link positions, which differ by grammar. */}
+                <T
+                  keyName="auth.register.terms"
+                  params={{
+                    terms: (
+                      <Link
+                        href="/terms"
+                        target="_blank"
+                        // Inside the label, so a click would otherwise also
+                        // toggle the checkbox.
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+                      />
+                    ),
+                    privacy: (
+                      <Link
+                        href="/privacy"
+                        target="_blank"
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+                      />
+                    ),
+                  }}
+                />
               </span>
             </label>
             {errors.acceptedTerms?.message ? (
@@ -280,10 +288,6 @@ export default function RegisterPage() {
           <Button type="submit" fullWidth loading={isSubmitting} disabled={isSubmitting}>
             {t('auth.register.submit')}
           </Button>
-
-          <p className="text-center text-xs text-dark-light">
-            {t('auth.register.terms')}
-          </p>
         </form>
 
         <div className="mt-6 border-t border-gray-light pt-5 text-center text-sm text-dark-light">

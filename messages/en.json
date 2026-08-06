@@ -128,13 +128,7 @@
       "showPassword": "Show password",
       "hidePassword": "Hide password",
       "submit": "Create account",
-      "terms": {
-        "prefix": "By registering you accept the",
-        "termsLink": "Terms of Use",
-        "and": "and the",
-        "privacyLink": "Privacy Policy",
-        "suffix": "."
-      },
+      "terms": "By registering you accept the <terms>Terms of Use</terms> and the <privacy>Privacy Policy</privacy>.",
       "haveAccount": "Already have an account?",
       "noAccount": "Don't have an account?",
       "signIn": "Sign in",

@@ -128,13 +128,7 @@
       "showPassword": "Prikaži lozinku",
       "hidePassword": "Sakrij lozinku",
       "submit": "Napravi nalog",
-      "terms": {
-        "prefix": "Registracijom prihvataš",
-        "termsLink": "Uslove korišćenja",
-        "and": "i",
-        "privacyLink": "Politiku privatnosti",
-        "suffix": "."
-      },
+      "terms": "Registracijom prihvataš <terms>Uslove korišćenja</terms> i <privacy>Politiku privatnosti</privacy>.",
       "haveAccount": "Već imaš nalog?",
       "noAccount": "Nemaš nalog?",
       "signIn": "Prijavi se",
