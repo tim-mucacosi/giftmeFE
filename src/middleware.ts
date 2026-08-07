@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { EEA_COUNTRY_CODES, GEO_COOKIE } from '@/lib/consent/constants'
+import { EEA_COUNTRY_CODES, GEO_COOKIE, GEO_HEADER } from '@/lib/consent/constants'
 
 // Vercel injects this header at the edge with the visitor's IP-derived
 // country. Absent on other hosts, those visitors fall through to "other",
@@ -7,9 +7,17 @@ import { EEA_COUNTRY_CODES, GEO_COOKIE } from '@/lib/consent/constants'
 export function middleware(request: NextRequest) {
   const country = request.headers.get('x-vercel-ip-country')
   const isEea = !!country && EEA_COUNTRY_CODES.has(country)
+  const geoValue = isEea ? 'eea' : 'other'
 
-  const response = NextResponse.next()
-  response.cookies.set(GEO_COOKIE, isEea ? 'eea' : 'other', {
+  // Response cookies only reach the browser on this response and apply
+  // starting with its *next* request — layout.tsx renders as part of this
+  // same request, so it can't see GEO_COOKIE yet. Forward the value via a
+  // request header instead, which Next.js does propagate to this render.
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set(GEO_HEADER, geoValue)
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } })
+  response.cookies.set(GEO_COOKIE, geoValue, {
     path: '/',
     maxAge: 60 * 60 * 24,
     sameSite: 'lax',

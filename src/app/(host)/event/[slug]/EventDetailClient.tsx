@@ -15,6 +15,8 @@ import {
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
 import { copyToClipboard, getEventUrl, shareOrCopy } from '@/lib/utils/appUrl'
+import { isPastDate } from '@/lib/validations/eventSchema'
+import { formatDateShort } from '@/lib/utils/formatDate'
 import { trackEvent } from '@/lib/analytics/track'
 import { cn } from '@/lib/utils/cn'
 
@@ -135,6 +137,10 @@ export function EventDetailClient({ slug }: Props) {
     )
   }
 
+  // A completed event is read-only: no editing, sharing, or copying the
+  // link — guests are blocked from it too (see GuestEventClient).
+  const isPast = isPastDate(event.date)
+
   return (
     <Shell>
       {showNotHostBanner ? (
@@ -176,10 +182,10 @@ export function EventDetailClient({ slug }: Props) {
                 {event.name}
               </h1>
               <p className="mt-1 text-sm text-dark-light">
-                {new Date(event.date).toLocaleDateString()} · {t(`eventTypes.${event.type}`)}
+                {formatDateShort(event.date)} · {t(`eventTypes.${event.type}`)}
               </p>
             </div>
-            {isHost ? (
+            {isHost && !isPast ? (
               <Link
                 href={`/create?eventId=${event.id}`}
                 className="shrink-0 rounded-full border-2 border-gray-light bg-white px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:border-coral hover:text-coral"
@@ -189,30 +195,38 @@ export function EventDetailClient({ slug }: Props) {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="coral" size="md" onClick={shareLink} fullWidth className="sm:w-auto">
-              📤 {t('host.event.share')}
-            </Button>
-            <Button variant="outline" size="md" onClick={copyLink} fullWidth className="sm:w-auto">
-              📋 {t('host.dashboard.actions.copyLink')}
-            </Button>
-            <Button
-              variant="outline"
-              size="md"
-              href={`/event/${shareSlug}`}
-              fullWidth
-              className="sm:w-auto"
-            >
-              👁️ {t('host.dashboard.actions.view')}
-            </Button>
-          </div>
+          {isPast ? (
+            <div className="w-fit rounded-full bg-gray-light/60 px-3 py-1.5 text-xs font-semibold text-dark-light">
+              🏁 {t('host.dashboard.filters.past')}
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button variant="coral" size="md" onClick={shareLink} fullWidth className="sm:w-auto">
+                  📤 {t('host.event.share')}
+                </Button>
+                <Button variant="outline" size="md" onClick={copyLink} fullWidth className="sm:w-auto">
+                  📋 {t('host.dashboard.actions.copyLink')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="md"
+                  href={`/event/${shareSlug}`}
+                  fullWidth
+                  className="sm:w-auto"
+                >
+                  👁️ {t('host.dashboard.actions.view')}
+                </Button>
+              </div>
 
-          <div
-            className="rounded-xl bg-bg px-3 py-2 text-xs text-dark-light"
-            title={eventUrl}
-          >
-            <span className="block truncate">{eventUrl}</span>
-          </div>
+              <div
+                className="rounded-xl bg-bg px-3 py-2 text-xs text-dark-light"
+                title={eventUrl}
+              >
+                <span className="block truncate">{eventUrl}</span>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -385,7 +399,7 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
                   → {r.giftName}
                 </span>
                 <span className="shrink-0 text-xs text-gray">
-                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
+                  {r.createdAt ? formatDateShort(r.createdAt) : ''}
                 </span>
                 {r.message ? (
                   <span className="w-full text-xs italic text-dark-light">“{r.message}”</span>

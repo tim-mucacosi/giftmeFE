@@ -11,7 +11,8 @@
       "copied": "Kopiert!",
       "publish": "Event erstellen",
       "createFirst": "Erstes Event erstellen",
-      "retry": "Erneut versuchen"
+      "retry": "Erneut versuchen",
+      "more": "Mehr"
     },
     "errors": {
       "required": "Dieses Feld ist erforderlich",
@@ -37,11 +38,12 @@
     "create": "Neues Event",
     "dashboard": "Meine Events",
     "login": "Anmelden",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "deactivateAccount": "Konto deaktivieren"
   },
   "landing": {
     "meta": {
-      "title": "SchenkMir — Feiern ohne unerwünschte Geschenke",
+      "title": "SchenkMir — Feiern mit Geschenken, die du wirklich brauchst",
       "description": "Erstelle eine Wunschliste, teile sie mit Gästen, alle sind glücklich."
     },
     "beta": {
@@ -50,7 +52,7 @@
       "dismiss": "Schließen"
     },
     "hero": {
-      "headline": "Feiern ohne unerwünschte Geschenke",
+      "headline": "Feiern mit Geschenken, die du wirklich brauchst",
       "subheadline": "Erstelle eine Wunschliste, teile sie mit deinen Gästen, alle gewinnen.",
       "cta": "Event erstellen — kostenlos",
       "note": "Keine Anmeldung für Gäste. Keine App-Installation.",
@@ -169,7 +171,6 @@
       "submit": "Link senden",
       "successTitle": "Prüfe deinen Posteingang",
       "successDesc": "Falls es ein Konto mit dieser E-Mail gibt, haben wir einen Link zum Zurücksetzen gesendet an:",
-      "comingSoonNotice": "Der E-Mail-Versand wird gerade noch eingerichtet, daher kann es etwas dauern, bis der Link ankommt. Danke für deine Geduld!",
       "backToLogin": "Zurück zur Anmeldung",
       "tryAnotherEmail": "Andere E-Mail versuchen"
     },
@@ -187,6 +188,13 @@
       "oauthTitle": "Kein Passwort für dieses Konto",
       "oauthDesc": "Du hast dich mit einem sozialen Konto angemeldet. Verwalte dein Passwort über diesen Anbieter — hier gibt es nichts zu ändern.",
       "oauthOnly": "Dieses Konto nutzt Social-Login. Es gibt kein Passwort zum Ändern."
+    },
+    "deactivateAccount": {
+      "title": "Konto deaktivieren?",
+      "confirm": "Möchtest du dein Konto wirklich deaktivieren?",
+      "warning": "Du wirst sofort abgemeldet und kannst dich danach nicht mehr anmelden. Dies kannst du nicht selbst rückgängig machen.",
+      "submit": "Deaktivieren",
+      "successToast": "Dein Konto wurde deaktiviert"
     },
     "resetPassword": {
       "title": "Passwort zurücksetzen",
@@ -437,6 +445,9 @@
       "notFound": {
         "title": "Ereignis nicht gefunden",
         "desc": "Wir konnten das Event nicht finden. Der Link ist möglicherweise falsch oder das Event wurde entfernt."
+      },
+      "ended": {
+        "title": "Dieses Event ist beendet"
       },
       "share": "Teilen",
       "floating": {

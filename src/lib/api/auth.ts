@@ -242,6 +242,15 @@ export async function requestPasswordReset(email: string): Promise<void> {
   }
 }
 
+/** Soft deletes the logged in user's account. The backend also blocks any future login for it. */
+export async function deactivateAccount(token: string): Promise<void> {
+  if (USE_MOCKS) {
+    await mockDelay()
+    return
+  }
+  await authRequest<unknown>('/users/me', { method: 'DELETE', token })
+}
+
 export async function resetPassword(
   passwordResetToken: string,
   newPassword: string,

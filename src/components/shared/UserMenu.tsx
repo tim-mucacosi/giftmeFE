@@ -5,6 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslate } from '@tolgee/react'
 import { cn } from '@/lib/utils/cn'
+import { Modal } from '@/components/shared/Modal'
+import { Button } from '@/components/shared/Button'
+import { useToast } from '@/components/shared/Toast'
+import { deactivateAccount } from '@/lib/api/auth'
+import { loadSession } from '@/lib/auth/session'
+import { AuthError } from '@/types/auth'
 import type { User } from '@/types/user'
 
 type Props = { user: User; onLogout: () => void }
@@ -12,10 +18,13 @@ type Props = { user: User; onLogout: () => void }
 export function UserMenu({ user, onLogout }: Props) {
   const { t } = useTranslate()
   const router = useRouter()
+  const toast = useToast()
   const [open, setOpen] = useState(false)
   // Fall back to initials when the provider photo fails to load (expired
   // Google/Facebook CDN URLs would otherwise render a broken image).
   const [imgError, setImgError] = useState(false)
+  const [deactivateOpen, setDeactivateOpen] = useState(false)
+  const [deactivating, setDeactivating] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const showImage = !!user.profilePicture && !imgError
 
@@ -38,6 +47,26 @@ export function UserMenu({ user, onLogout }: Props) {
     onLogout()
     router.push('/')
     router.refresh()
+  }
+
+  async function handleDeactivate() {
+    if (deactivating) return
+    const session = loadSession()
+    if (!session?.accessToken) return
+    setDeactivating(true)
+    try {
+      await deactivateAccount(session.accessToken)
+      setDeactivateOpen(false)
+      onLogout()
+      toast.success(t('auth.deactivateAccount.successToast'))
+      router.push('/')
+      router.refresh()
+    } catch (err) {
+      const message = err instanceof AuthError ? err.message : t('common.errors.generic')
+      toast.error(message)
+    } finally {
+      setDeactivating(false)
+    }
   }
 
   return (
@@ -118,9 +147,44 @@ export function UserMenu({ user, onLogout }: Props) {
               <span aria-hidden="true">👋</span>
               {t('nav.logout')}
             </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false)
+                setDeactivateOpen(true)
+              }}
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-soft transition-colors hover:bg-red-soft/10"
+            >
+              <span aria-hidden="true">🚫</span>
+              {t('nav.deactivateAccount')}
+            </button>
           </div>
         </div>
       )}
+
+      <Modal
+        open={deactivateOpen}
+        onClose={() => {
+          if (!deactivating) setDeactivateOpen(false)
+        }}
+        title={t('auth.deactivateAccount.title')}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-dark">{t('auth.deactivateAccount.confirm')}</p>
+          <p className="rounded-xl bg-red-soft/15 px-3 py-2 text-xs text-dark">
+            ⚠️ {t('auth.deactivateAccount.warning')}
+          </p>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" type="button" onClick={() => setDeactivateOpen(false)} disabled={deactivating}>
+              {t('common.buttons.cancel')}
+            </Button>
+            <Button type="button" variant="dark" onClick={handleDeactivate} loading={deactivating} disabled={deactivating}>
+              🚫 {t('auth.deactivateAccount.submit')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
