@@ -11,7 +11,7 @@ export function formatDate(iso: string, locale: string = 'sr-RS'): string {
   }
 }
 
-export function formatDateShort(iso: string, locale: string = 'sr-RS'): string {
+export function formatDateShort(iso: string, locale: string = 'en-GB'): string {
   try {
     const d = new Date(iso)
     return new Intl.DateTimeFormat(locale, {

@@ -6,10 +6,42 @@ import { setLanguage } from '@/tolgee/language'
 import { ALL_LANGUAGES } from '@/tolgee/shared'
 import { cn } from '@/lib/utils/cn'
 
-const FLAGS: Record<string, string> = {
-  sr: '🇷🇸',
-  en: '🇬🇧',
-  de: '🇩🇪',
+// Emoji flags (🇷🇸 etc.) are two combined "regional indicator" letters; when
+// the OS font can't combine them (notably Windows) it falls back to showing
+// the raw letters (e.g. "GB") instead of a flag. SVGs render identically
+// everywhere.
+function FlagIcon({ code, className }: { code: string; className?: string }) {
+  const common = cn('h-3.5 w-5 shrink-0 rounded-[2px]', className)
+  switch (code) {
+    case 'sr':
+      return (
+        <svg viewBox="0 0 20 15" className={common} aria-hidden="true">
+          <rect width="20" height="15" fill="#fff" />
+          <rect width="20" height="5" fill="#C6363C" />
+          <rect y="5" width="20" height="5" fill="#0C4076" />
+        </svg>
+      )
+    case 'de':
+      return (
+        <svg viewBox="0 0 20 15" className={common} aria-hidden="true">
+          <rect width="20" height="5" fill="#000" />
+          <rect y="5" width="20" height="5" fill="#DD0000" />
+          <rect y="10" width="20" height="5" fill="#FFCE00" />
+        </svg>
+      )
+    case 'en':
+      return (
+        <svg viewBox="0 0 20 15" className={common} aria-hidden="true">
+          <rect width="20" height="15" fill="#00247D" />
+          <path d="M0 0L20 15M20 0L0 15" stroke="#fff" strokeWidth="3" />
+          <path d="M0 0L20 15M20 0L0 15" stroke="#CF142B" strokeWidth="1.2" />
+          <path d="M10 0V15M0 7.5H20" stroke="#fff" strokeWidth="5" />
+          <path d="M10 0V15M0 7.5H20" stroke="#CF142B" strokeWidth="2" />
+        </svg>
+      )
+    default:
+      return null
+  }
 }
 
 // Custom dropdown instead of a native <select>: mobile browsers render the
@@ -63,7 +95,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral',
         )}
       >
-        <span aria-hidden="true">{FLAGS[current]}</span>
+        <FlagIcon code={current} />
         <span className="uppercase">{current}</span>
         <svg
           aria-hidden="true"
@@ -99,7 +131,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
                   : 'text-dark hover:bg-gray-light/60',
               )}
             >
-              <span aria-hidden="true">{FLAGS[lang]}</span>
+              <FlagIcon code={lang} />
               {t(`common.languages.${lang}`)}
             </button>
           ))}

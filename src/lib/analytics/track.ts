@@ -20,8 +20,8 @@ export interface AnalyticsEventMap {
    * custom metric to average it. `language`: UI language active at publish.
    */
   event_published: { duration_seconds: number; language: string }
-  event_link_shared: { source: 'host_review' | 'host_overview' | 'guest_page' }
-  event_link_copied: { source: 'host_review' | 'host_overview' | 'guest_page' }
+  event_link_shared: { source: 'host_review' | 'host_overview' | 'host_dashboard' | 'guest_page' }
+  event_link_copied: { source: 'host_review' | 'host_overview' | 'host_dashboard' | 'guest_page' }
   event_edited: undefined
   view_event: { event_type: string; gift_count: number }
   gift_reserve_start: undefined

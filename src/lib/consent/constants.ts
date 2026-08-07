@@ -8,6 +8,10 @@ export const EEA_COUNTRY_CODES = new Set([
 
 /** Set by middleware from the visitor's IP-derived country. */
 export const GEO_COOKIE = 'pm_geo'
+/** Same value as GEO_COOKIE, forwarded as a request header so the page
+ *  rendered by this same request can read it — response cookies only take
+ *  effect on the visitor's *next* request. */
+export const GEO_HEADER = 'x-pm-geo'
 /** Set once the visitor answers the consent banner. */
 export const CONSENT_COOKIE = 'pm_consent'
 

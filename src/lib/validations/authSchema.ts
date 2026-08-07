@@ -9,6 +9,7 @@ export const registerSchema = z.object({
   email: z.string().trim().email('common.errors.invalidEmail'),
   password: z
     .string()
+    .trim()
     .min(8, 'auth.errors.passwordTooShort')
     .max(128, 'common.errors.tooLong'),
   // Boolean rather than literal(true) so the form can start unchecked.
@@ -22,7 +23,7 @@ export type RegisterSchema = z.infer<typeof registerSchema>
 
 export const loginSchema = z.object({
   email: z.string().trim().email('common.errors.invalidEmail'),
-  password: z.string().min(1, 'common.errors.required'),
+  password: z.string().trim().min(1, 'common.errors.required'),
 });
 
 export type LoginSchema = z.infer<typeof loginSchema>
@@ -37,12 +38,13 @@ export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>
 
 export const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'common.errors.required'),
+    currentPassword: z.string().trim().min(1, 'common.errors.required'),
     newPassword: z
       .string()
+      .trim()
       .min(8, 'auth.errors.passwordTooShort')
       .max(128, 'common.errors.tooLong'),
-    confirmPassword: z.string().min(1, 'common.errors.required'),
+    confirmPassword: z.string().trim().min(1, 'common.errors.required'),
   })
   .refine((v) => v.newPassword === v.confirmPassword, {
     path: ['confirmPassword'],
@@ -60,9 +62,10 @@ export const resetPasswordSchema = z
   .object({
     password: z
       .string()
+      .trim()
       .min(8, 'auth.errors.passwordTooShort')
       .max(128, 'common.errors.tooLong'),
-    confirmPassword: z.string().min(1, 'common.errors.required'),
+    confirmPassword: z.string().trim().min(1, 'common.errors.required'),
   })
   .refine((v) => v.password === v.confirmPassword, {
     path: ['confirmPassword'],

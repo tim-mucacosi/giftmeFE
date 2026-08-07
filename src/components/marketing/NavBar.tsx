@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useTranslate } from '@tolgee/react'
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 import { UserMenu } from '@/components/shared/UserMenu'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
-import { withReturnTo } from '@/lib/auth/returnTo'
+import { RETURN_TO_PARAM, safeReturnTo, withReturnTo } from '@/lib/auth/returnTo'
 import { useEventViewMode } from '@/lib/state/eventViewMode'
 import { cn } from '@/lib/utils/cn'
 import styles from './Navbar.module.css'
@@ -27,9 +27,13 @@ const BASE_ITEMS: NavItem[] = [
 
 export function Navbar() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { t } = useTranslate()
   const { user, ready, logout } = useCurrentUser()
   const eventViewMode = useEventViewMode()
+
+  const highlightPath =
+    pathname === '/login' ? safeReturnTo(searchParams.get(RETURN_TO_PARAM)) : pathname
 
   // Highlight rules:
   //  - Home only on the exact "/" path.
@@ -38,11 +42,11 @@ export function Navbar() {
   //    under "My events" conceptually, so /dashboard stays selected there
   //    instead of leaving the user with no active tab.
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/'
+    if (href === '/') return highlightPath === '/'
     if (href === '/dashboard') {
-      return pathname?.startsWith('/dashboard') || !!pathname?.startsWith('/event/')
+      return highlightPath?.startsWith('/dashboard') || !!highlightPath?.startsWith('/event/')
     }
-    return pathname?.startsWith(href)
+    return highlightPath?.startsWith(href)
   }
 
   const showLanguageSwitcher =

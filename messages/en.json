@@ -11,7 +11,8 @@
       "copied": "Copied!",
       "publish": "Create event",
       "createFirst": "Create your first event",
-      "retry": "Retry"
+      "retry": "Retry",
+      "more": "More"
     },
     "errors": {
       "required": "This field is required",
@@ -37,11 +38,12 @@
     "create": "New event",
     "dashboard": "My events",
     "login": "Log in",
-    "logout": "Log out"
+    "logout": "Log out",
+    "deactivateAccount": "Deactivate account"
   },
   "landing": {
     "meta": {
-      "title": "GiftMe — Celebrations without unwanted gifts",
+      "title": "GiftMe — Celebrations with gifts you actually need",
       "description": "Create a wishlist, share with guests, everyone wins. Guests don't need to register."
     },
     "beta": {
@@ -50,7 +52,7 @@
       "dismiss": "Dismiss"
     },
     "hero": {
-      "headline": "Celebrations without unwanted gifts",
+      "headline": "Celebrations with gifts you actually need",
       "subheadline": "Create a wishlist, share it with your guests, everyone wins.",
       "cta": "Create your event — free",
       "note": "No registration for guests. No app install.",
@@ -169,7 +171,6 @@
       "submit": "Send reset link",
       "successTitle": "Check your inbox",
       "successDesc": "If an account exists for this email, we've sent a reset link to:",
-      "comingSoonNotice": "Email delivery is still being set up, so the link may take a while to arrive. Thanks for your patience!",
       "backToLogin": "Back to sign in",
       "tryAnotherEmail": "Use a different email"
     },
@@ -187,6 +188,13 @@
       "oauthTitle": "No password on this account",
       "oauthDesc": "You signed in with a social account. Manage your password through that provider — there's nothing to change here.",
       "oauthOnly": "This account uses social sign-in. There is no password to change."
+    },
+    "deactivateAccount": {
+      "title": "Deactivate account?",
+      "confirm": "Are you sure you want to deactivate your account?",
+      "warning": "You'll be signed out immediately and won't be able to log back in. This cannot be undone by yourself.",
+      "submit": "Deactivate",
+      "successToast": "Your account has been deactivated"
     },
     "resetPassword": {
       "title": "Reset your password",
@@ -437,6 +445,9 @@
       "notFound": {
         "title": "Event not found",
         "desc": "We couldn't find that event. The link may be wrong or the event was removed."
+      },
+      "ended": {
+        "title": "This event has ended"
       },
       "share": "Share",
       "floating": {

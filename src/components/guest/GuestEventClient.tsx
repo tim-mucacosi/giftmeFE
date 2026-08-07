@@ -12,6 +12,7 @@ import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
 import { availableUnits, isGiftAvailable } from '@/lib/utils/giftAvailability'
 import { copyToClipboard, getAppBaseUrl, shareOrCopy } from '@/lib/utils/appUrl'
+import { isPastDate } from '@/lib/validations/eventSchema'
 import { trackEvent } from '@/lib/analytics/track'
 import { cn } from '@/lib/utils/cn'
 import styles from './GuestEvent.module.css'
@@ -306,6 +307,25 @@ export function GuestEventClient({ slug }: Props) {
           </p>
           <p className="px-6 text-sm text-dark-light">
             {t('host.event.notFound.desc')}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Once the event date has passed, guests can no longer view the gift list
+  // or reserve anything — the host's dashboard/overview actions are hidden
+  // for the same reason.
+  if (isPastDate(event.date)) {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-gray-light py-16 text-center">
+          <span className="text-4xl">📅</span>
+          <p className="font-semibold text-dark">
+            {t('host.guest.ended.title')}
+          </p>
+          <p className="px-6 text-sm text-dark-light">
+            {t('host.guest.errors.expired')}
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTolgee, useTranslate } from '@tolgee/react'
 import { StepIndicator } from '@/components/host/StepIndicator'
 import { EventDetailsStep, type EventDetailsData } from '@/components/host/EventDetailsStep'
@@ -34,6 +34,7 @@ export default function CreatePage() {
   const tolgee = useTolgee(['language'])
   const toast = useToast()
   const { user } = useCurrentUser()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const eventId = searchParams.get('eventId')
   // Wall-clock start of a fresh wizard visit, for the event_published duration metric.
@@ -41,7 +42,6 @@ export default function CreatePage() {
 
   const [draft, setDraft] = useState<Draft>(emptyDraft)
   const [errors, setErrors] = useState<Partial<Record<keyof EventDetailsData, string>>>({})
-  const [createdEventId, setCreatedEventId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(!!eventId)
   // Date the event had when loaded for editing. Keeping it unchanged is
   // allowed even if it is in the past; picking a new past date is not.
@@ -100,7 +100,6 @@ export default function CreatePage() {
             ],
           })
           setInitialDate(eventDate)
-          setCreatedEventId(event.slug)
         }
       } catch (err) {
         toast.error(t('common.errors.generic'))
@@ -190,8 +189,6 @@ export default function CreatePage() {
         ? await updateEvent(eventId, eventPayload, session.accessToken)
         : await createEvent(eventPayload, session.accessToken)
 
-      // The share URL uses the public slug, never the internal id.
-      setCreatedEventId(saved?.slug ?? eventId ?? null)
       if (eventId) {
         trackEvent('event_edited')
       } else {
@@ -203,11 +200,15 @@ export default function CreatePage() {
           language: tolgee.getLanguage() ?? 'sr',
         })
       }
-      toast.success(
-        eventId
-          ? t('host.create.step3.successTitle', 'Event updated!')
-          : t('host.create.step3.successTitle', 'Event created!')
-      )
+      // The share URL uses the public slug, never the internal id. Leaving
+      // the wizard here (rather than staying on step 3) is what shows the
+      // success modal on the dashboard instead of behind it.
+      const slug = saved?.slug ?? eventId ?? ''
+      const params = new URLSearchParams()
+      if (slug) params.set('created', slug)
+      if (eventId) params.set('edited', '1')
+      const query = params.toString()
+      router.push(query ? `/dashboard?${query}` : '/dashboard')
     } catch (err) {
       const message =
         err instanceof EventApiError
@@ -258,7 +259,6 @@ export default function CreatePage() {
           <ReviewStep
             details={draft.details}
             gifts={draft.gifts}
-            id={createdEventId ?? ''}
             isEditing={!!eventId}
             onEdit={setStep}
             onBack={goBack}
