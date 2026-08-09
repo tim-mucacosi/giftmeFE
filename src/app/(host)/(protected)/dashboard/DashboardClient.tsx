@@ -1,15 +1,21 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslate } from '@tolgee/react'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
 import { useToast } from '@/components/shared/Toast'
 import { Modal } from '@/components/shared/Modal'
 import { Button } from '@/components/shared/Button'
+import { Input } from '@/components/shared/Input'
 import { getMyEvents, deleteEvent, EventApiError } from '@/lib/api/events'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
+import { getEventUrl, shareOrCopy, copyToClipboard } from '@/lib/utils/appUrl'
+import { trackEvent } from '@/lib/analytics/track'
+import { isPastDate } from '@/lib/validations/eventSchema'
+import { formatDateShort } from '@/lib/utils/formatDate'
 import { cn } from '@/lib/utils/cn'
 import type { Event, EventType } from '@/types/event'
 
@@ -66,6 +72,8 @@ export function DashboardClient() {
   const { t } = useTranslate()
   const { user, ready } = useCurrentUser()
   const toast = useToast()
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [typeFilter, setTypeFilter] = useState<EventType | 'all'>('all')
@@ -77,6 +85,47 @@ export function DashboardClient() {
   const [deleteTarget, setDeleteTarget] = useState<Event | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  // Set right after publishing a new/updated event (via /dashboard?created=<slug>)
+  // so the "share your event" modal shows on top of the dashboard instead of
+  // leaving the user stranded on the wizard's last step.
+  const [successSlug, setSuccessSlug] = useState<string | null>(null)
+  const [successIsEdit, setSuccessIsEdit] = useState(false)
+
+  useEffect(() => {
+    const created = searchParams.get('created')
+    if (created) {
+      setSuccessSlug(created)
+      setSuccessIsEdit(searchParams.get('edited') === '1')
+    }
+  }, [searchParams])
+
+  const closeSuccess = useCallback(() => {
+    setSuccessSlug(null)
+    router.replace('/dashboard')
+  }, [router])
+
+  const successUrl = successSlug ? getEventUrl(successSlug) : ''
+  const successEvent = events.find((e) => e.slug === successSlug)
+
+  const copySuccessLink = async () => {
+    const ok = await copyToClipboard(successUrl)
+    if (ok) {
+      trackEvent('event_link_copied', { source: 'host_review' })
+      toast.success(t('common.buttons.copied'))
+    } else {
+      toast.error(t('common.errors.generic'))
+    }
+  }
+
+  const shareSuccessLink = async () => {
+    const result = await shareOrCopy(successUrl, successEvent?.name ?? t('common.appName'))
+    if (result === 'shared' || result === 'copied') {
+      trackEvent('event_link_shared', { source: 'host_review' })
+    }
+    if (result === 'copied') toast.success(t('common.buttons.copied'))
+    if (result === 'failed') toast.error(t('common.errors.generic'))
+  }
+
   useEffect(() => {
     if (typeof window !== 'undefined') setOrigin(window.location.origin)
   }, [])
@@ -87,7 +136,10 @@ export function DashboardClient() {
     setLoading(true)
     setErrorMessage(null)
     return getMyEvents(token)
-      .then(setEvents)
+      .then((data) => {
+        setEvents(data)
+        trackEvent('dashboard_view')
+      })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : t('common.errors.generic')
         setErrorMessage(message)
@@ -131,8 +183,7 @@ export function DashboardClient() {
 
   const filtered = useMemo(() => {
     return events.filter((event) => {
-      const eventDate = new Date(event.date)
-      const isActive = eventDate >= TODAY
+      const isActive = !isPastDate(event.date, TODAY)
 
       if (statusFilter === 'active' && !isActive) return false
       if (statusFilter === 'past' && isActive) return false
@@ -274,6 +325,51 @@ export function DashboardClient() {
         </ul>
       )}
 
+      {/* Just-published/updated success — copy or share the event link */}
+      <Modal
+        open={!!successSlug}
+        onClose={closeSuccess}
+        title={
+          successIsEdit
+            ? t('host.create.step3.updateTitle')
+            : t('host.create.step3.successTitle')
+        }
+      >
+        <div className="flex flex-col gap-5 py-2">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="text-5xl" aria-hidden="true">
+              🎉
+            </div>
+            <p className="text-sm text-dark-light">{t('host.create.step3.successDesc')}</p>
+          </div>
+
+          <div className="rounded-xl bg-bg p-3">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-dark-light">
+              {t('host.create.step3.eventLink')}
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                value={successUrl}
+                readOnly
+                onFocus={(e) => e.currentTarget.select()}
+                containerClassName="flex-1"
+              />
+              <Button variant="dark" onClick={copySuccessLink} type="button">
+                📋 {t('common.buttons.copy')}
+              </Button>
+            </div>
+          </div>
+
+          <Button variant="coral" onClick={shareSuccessLink} type="button" size="lg" fullWidth>
+            📤 {t('host.event.share')}
+          </Button>
+
+          <p className="rounded-xl bg-bg p-3 text-center text-xs text-dark-light">
+            {t('host.create.step3.referral')}
+          </p>
+        </div>
+      </Modal>
+
       {/* Delete confirmation */}
       <Modal
         open={!!deleteTarget}
@@ -330,7 +426,7 @@ function EventCard({
   const { t } = useTranslate()
   const toast = useToast()
   const eventDate = new Date(event.date)
-  const isPast = eventDate < TODAY
+  const isPast = isPastDate(event.date, TODAY)
   const { key: dateKey, params: dateParams } = timeUntilDescriptor(eventDate, TODAY)
   const dateLabel = dateParams ? t(dateKey, dateParams) : t(dateKey)
 
@@ -338,37 +434,45 @@ function EventCard({
   const reserved = event.stats?.reserved ?? 0
   const desired = event.stats?.desired ?? 0
 
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    if (menuOpen) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [menuOpen])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    if (menuOpen) document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [menuOpen])
+
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(eventUrl)
+    if (await copyToClipboard(eventUrl)) {
+      trackEvent('event_link_copied', { source: 'host_dashboard' })
       toast.success(t('common.buttons.copied'))
-    } catch {
+    } else {
       toast.error(t('common.errors.generic'))
     }
   }
 
   const shareLink = async () => {
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
-      try {
-        await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
-          title: event.name,
-          url: eventUrl,
-        })
-        return
-      } catch {
-        // User dismissed, fall back to copy
-      }
+    const result = await shareOrCopy(eventUrl, event.name)
+    if (result === 'shared' || result === 'copied') {
+      trackEvent('event_link_shared', { source: 'host_dashboard' })
     }
-    await copyLink()
+    if (result === 'copied') toast.success(t('common.buttons.copied'))
+    else if (result === 'failed') toast.error(t('common.errors.generic'))
   }
 
   return (
-    <li className="group relative flex items-start gap-3 overflow-hidden rounded-2xl border border-gray-light bg-white p-4 pt-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-coral/40 hover:shadow-card-hover focus-within:ring-2 focus-within:ring-coral/40">
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-coral via-coral-light to-gold"
-      />
-
+    <li className="group relative rounded-2xl border border-gray-light bg-white p-4 shadow-card ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:border-coral/40 hover:shadow-card-hover focus-within:ring-2 focus-within:ring-coral/40">
       {/* Stretched link opens the host overview (stats, reservations).
           Sits behind interactive children (z-[1]) so buttons and links still work. */}
       <Link
@@ -381,109 +485,136 @@ function EventCard({
         </span>
       </Link>
 
-      {/* Type icon */}
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-coral/15 to-gold/15 text-2xl">
-        {getEventEmoji(event.type, event.gender)}
-      </div>
-
-      {/* Info + actions */}
-      <div className="min-w-0 flex-1">
-        {/* Name + status badge */}
-        <div className="flex items-center gap-2">
-          <p className="truncate font-semibold text-dark transition-colors group-hover:text-coral">
-            {event.name}
-          </p>
-          <span className={cn(
-            'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold',
-            isPast ? 'bg-gray-light text-dark-light' : 'bg-coral/10 text-coral',
-          )}>
-            {isPast ? t('host.dashboard.filters.past') : t('host.dashboard.filters.active')}
-          </span>
+      {/* Header: icon, name/status/meta, overflow menu */}
+      <div className="flex items-start gap-3">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-coral/15 to-gold/15 text-2xl">
+          {getEventEmoji(event.type, event.gender)}
         </div>
 
-        {/* Meta row wraps naturally on narrow screens */}
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-dark-light">
-          <span>{new Date(event.date).toLocaleDateString()}</span>
-          <span aria-hidden="true">·</span>
-          <span className={isPast ? 'text-dark-light' : 'text-coral font-medium'}>
-            {dateLabel}
-          </span>
-          <span aria-hidden="true">·</span>
-          <span className="capitalize">{t(`eventTypes.${event.type}`)}</span>
-        </div>
-
-        {/* Reservation progress */}
-        {desired > 0 ? (
-          <div className="mt-2 flex items-center gap-2">
-            <div
-              className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-light/60"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={desired}
-              aria-valuenow={reserved}
-              aria-label={t('host.event.progress.reserved')}
-            >
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-coral to-gold transition-all"
-                style={{ width: `${Math.min(100, (reserved / desired) * 100)}%` }}
-              />
-            </div>
-            <span className="shrink-0 text-xs font-semibold text-dark-light">
-              🎁 {reserved}/{desired}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="truncate font-semibold text-dark transition-colors group-hover:text-coral">
+              {event.name}
+            </p>
+            <span className={cn(
+              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold',
+              isPast ? 'bg-gray-light text-dark-light' : 'bg-coral/10 text-coral',
+            )}>
+              {isPast ? t('host.dashboard.filters.past') : t('host.dashboard.filters.active')}
             </span>
           </div>
-        ) : null}
 
-        {/* Event link */}
-        <div className="mt-2.5 flex flex-col gap-2">
-          <span
-            className="block w-full truncate rounded-md bg-bg px-2.5 py-1.5 text-xs text-dark-light"
-            title={eventUrl}
+          {/* Meta row wraps naturally on narrow screens */}
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-dark-light">
+            <span>{formatDateShort(event.date)}</span>
+            <span aria-hidden="true">·</span>
+            <span className={isPast ? 'text-dark-light' : 'text-coral font-medium'}>
+              {dateLabel}
+            </span>
+            <span aria-hidden="true">·</span>
+            <span className="capitalize">{t(`eventTypes.${event.type}`)}</span>
+          </div>
+        </div>
+
+        <div ref={menuRef} className="relative z-[1] shrink-0">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((s) => !s)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-label={t('common.buttons.more')}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-dark-light transition-colors hover:bg-gray-light/60"
           >
-            {eventUrl}
-          </span>
-          <div className="flex gap-2">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="12" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="19" cy="12" r="2" />
+            </svg>
+          </button>
+          {menuOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 top-full z-10 mt-1 w-40 overflow-hidden rounded-xl border border-gray-light bg-white py-1 shadow-card"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false)
+                  onDelete()
+                }}
+                className="flex w-full items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-dark transition-colors hover:bg-red-soft/15"
+                aria-label={`${t('common.buttons.delete')} - ${event.name}`}
+              >
+                🗑 {t('common.buttons.delete')}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Reservation progress — label above the bar reads clearer than
+          squeezed next to it, especially at narrow widths. */}
+      {desired > 0 ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-xs font-semibold text-dark-light">
+            🎁 {t('host.event.progress.reserved')}: {reserved} / {desired}
+          </p>
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full bg-gray-light/60"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={desired}
+            aria-valuenow={reserved}
+            aria-label={t('host.event.progress.reserved')}
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-coral to-gold transition-all"
+              style={{ width: `${Math.min(100, (reserved / desired) * 100)}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {/* Actions — hidden once the event is past: guests can no longer open
+          it, and the host can't view/copy/share/manage it anymore either
+          (see GuestEventClient's and EventDetailClient's own past-date
+          gates). Delete stays reachable via the overflow menu regardless. */}
+      {!isPast ? (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-gray-light pt-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+            <Link
+              href={`/event/${event.slug}`}
+              className="relative z-[1] inline-flex items-center gap-1.5 text-xs font-semibold text-dark-light transition-colors hover:text-dark"
+            >
+              👁️ {t('host.dashboard.actions.view')}
+            </Link>
             <button
               type="button"
               onClick={copyLink}
-              className="relative z-[1] block flex-1 rounded-full bg-coral/10 px-3 py-1.5 text-xs font-semibold text-coral transition-colors hover:bg-coral/20"
+              className="relative z-[1] inline-flex items-center gap-1.5 text-xs font-semibold text-dark-light transition-colors hover:text-dark"
             >
               📋 {t('host.dashboard.actions.copyLink')}
             </button>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
               onClick={shareLink}
-              className="relative z-[1] block flex-1 rounded-full bg-coral px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-coral-dark"
+              className="relative z-[1] inline-flex items-center gap-1 rounded-full border border-coral/40 px-3 py-1.5 text-xs font-semibold text-coral transition-colors hover:bg-coral/10"
             >
               📤 {t('host.event.share')}
             </button>
+            <Link
+              href={`/create?eventId=${event.id}`}
+              className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-coral px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:translate-x-0.5"
+            >
+              ✏️ {t('host.dashboard.actions.manage')} →
+            </Link>
           </div>
         </div>
-
-        {/* Secondary actions */}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Link
-            href={`/event/${event.slug}`}
-            className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-gray-light/60 px-3 py-1 text-xs font-semibold text-dark-light transition-colors hover:bg-gray-light hover:text-dark"
-          >
-            👁️ {t('host.dashboard.actions.view')}
-          </Link>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-red-soft/20 px-3 py-1 text-xs font-semibold text-dark transition-colors hover:bg-red-soft/40"
-            aria-label={`${t('common.buttons.delete')} - ${event.name}`}
-          >
-            🗑 {t('common.buttons.delete')}
-          </button>
-          <Link
-            href={`/create?eventId=${event.id}`}
-            className="relative z-[1] ml-auto inline-flex items-center gap-1 rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white shadow-sm transition-transform hover:translate-x-0.5"
-          >
-            ✏️ {t('host.dashboard.actions.manage')} →
-          </Link>
-        </div>
-      </div>
+      ) : null}
     </li>
   )
 }

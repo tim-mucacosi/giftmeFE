@@ -11,7 +11,8 @@
       "copied": "Kopiert!",
       "publish": "Event erstellen",
       "createFirst": "Erstes Event erstellen",
-      "retry": "Erneut versuchen"
+      "retry": "Erneut versuchen",
+      "more": "Mehr"
     },
     "errors": {
       "required": "Dieses Feld ist erforderlich",
@@ -25,6 +26,11 @@
       "sr": "Srpski",
       "en": "English",
       "de": "Deutsch"
+    },
+    "cookieConsent": {
+      "message": "Wir verwenden Google Analytics, um zu sehen, wie die App genutzt wird. Sie sehen dies, weil Sie aus der EU/dem EWR zugreifen, eine Ablehnung hat keinen Einfluss auf die Funktion der App.",
+      "accept": "Akzeptieren",
+      "decline": "Ablehnen"
     }
   },
   "nav": {
@@ -32,11 +38,12 @@
     "create": "Neues Event",
     "dashboard": "Meine Events",
     "login": "Anmelden",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "deactivateAccount": "Konto deaktivieren"
   },
   "landing": {
     "meta": {
-      "title": "SchenkMir — Feiern ohne unerwünschte Geschenke",
+      "title": "SchenkMir — Feiern mit Geschenken, die du wirklich brauchst",
       "description": "Erstelle eine Wunschliste, teile sie mit Gästen, alle sind glücklich."
     },
     "beta": {
@@ -45,7 +52,7 @@
       "dismiss": "Schließen"
     },
     "hero": {
-      "headline": "Feiern ohne unerwünschte Geschenke",
+      "headline": "Feiern mit Geschenken, die du wirklich brauchst",
       "subheadline": "Erstelle eine Wunschliste, teile sie mit deinen Gästen, alle gewinnen.",
       "cta": "Event erstellen — kostenlos",
       "note": "Keine Anmeldung für Gäste. Keine App-Installation.",
@@ -164,7 +171,6 @@
       "submit": "Link senden",
       "successTitle": "Prüfe deinen Posteingang",
       "successDesc": "Falls es ein Konto mit dieser E-Mail gibt, haben wir einen Link zum Zurücksetzen gesendet an:",
-      "comingSoonNotice": "Der E-Mail-Versand wird gerade noch eingerichtet, daher kann es etwas dauern, bis der Link ankommt. Danke für deine Geduld!",
       "backToLogin": "Zurück zur Anmeldung",
       "tryAnotherEmail": "Andere E-Mail versuchen"
     },
@@ -182,6 +188,13 @@
       "oauthTitle": "Kein Passwort für dieses Konto",
       "oauthDesc": "Du hast dich mit einem sozialen Konto angemeldet. Verwalte dein Passwort über diesen Anbieter — hier gibt es nichts zu ändern.",
       "oauthOnly": "Dieses Konto nutzt Social-Login. Es gibt kein Passwort zum Ändern."
+    },
+    "deactivateAccount": {
+      "title": "Konto deaktivieren?",
+      "confirm": "Möchtest du dein Konto wirklich deaktivieren?",
+      "warning": "Du wirst sofort abgemeldet und kannst dich danach nicht mehr anmelden. Dies kannst du nicht selbst rückgängig machen.",
+      "submit": "Deaktivieren",
+      "successToast": "Dein Konto wurde deaktiviert"
     },
     "resetPassword": {
       "title": "Passwort zurücksetzen",
@@ -263,9 +276,12 @@
         "messagePlaceholder": "Liebe Gäste, das sind die Geschenke, die uns viel bedeuten würden...",
         "imageLabel": "Hintergrundbild (optional)",
         "imageHint": "Bild hierhin ziehen oder klicken",
-        "imageErrorType": "Bitte wähle ein JPG-, PNG-, WebP- oder GIF-Bild.",
+        "imageErrorType": "Bitte wähle ein JPG-, PNG- oder WebP-Bild.",
         "imageErrorSize": "Bild ist zu groß (max. 10 MB).",
         "imageRemove": "Bild entfernen",
+        "cropTitle": "Titelbild zuschneiden",
+        "cropZoomLabel": "Zoom",
+        "cropApply": "Zuschnitt übernehmen",
         "dateErrorPast": "Das Datum darf nicht in der Vergangenheit liegen",
         "presetsLabel": "Vorgeschlagene Titelbilder",
         "presetsOr": "oder eigenes Bild hochladen",
@@ -318,7 +334,8 @@
         "successDesc": "Teile den Link mit deinen Gästen — fertig.",
         "updateTitle": "Event aktualisiert!",
         "referral": "Kennst du jemanden, dem das helfen würde? Teile SchenkMir.",
-        "update": "Event aktualisieren"
+        "update": "Event aktualisieren",
+        "imageUploadFailed": "Dein Foto konnte nicht hochgeladen werden. Du kannst es später über Bearbeiten erneut versuchen."
       }
     },
     "dashboard": {
@@ -432,6 +449,9 @@
       "notFound": {
         "title": "Ereignis nicht gefunden",
         "desc": "Wir konnten das Event nicht finden. Der Link ist möglicherweise falsch oder das Event wurde entfernt."
+      },
+      "ended": {
+        "title": "Dieses Event ist beendet"
       },
       "share": "Teilen",
       "floating": {

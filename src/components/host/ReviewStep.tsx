@@ -3,50 +3,45 @@
 import { useState } from 'react'
 import { useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
-import { Input } from '@/components/shared/Input'
-import { Modal } from '@/components/shared/Modal'
-import { useToast } from '@/components/shared/Toast'
 import { formatDate } from '@/lib/utils/formatDate'
+import { cn } from '@/lib/utils/cn'
 import type { EventDetailsData } from './EventDetailsStep'
-import type { Gift } from '@/types/gift'
+import type { Gift, GiftCategory } from '@/types/gift'
+
+const CATEGORY_PILL_STYLE: Record<GiftCategory, string> = {
+  want: 'border-success/70 bg-success/30 text-dark',
+  nice: 'border-gold/70 bg-gold/30 text-dark',
+  avoid: 'border-red-soft/80 bg-red-soft/30 text-dark',
+}
+
+const CATEGORY_ICON: Record<GiftCategory, string> = {
+  want: '❤️',
+  nice: '💛',
+  avoid: '⛔',
+}
 
 interface Props {
   details: EventDetailsData
   gifts: Gift[]
-  id: string
   isEditing?: boolean
   onEdit: (step: number) => void
   onBack: () => void
   onPublish: () => Promise<void> | void
 }
 
-export function ReviewStep({ details, gifts, id, isEditing, onEdit, onBack, onPublish }: Props) {
+export function ReviewStep({ details, gifts, isEditing, onEdit, onBack, onPublish }: Props) {
   const { t } = useTranslate()
-  const toast = useToast()
   const [publishing, setPublishing] = useState(false)
-  const [done, setDone] = useState(false)
 
   const publish = async () => {
     setPublishing(true)
     try {
+      // On success the parent navigates away (to the dashboard, with a
+      // success modal there); on failure it surfaces a toast and we just
+      // stop spinning so the user can retry.
       await onPublish()
-      setDone(true)
     } catch {
-      // Parent surfaces the error via toast; keep the modal closed.
-    } finally {
       setPublishing(false)
-    }
-  }
-
-  const url =
-    typeof window !== 'undefined' ? `${window.location.origin}/event/${id}` : `/event/${id}`
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.success(t('common.buttons.copied'))
-    } catch {
-      toast.error(t('common.errors.generic'))
     }
   }
 
@@ -114,10 +109,18 @@ export function ReviewStep({ details, gifts, id, isEditing, onEdit, onBack, onPu
             {t('common.buttons.edit')}
           </button>
         </header>
-        <div className="text-sm text-dark-light">
-          ❤️ {gifts.filter((g) => g.category === 'want').length} · 💛{' '}
-          {gifts.filter((g) => g.category === 'nice').length} · ⛔{' '}
-          {gifts.filter((g) => g.category === 'avoid').length}
+        <div className="flex flex-wrap gap-2">
+          {gifts.map((g) => (
+            <span
+              key={g.id}
+              className={cn(
+                'rounded-full border-2 px-3 py-1 text-sm font-semibold',
+                CATEGORY_PILL_STYLE[g.category],
+              )}
+            >
+              {CATEGORY_ICON[g.category]} {g.name}
+            </span>
+          ))}
         </div>
       </section>
 
@@ -129,51 +132,6 @@ export function ReviewStep({ details, gifts, id, isEditing, onEdit, onBack, onPu
           {isEditing ? t('host.create.step3.update') : t('common.buttons.publish')}
         </Button>
       </div>
-
-      <Modal
-        open={done}
-        onClose={() => setDone(false)}
-        title={isEditing ? t('host.create.step3.updateTitle') : t('host.create.step3.successTitle')}
-        hideClose
-      >
-        <div className="flex flex-col gap-5 py-2">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <div className="text-5xl" aria-hidden="true">
-              🎉
-            </div>
-            <p className="text-sm text-dark-light">
-              {t('host.create.step3.successDesc')}
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-bg p-3">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-dark-light">
-              {t('host.create.step3.eventLink')}
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                value={url}
-                readOnly
-                onFocus={(e) => e.currentTarget.select()}
-                containerClassName="flex-1"
-              />
-              <Button variant="dark" onClick={copyLink} type="button">
-                📋 {t('common.buttons.copy')}
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-            <Button href="/dashboard" fullWidth className="sm:w-auto">
-              {t('host.dashboard.title')}
-            </Button>
-          </div>
-
-          <p className="rounded-xl bg-bg p-3 text-center text-xs text-dark-light">
-            {t('host.create.step3.referral')}
-          </p>
-        </div>
-      </Modal>
     </div>
   )
 }

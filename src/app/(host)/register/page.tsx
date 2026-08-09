@@ -72,6 +72,10 @@ export default function RegisterPage() {
           setError('email', { type: 'server', message: 'auth.errors.emailInUse' })
           return
         }
+        if (err.code === 'TERMS_NOT_ACCEPTED') {
+          setError('acceptedTerms', { type: 'server', message: 'auth.errors.termsRequired' })
+          return
+        }
         if (err.code === 'NETWORK') {
           setFormError(t('auth.errors.network'))
           return
@@ -158,7 +162,7 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-          <GoogleAuthButton next={next} onError={(msg) => setFormError(msg)} />
+          <GoogleAuthButton mode="signup" next={next} onError={(msg) => setFormError(msg)} />
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-light" />

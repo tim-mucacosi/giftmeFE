@@ -7,15 +7,18 @@ import { cn } from '@/lib/utils/cn'
 import { loginWithGoogle } from '@/lib/api/auth'
 import { saveSession } from '@/lib/auth/session'
 import { rememberReturnTo, safeReturnTo } from '@/lib/auth/returnTo'
+import { trackEvent } from '@/lib/analytics/track'
 
 type Props = {
   /** Where to land after a successful sign-in. */
   next?: string
   onError?: (message: string) => void
   className?: string
+  /** Which page this button lives on, for analytics (the OAuth flow itself does not say). */
+  mode: 'login' | 'signup'
 }
 
-export function GoogleAuthButton({ next, onError, className }: Props) {
+export function GoogleAuthButton({ next, onError, className, mode }: Props) {
   const { t } = useTranslate()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -30,6 +33,8 @@ export function GoogleAuthButton({ next, onError, className }: Props) {
       const response = await loginWithGoogle()
       if (response) {
         saveSession(response)
+        // Signup has no separate event; only a login on the login page counts.
+        if (mode === 'login') trackEvent('login', { method: 'google' })
         router.push(target)
         router.refresh()
       }

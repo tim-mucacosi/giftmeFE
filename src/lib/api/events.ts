@@ -325,7 +325,11 @@ export async function getEventById(idOrSlug: string, token?: string): Promise<Ev
   const response = await apiFetch(`/events/public/${encoded}`, {
     headers: { Accept: 'application/json' },
   })
-  if (response.status === 404) return null
+  // 400 = no such event, 404 = legacy/other "not found" — both render the
+  // same not-found UI. 410 (expired) is NOT mapped to null here: it must
+  // stay distinguishable from "not found" so callers can show the
+  // dedicated expired-event UI instead (see EventApiError below).
+  if (response.status === 400 || response.status === 404) return null
   const data = await readJson(response)
   if (!response.ok) throwApiError(response, data)
   const dto = unwrapDto(data)
@@ -432,6 +436,28 @@ export async function updateEvent(
 ): Promise<EventDetail | null> {
   if (USE_MOCKS) return mockDetail(id)
   return sendEventMutation(`/events/${encodeURIComponent(id)}`, 'PUT', buildEventPayload(input), token)
+}
+
+/**
+ * Upload a cover photo to the backend, which stores it in Cloudinary
+ * (resizing/re-encoding happens there) and hands back its delivery URL.
+ */
+export async function uploadEventImage(file: File, token: string): Promise<string> {
+  if (USE_MOCKS) return URL.createObjectURL(file)
+
+  const body = new FormData()
+  body.append('image', file)
+
+  const response = await apiFetch('/events/upload-image', {
+    method: 'POST',
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+    body,
+  })
+  const data = await readJson(response)
+  if (!response.ok) throwApiError(response, data)
+  const url = (data as { data?: { url?: string } })?.data?.url
+  if (!url) throw new EventApiError('Image upload failed', response.status)
+  return url
 }
 
 export async function deleteEvent(id: string, token: string): Promise<void> {

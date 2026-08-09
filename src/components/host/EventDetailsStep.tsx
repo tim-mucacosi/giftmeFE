@@ -1,10 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslate } from '@tolgee/react'
 import { Input } from '@/components/shared/Input'
+import { DatePicker } from '@/components/shared/DatePicker'
 import { Textarea } from '@/components/shared/Textarea'
 import { Button } from '@/components/shared/Button'
+import { ImageCropModal } from './ImageCropModal'
 import { ACCEPTED_IMAGE_TYPES, COVER_PRESETS, validateImageFile } from '@/lib/utils/imageUpload'
 import { todayIsoDate } from '@/lib/validations/eventSchema'
 import { cn } from '@/lib/utils/cn'
@@ -42,8 +44,19 @@ interface Props {
 export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, errors }: Props) {
   const { t } = useTranslate()
   const [imageError, setImageError] = useState<string | null>(null)
+  // Object URL of a just-picked file, pending crop confirmation.
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   // Picker floor; manual entry and restored state are re-checked on submit.
   const minDate = useMemo(() => todayIsoDate(), [])
+
+  const closeCrop = () => {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
+    // Allows re picking the same file (browsers dont fire onChange again
+    // for an unchanged selection unless the input is cleared first).
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -85,12 +98,11 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
         error={errors?.name}
       />
 
-      <Input
-        type="date"
+      <DatePicker
         label={t('host.create.step1.dateLabel')}
         min={minDate}
         value={value.date}
-        onChange={(e) => onChange({ ...value, date: e.target.value })}
+        onChange={(iso) => onChange({ ...value, date: iso })}
         error={errors?.date}
       />
 
@@ -166,6 +178,7 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
           )}
           <input
             id="bg-image"
+            ref={fileInputRef}
             type="file"
             // Limits the OS picker to the formats the backend accepts;
             // validateImageFile re-checks in case the dialog is bypassed.
@@ -185,9 +198,9 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
                 return
               }
               setImageError(null)
-              const url = URL.createObjectURL(file)
-              onChange({ ...value, backgroundImageUrl: url })
-              onImageFileChange?.(file)
+              // Cropping happens before the file is accepted; onChange/
+              // onImageFileChange only fire once the host confirms the crop.
+              setCropSrc(URL.createObjectURL(file))
             }}
           />
         </label>
@@ -216,6 +229,18 @@ export function EventDetailsStep({ value, onChange, onImageFileChange, onNext, e
           {t('common.buttons.next')} →
         </Button>
       </div>
+
+      {cropSrc ? (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          onCancel={closeCrop}
+          onApply={(file, previewUrl) => {
+            closeCrop()
+            onChange({ ...value, backgroundImageUrl: previewUrl })
+            onImageFileChange?.(file)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

@@ -14,7 +14,11 @@ import {
 } from '@/lib/api/events'
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
+import { FALLBACK_COVER_IMAGE_URL } from '@/lib/utils/imageUpload'
 import { copyToClipboard, getEventUrl, shareOrCopy } from '@/lib/utils/appUrl'
+import { isPastDate } from '@/lib/validations/eventSchema'
+import { formatDateShort } from '@/lib/utils/formatDate'
+import { trackEvent } from '@/lib/analytics/track'
 import { cn } from '@/lib/utils/cn'
 
 interface Props {
@@ -49,6 +53,7 @@ export function EventDetailClient({ slug }: Props) {
       .then((detail) => {
         if (cancelled) return
         setEvent(detail)
+        trackEvent('event_overview_view')
       })
       .catch((err: unknown) => {
         if (cancelled) return
@@ -80,6 +85,7 @@ export function EventDetailClient({ slug }: Props) {
   // The host shares their own event, so these keep the event-specific URL.
   const copyLink = async () => {
     if (await copyToClipboard(eventUrl)) {
+      trackEvent('event_link_copied', { source: 'host_overview' })
       toast.success(t('common.buttons.copied'))
     } else {
       toast.error(t('common.errors.generic'))
@@ -88,6 +94,9 @@ export function EventDetailClient({ slug }: Props) {
 
   const shareLink = async () => {
     const result = await shareOrCopy(eventUrl, event?.name ?? t('common.appName'))
+    if (result === 'shared' || result === 'copied') {
+      trackEvent('event_link_shared', { source: 'host_overview' })
+    }
     if (result === 'copied') toast.success(t('common.buttons.copied'))
     else if (result === 'failed') toast.error(t('common.errors.generic'))
   }
@@ -129,6 +138,10 @@ export function EventDetailClient({ slug }: Props) {
     )
   }
 
+  // A completed event is read-only: no editing, sharing, or copying the
+  // link — guests are blocked from it too (see GuestEventClient).
+  const isPast = isPastDate(event.date)
+
   return (
     <Shell>
       {showNotHostBanner ? (
@@ -148,15 +161,14 @@ export function EventDetailClient({ slug }: Props) {
       {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl border border-gray-light bg-white shadow-card">
         <div className="absolute inset-x-0 top-0 z-10 h-1.5 bg-gradient-to-r from-coral via-coral-light to-gold" />
-        {event.backgroundImageUrl ? (
-          // Cover chosen on step 1: an uploaded data URL or a bundled preset.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={event.backgroundImageUrl}
-            alt=""
-            className="h-40 w-full object-cover sm:h-52"
-          />
-        ) : null}
+        {/* Cover chosen on step 1: an uploaded photo or a bundled preset,
+            or the fallback illustration when the host never picked one. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={event.backgroundImageUrl || FALLBACK_COVER_IMAGE_URL}
+          alt=""
+          className="h-40 w-full object-cover sm:h-52"
+        />
         <div className="flex flex-col gap-5 p-6 sm:p-8">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-coral/15 to-gold/15 text-3xl">
@@ -170,10 +182,10 @@ export function EventDetailClient({ slug }: Props) {
                 {event.name}
               </h1>
               <p className="mt-1 text-sm text-dark-light">
-                {new Date(event.date).toLocaleDateString()} · {t(`eventTypes.${event.type}`)}
+                {formatDateShort(event.date)} · {t(`eventTypes.${event.type}`)}
               </p>
             </div>
-            {isHost ? (
+            {isHost && !isPast ? (
               <Link
                 href={`/create?eventId=${event.id}`}
                 className="shrink-0 rounded-full border-2 border-gray-light bg-white px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:border-coral hover:text-coral"
@@ -183,30 +195,31 @@ export function EventDetailClient({ slug }: Props) {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="coral" size="md" onClick={shareLink} fullWidth className="sm:w-auto">
-              📤 {t('host.event.share')}
-            </Button>
-            <Button variant="outline" size="md" onClick={copyLink} fullWidth className="sm:w-auto">
-              📋 {t('host.dashboard.actions.copyLink')}
-            </Button>
-            <Button
-              variant="outline"
-              size="md"
-              href={`/event/${shareSlug}`}
-              fullWidth
-              className="sm:w-auto"
-            >
-              👁️ {t('host.dashboard.actions.view')}
-            </Button>
-          </div>
-
-          <div
-            className="rounded-xl bg-bg px-3 py-2 text-xs text-dark-light"
-            title={eventUrl}
-          >
-            <span className="block truncate">{eventUrl}</span>
-          </div>
+          {isPast ? (
+            <div className="w-fit rounded-full bg-gray-light/60 px-3 py-1.5 text-xs font-semibold text-dark-light">
+              🏁 {t('host.dashboard.filters.past')}
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button variant="coral" size="md" onClick={shareLink} fullWidth className="sm:w-auto">
+                  📤 {t('host.event.share')}
+                </Button>
+                <Button variant="outline" size="md" onClick={copyLink} fullWidth className="sm:w-auto">
+                  📋 {t('host.dashboard.actions.copyLink')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="md"
+                  href={`/event/${shareSlug}`}
+                  fullWidth
+                  className="sm:w-auto"
+                >
+                  👁️ {t('host.dashboard.actions.view')}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -379,7 +392,7 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
                   → {r.giftName}
                 </span>
                 <span className="shrink-0 text-xs text-gray">
-                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
+                  {r.createdAt ? formatDateShort(r.createdAt) : ''}
                 </span>
                 {r.message ? (
                   <span className="w-full text-xs italic text-dark-light">“{r.message}”</span>

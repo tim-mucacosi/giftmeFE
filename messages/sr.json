@@ -11,7 +11,8 @@
       "copied": "Kopirano!",
       "publish": "Kreiraj event",
       "createFirst": "Napravi prvi event",
-      "retry": "Pokušaj ponovo"
+      "retry": "Pokušaj ponovo",
+      "more": "Više"
     },
     "errors": {
       "required": "Ovo polje je obavezno",
@@ -25,6 +26,11 @@
       "sr": "Srpski",
       "en": "English",
       "de": "Deutsch"
+    },
+    "cookieConsent": {
+      "message": "Koristimo Google Analytics da vidimo kako se aplikacija koristi. Ovo vidite jer nas posećujete iz EU/EEA, odbijanje neće uticati na rad aplikacije.",
+      "accept": "Prihvati",
+      "decline": "Odbij"
     }
   },
   "nav": {
@@ -32,11 +38,12 @@
     "create": "Novi event",
     "dashboard": "Moji eventi",
     "login": "Prijavi se",
-    "logout": "Odjavi se"
+    "logout": "Odjavi se",
+    "deactivateAccount": "Deaktiviraj nalog"
   },
   "landing": {
     "meta": {
-      "title": "PokloniMi — Slavlje bez neželjenih poklona",
+      "title": "PokloniMi — Slavlje sa poklonima koji su ti stvarno potrebni",
       "description": "Napravi listu želja, podeli sa gostima, i svi su srećni. Bez registracije za goste."
     },
     "beta": {
@@ -45,7 +52,7 @@
       "dismiss": "Zatvori"
     },
     "hero": {
-      "headline": "Slavlje bez neželjenih poklona",
+      "headline": "Slavlje sa poklonima koji su ti stvarno potrebni",
       "subheadline": "Napravi listu želja, podeli sa gostima, i svi su srećni.",
       "cta": "Započni odmah — besplatno",
       "note": "Bez registracije za goste. Bez instalacije.",
@@ -164,7 +171,6 @@
       "submit": "Pošalji link",
       "successTitle": "Proverite poštu",
       "successDesc": "Ako nalog sa ovim email-om postoji, poslali smo link za resetovanje na:",
-      "comingSoonNotice": "Slanje email-ova se još uvek podešava, pa link može malo duže da stigne. Hvala na strpljenju!",
       "backToLogin": "Nazad na prijavu",
       "tryAnotherEmail": "Pokušaj sa drugim email-om"
     },
@@ -182,6 +188,13 @@
       "oauthTitle": "Ovaj nalog nema lozinku",
       "oauthDesc": "Prijavili ste se putem društvene mreže. Upravljajte lozinkom kroz tog provajdera — ovde nema šta da se menja.",
       "oauthOnly": "Ovaj nalog koristi prijavu putem društvene mreže. Nema lozinke za promenu."
+    },
+    "deactivateAccount": {
+      "title": "Deaktivirati nalog?",
+      "confirm": "Da li ste sigurni da želite da deaktivirate svoj nalog?",
+      "warning": "Bićete odmah odjavljeni i nećete moći ponovo da se prijavite. Ovo ne možete sami poništiti.",
+      "submit": "Deaktiviraj",
+      "successToast": "Vaš nalog je deaktiviran"
     },
     "resetPassword": {
       "title": "Resetuj svoju lozinku",
@@ -263,9 +276,12 @@
         "messagePlaceholder": "Dragi gosti, ovo su pokloni koji bi nam značili...",
         "imageLabel": "Pozadinska slika (opciono)",
         "imageHint": "Prevuci sliku ovde ili klikni za upload",
-        "imageErrorType": "Izaberite JPG, PNG, WebP ili GIF sliku.",
+        "imageErrorType": "Izaberite JPG, PNG ili WebP sliku.",
         "imageErrorSize": "Slika je prevelika (najviše 10 MB).",
         "imageRemove": "Ukloni sliku",
+        "cropTitle": "Uokviri naslovnu fotografiju",
+        "cropZoomLabel": "Zumiranje",
+        "cropApply": "Primeni isečak",
         "dateErrorPast": "Datum ne može biti u prošlosti",
         "presetsLabel": "Predložene pozadine",
         "presetsOr": "ili otpremi svoju sliku",
@@ -312,13 +328,14 @@
       "step3": {
         "title": "Pregled",
         "details": "Detalji eventa",
-        "giftsCount": "Poklona",
+        "giftsCount": "Pokloni",
         "eventLink": "Link eventa",
         "successTitle": "Event je kreiran!",
         "successDesc": "Podeli link sa gostima i gotovo.",
         "updateTitle": "Event je ažuriran!",
         "referral": "Poznaš nekoga kome bi ovo koristilo? Podeli PokloniMi.",
-        "update": "Ažuriraj event"
+        "update": "Ažuriraj event",
+        "imageUploadFailed": "Nismo uspeli da otpremimo fotografiju. Možete pokušati ponovo iz Izmeni."
       }
     },
     "dashboard": {
@@ -432,6 +449,9 @@
       "notFound": {
         "title": "Slavlje nije pronađeno",
         "desc": "Nismo mogli da pronađemo to slavlje. Link može biti pogrešan ili je slavlje obrisano."
+      },
+      "ended": {
+        "title": "Ovo slavlje je završeno"
       },
       "share": "Podeli",
       "floating": {

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { buildEventPayload, mapApiEventDetail, mapGift } from './events'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { buildEventPayload, EventApiError, getEventById, mapApiEventDetail, mapGift } from './events'
 
 describe('buildEventPayload', () => {
   const base = {
@@ -148,5 +148,50 @@ describe('mapApiEventDetail', () => {
   it('leaves reservations undefined on public payloads', () => {
     const { reservations, ...publicDto } = dto
     expect(mapApiEventDetail(publicDto).reservations).toBeUndefined()
+  })
+})
+
+describe('getEventById (public endpoint status handling)', () => {
+  function mockFetchOnce(status: number, body: unknown) {
+    const response = {
+      ok: status >= 200 && status < 300,
+      status,
+      text: async () => JSON.stringify(body),
+    } as Response
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response))
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('returns the mapped event on 200', async () => {
+    mockFetchOnce(200, {
+      success: true,
+      data: { publicId: 'pub123', name: 'Wedding', eventType: { name: 'wedding' } },
+    })
+    const detail = await getEventById('pub123')
+    expect(detail?.name).toBe('Wedding')
+  })
+
+  it('resolves null for a nonexistent event (400)', async () => {
+    mockFetchOnce(400, { success: false, message: 'Event not found' })
+    await expect(getEventById('does-not-exist')).resolves.toBeNull()
+  })
+
+  it('resolves null for a legacy 404', async () => {
+    mockFetchOnce(404, { success: false, message: 'Event not found' })
+    await expect(getEventById('legacy')).resolves.toBeNull()
+  })
+
+  it('throws an EventApiError with status 410 for an expired event, without treating it as not-found', async () => {
+    mockFetchOnce(410, {
+      success: false,
+      message: 'This event has expired',
+      expirationDate: '2026-01-01T00:00:00.000Z',
+    })
+    const error = await getEventById('expired-event').catch((e: unknown) => e)
+    expect(error).toBeInstanceOf(EventApiError)
+    expect((error as EventApiError).status).toBe(410)
   })
 })

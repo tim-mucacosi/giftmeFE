@@ -4,7 +4,7 @@ import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
-type Variant = 'coral' | 'gold' | 'outline' | 'ghost' | 'dark'
+type Variant = 'coral' | 'gold' | 'success' | 'outline' | 'ghost' | 'dark'
 type Size = 'sm' | 'md' | 'lg'
 
 const base =
@@ -17,6 +17,7 @@ const variants: Record<Variant, string> = {
   coral:
     'bg-coral text-white shadow-cta hover:bg-coral-dark hover:shadow-cta-hover',
   gold: 'bg-gold text-dark shadow-card hover:shadow-card-hover hover:bg-gold-light',
+  success: 'bg-success text-dark shadow-card hover:shadow-card-hover hover:brightness-95',
   outline:
     'bg-white text-dark border-2 border-gray-light hover:border-coral hover:text-coral',
   ghost: 'bg-transparent text-dark hover:bg-gray-light/60',

@@ -98,9 +98,10 @@
 
 .headline {
   margin: 20px 0 12px;
+  padding-bottom: 0.12em;
   font-weight: 800;
   letter-spacing: -0.8px;
-  line-height: 1.1;
+  line-height: 1.2;
   font-size: clamp(32px, 7vw, 64px);
   background: linear-gradient(135deg, #2d3436 0%, #ff6b6b 80%);
   -webkit-background-clip: text;

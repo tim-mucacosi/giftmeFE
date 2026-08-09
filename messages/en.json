@@ -11,7 +11,8 @@
       "copied": "Copied!",
       "publish": "Create event",
       "createFirst": "Create your first event",
-      "retry": "Retry"
+      "retry": "Retry",
+      "more": "More"
     },
     "errors": {
       "required": "This field is required",
@@ -25,6 +26,11 @@
       "sr": "Srpski",
       "en": "English",
       "de": "Deutsch"
+    },
+    "cookieConsent": {
+      "message": "We use Google Analytics to see how the app is used. You're seeing this because you're visiting from the EU/EEA, declining won't affect how the app works.",
+      "accept": "Accept",
+      "decline": "Decline"
     }
   },
   "nav": {
@@ -32,11 +38,12 @@
     "create": "New event",
     "dashboard": "My events",
     "login": "Log in",
-    "logout": "Log out"
+    "logout": "Log out",
+    "deactivateAccount": "Deactivate account"
   },
   "landing": {
     "meta": {
-      "title": "GiftMe — Celebrations without unwanted gifts",
+      "title": "GiftMe — Celebrations with gifts you actually need",
       "description": "Create a wishlist, share with guests, everyone wins. Guests don't need to register."
     },
     "beta": {
@@ -45,7 +52,7 @@
       "dismiss": "Dismiss"
     },
     "hero": {
-      "headline": "Celebrations without unwanted gifts",
+      "headline": "Celebrations with gifts you actually need",
       "subheadline": "Create a wishlist, share it with your guests, everyone wins.",
       "cta": "Create your event — free",
       "note": "No registration for guests. No app install.",
@@ -164,7 +171,6 @@
       "submit": "Send reset link",
       "successTitle": "Check your inbox",
       "successDesc": "If an account exists for this email, we've sent a reset link to:",
-      "comingSoonNotice": "Email delivery is still being set up, so the link may take a while to arrive. Thanks for your patience!",
       "backToLogin": "Back to sign in",
       "tryAnotherEmail": "Use a different email"
     },
@@ -182,6 +188,13 @@
       "oauthTitle": "No password on this account",
       "oauthDesc": "You signed in with a social account. Manage your password through that provider — there's nothing to change here.",
       "oauthOnly": "This account uses social sign-in. There is no password to change."
+    },
+    "deactivateAccount": {
+      "title": "Deactivate account?",
+      "confirm": "Are you sure you want to deactivate your account?",
+      "warning": "You'll be signed out immediately and won't be able to log back in. This cannot be undone by yourself.",
+      "submit": "Deactivate",
+      "successToast": "Your account has been deactivated"
     },
     "resetPassword": {
       "title": "Reset your password",
@@ -263,9 +276,12 @@
         "messagePlaceholder": "Dear guests, these are the gifts that would mean the most to us...",
         "imageLabel": "Background image (optional)",
         "imageHint": "Drop an image here or click to upload",
-        "imageErrorType": "Please choose a JPG, PNG, WebP or GIF image.",
+        "imageErrorType": "Please choose a JPG, PNG or WebP image.",
         "imageErrorSize": "Image is too large (max 10 MB).",
         "imageRemove": "Remove image",
+        "cropTitle": "Frame your cover photo",
+        "cropZoomLabel": "Zoom",
+        "cropApply": "Use this crop",
         "dateErrorPast": "The date cannot be in the past",
         "presetsLabel": "Suggested covers",
         "presetsOr": "or upload your own image",
@@ -318,7 +334,8 @@
         "successDesc": "Share the link with your guests and you're done.",
         "updateTitle": "Event updated!",
         "referral": "Know someone who'd enjoy this? Share GiftMe.",
-        "update": "Update event"
+        "update": "Update event",
+        "imageUploadFailed": "We couldn't upload your photo. You can try again from Edit."
       }
     },
     "dashboard": {
@@ -432,6 +449,9 @@
       "notFound": {
         "title": "Event not found",
         "desc": "We couldn't find that event. The link may be wrong or the event was removed."
+      },
+      "ended": {
+        "title": "This event has ended"
       },
       "share": "Share",
       "floating": {

@@ -106,7 +106,7 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
             key={key}
             className={cn(
               'rounded-2xl',
-              palette === 'want' && 'bg-gradient-to-br from-coral/10 to-coral/5 p-1',
+              palette === 'want' && 'bg-gradient-to-br from-success/15 to-success/5 p-1',
               palette === 'nice' && 'bg-gradient-to-br from-gold/15 to-gold/5 p-1',
               palette === 'avoid' && 'border-2 border-dashed border-red-soft bg-red-soft/5 p-1',
             )}
@@ -116,7 +116,7 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
               onClick={() => setOpenMap((m) => ({ ...m, [key]: !m[key] }))}
               className={cn(
                 'flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-colors',
-                palette === 'want' && 'bg-gradient-to-r from-coral to-coral-light text-white',
+                palette === 'want' && 'bg-gradient-to-r from-success to-success/80 text-dark',
                 palette === 'nice' && 'bg-gradient-to-r from-gold to-gold-light text-dark',
                 palette === 'avoid' && 'text-dark-light',
               )}
@@ -153,7 +153,12 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
                   items.map((g, idx) => (
                     <div
                       key={g.id}
-                      className="flex items-center gap-2 rounded-xl bg-white p-3 shadow-sm"
+                      className={cn(
+                        'flex items-center gap-2 rounded-xl border-2 p-3 shadow-sm transition-all hover:shadow-md',
+                        palette === 'want' && 'border-success/70 bg-success/30 hover:border-success hover:bg-success/40',
+                        palette === 'nice' && 'border-gold/70 bg-gold/30 hover:border-gold hover:bg-gold/40',
+                        palette === 'avoid' && 'border-red-soft/80 bg-red-soft/30 hover:border-red-soft hover:bg-red-soft/40',
+                      )}
                     >
                       <div className="flex shrink-0 flex-col gap-1">
                         <button
@@ -227,7 +232,7 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
                 <div className="flex justify-center pt-1 pb-1">
                   <Button
                     type="button"
-                    variant={palette === 'nice' ? 'gold' : 'coral'}
+                    variant={palette === 'nice' ? 'gold' : palette === 'want' ? 'success' : 'coral'}
                     size="sm"
                     onClick={() => setAddingInto(key)}
                     className="px-6"

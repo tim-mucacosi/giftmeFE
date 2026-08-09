@@ -10,8 +10,11 @@ import { loadSession } from '@/lib/auth/session'
 import { EventApiError, getEventById, reserveGift, type EventDetail, type DetailGift } from '@/lib/api/events'
 import { usePublishEventViewMode } from '@/lib/state/eventViewMode'
 import { getEventEmoji } from '@/lib/utils/eventEmoji'
+import { FALLBACK_COVER_IMAGE_URL } from '@/lib/utils/imageUpload'
 import { availableUnits, isGiftAvailable } from '@/lib/utils/giftAvailability'
 import { copyToClipboard, getAppBaseUrl, shareOrCopy } from '@/lib/utils/appUrl'
+import { isPastDate } from '@/lib/validations/eventSchema'
+import { trackEvent } from '@/lib/analytics/track'
 import { cn } from '@/lib/utils/cn'
 import styles from './GuestEvent.module.css'
 
@@ -21,6 +24,10 @@ interface PendingChoice {
   gift: DetailGift
   /** Idempotency token, stable across retries of this one submission. */
   requestToken: string
+}
+
+function sortAvailableFirst(gifts: DetailGift[]): DetailGift[] {
+  return [...gifts].sort((a, b) => Number(!isGiftAvailable(a)) - Number(!isGiftAvailable(b)))
 }
 
 function newRequestToken(): string {
@@ -66,7 +73,7 @@ export function GuestEventClient({ slug }: Props) {
   const [event, setEvent] = useState<EventDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [errorKind, setErrorKind] = useState<'private' | 'generic' | null>(null)
+  const [errorKind, setErrorKind] = useState<'private' | 'expired' | 'generic' | null>(null)
 
   const [reservations, setReservations] = useState<Reservations>({})
   const [pending, setPending] = useState<PendingChoice | null>(null)
@@ -88,6 +95,10 @@ export function GuestEventClient({ slug }: Props) {
         if (cancelled) return
         setEvent(detail)
         setReservations(readReservations(slug))
+        if (detail) {
+          const giftCount = detail.gifts.want.length + detail.gifts.nice.length + detail.gifts.avoid.length
+          trackEvent('view_event', { event_type: detail.type, gift_count: giftCount })
+        }
       })
       .catch((err: unknown) => {
         if (cancelled) return
@@ -95,6 +106,11 @@ export function GuestEventClient({ slug }: Props) {
           if (err.status === 403) {
             setErrorKind('private')
             setErrorMessage(t('host.guest.private.hint'))
+            return
+          }
+          if (err.status === 410) {
+            setErrorKind('expired')
+            setErrorMessage(t('host.guest.errors.expired'))
             return
           }
         }
@@ -154,6 +170,7 @@ export function GuestEventClient({ slug }: Props) {
       return
     }
     setSubmitting(true)
+    trackEvent('gift_reserve_start')
     try {
       const result = await reserveGift(slug, pending.gift.id, pending.requestToken)
       if (result.event) setEvent(result.event)
@@ -164,6 +181,7 @@ export function GuestEventClient({ slug }: Props) {
       setReservations(updated)
       writeReservations(slug, updated)
 
+      trackEvent('gift_reserved')
       setSuccess(pending.gift.name)
       setPending(null)
 
@@ -201,6 +219,7 @@ export function GuestEventClient({ slug }: Props) {
   // both actions share the app's base URL rather than this event's link.
   const copyLink = async () => {
     if (await copyToClipboard(getAppBaseUrl())) {
+      trackEvent('event_link_copied', { source: 'guest_page' })
       toast.success(t('common.buttons.copied'))
     } else {
       toast.error(t('common.errors.generic'))
@@ -210,6 +229,9 @@ export function GuestEventClient({ slug }: Props) {
   const shareLink = async () => {
     const result = await shareOrCopy(getAppBaseUrl(), t('common.appName'))
     // A cancelled native sheet is a normal outcome and stays silent.
+    if (result === 'shared' || result === 'copied') {
+      trackEvent('event_link_shared', { source: 'guest_page' })
+    }
     if (result === 'copied') toast.success(t('common.buttons.copied'))
     else if (result === 'failed') toast.error(t('common.errors.generic'))
   }
@@ -245,9 +267,24 @@ export function GuestEventClient({ slug }: Props) {
     }, 5000)
   }
 
+  // Shared by both the 410-from-fetch path and the isPastDate fallback below
+  // so the "ended" state only has one place its markup lives.
+  const renderExpiredCard = () => (
+    <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-gray-light py-16 text-center">
+        <span className="text-4xl">📅</span>
+        <p className="font-semibold text-dark">{t('host.guest.ended.title')}</p>
+        <p className="px-6 text-sm text-dark-light">{t('host.guest.errors.expired')}</p>
+      </div>
+    </div>
+  )
+
   if (loading) return <GuestSkeleton />
 
   if (errorMessage) {
+    if (errorKind === 'expired') {
+      return renderExpiredCard()
+    }
     if (errorKind === 'private') {
       return (
         <div className="mx-auto w-full max-w-md px-4 py-16 sm:px-6 lg:px-8">
@@ -301,6 +338,13 @@ export function GuestEventClient({ slug }: Props) {
     )
   }
 
+  // Defensive fallback: the backend now gates expiration itself (410, above),
+  // but this covers the timing edge where a 200 event happens to be
+  // stale by the time it renders (e.g. a day boundary right after fetch).
+  if (isPastDate(event.date)) {
+    return renderExpiredCard()
+  }
+
   const wantAvailableCount = availableUnits(event.gifts.want)
   const niceAvailableCount = availableUnits(event.gifts.nice)
   const totalReserved = Object.values(reservations).reduce((sum, count) => sum + count, 0)
@@ -318,11 +362,7 @@ export function GuestEventClient({ slug }: Props) {
           <div
             className={styles.heroBg}
             aria-hidden="true"
-            style={
-              event?.backgroundImageUrl
-                ? { backgroundImage: `url(${event.backgroundImageUrl})` }
-                : undefined
-            }
+            style={{ backgroundImage: `url(${event?.backgroundImageUrl || FALLBACK_COVER_IMAGE_URL})` }}
           />
           <div className={styles.heroOverlay} aria-hidden="true" />
           <div className={cn('relative z-[2]', styles.heroContent)}>
@@ -367,7 +407,7 @@ export function GuestEventClient({ slug }: Props) {
                 childCount={wantAvailableCount}
                 category="want"
               >
-                {event.gifts.want.map((gift, idx) => (
+                {sortAvailableFirst(event.gifts.want).map((gift, idx) => (
                   <GiftCard
                     key={gift.id || idx}
                     gift={gift}
@@ -375,7 +415,6 @@ export function GuestEventClient({ slug }: Props) {
                     pickedByMe={(reservations[gift.id] ?? 0) > 0}
                     reservedLabel={t('host.guest.giftCard.reserved')}
                     badge={t('host.guest.giftCard.topWish')}
-                    category="want"
                     onChoose={() => openConfirm(gift)}
                   />
                 ))}
@@ -395,7 +434,7 @@ export function GuestEventClient({ slug }: Props) {
                   childCount={niceAvailableCount}
                   category="nice"
                 >
-                  {event.gifts.nice.map((gift, idx) => (
+                  {sortAvailableFirst(event.gifts.nice).map((gift, idx) => (
                     <GiftCard
                       key={gift.id || idx}
                       gift={gift}
@@ -403,7 +442,6 @@ export function GuestEventClient({ slug }: Props) {
                       pickedByMe={(reservations[gift.id] ?? 0) > 0}
                       reservedLabel={t('host.guest.giftCard.reserved')}
                       badge={t('host.guest.giftCard.welcomeToo')}
-                      category="nice"
                       onChoose={() => openConfirm(gift)}
                     />
                   ))}
@@ -615,7 +653,7 @@ function SectionBlock({ icon, title, tagline, childCount, children, category }: 
     <section
       className={cn(
         'rounded-3xl p-4 shadow-card sm:p-5 border-2',
-        isWant && 'border-coral/40 bg-gradient-to-br from-coral/5 to-coral/2',
+        isWant && 'border-success/50 bg-gradient-to-br from-success/8 to-success/2',
         isNice && 'border-gold/50 bg-gradient-to-br from-gold/5 to-gold/2',
         !isWant && !isNice && 'border-gray-light',
         styles.frame,
@@ -624,7 +662,7 @@ function SectionBlock({ icon, title, tagline, childCount, children, category }: 
       <header
         className={cn(
           'mb-4 flex flex-wrap items-center gap-y-2 rounded-2xl px-4 py-3 -mx-4 -mt-4 sm:-mx-5 sm:-mt-5',
-          isWant && 'bg-gradient-to-r from-coral/15 to-coral/5',
+          isWant && 'bg-gradient-to-r from-success/20 to-success/5',
           isNice && 'bg-gradient-to-r from-gold/20 to-gold/5',
           !isWant && !isNice && 'bg-gray-light/20',
           styles.accent,
@@ -639,7 +677,7 @@ function SectionBlock({ icon, title, tagline, childCount, children, category }: 
             childCount === 0
               ? 'bg-gray-light/20 border-gray-light/50 text-gray'
               : isWant
-                ? 'bg-coral/10 border-coral/30 text-coral'
+                ? 'bg-success/15 border-success/40 text-dark'
                 : isNice
                   ? 'bg-gold/10 border-gold/40 text-gold-dark'
                   : 'bg-gray-light/30 border-gray-light text-dark',
@@ -667,13 +705,11 @@ interface GiftCardProps {
   pickedByMe?: boolean
   reservedLabel: string
   badge: string
-  category?: SectionCategory
   onChoose: () => void
 }
 
-function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, category, onChoose }: GiftCardProps) {
+function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, onChoose }: GiftCardProps) {
   const { t } = useTranslate()
-  const isNice = category === 'nice'
   const isEnvelope = gift.type === 'envelope'
   const isUnlimited = gift.unlimited
   const remaining = Math.max(0, gift.quantity - gift.reservedQuantity)
@@ -682,7 +718,7 @@ function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, category
     return (
       <div
         className={cn(
-          'flex min-h-[100px] flex-col justify-between rounded-2xl border-2 border-success/30 bg-success/10 p-4 text-dark sm:p-5',
+          'flex min-h-[100px] flex-col justify-between rounded-2xl border-2 border-red-soft/60 bg-red-soft/15 p-4 text-dark sm:p-5',
           styles.giftCard,
         )}
       >
@@ -705,9 +741,7 @@ function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, category
         'group relative flex min-h-[100px] flex-col justify-between rounded-2xl border-2 p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 sm:p-5',
         isEnvelope
           ? 'border-dark/20 bg-gradient-to-br from-gold/15 to-white hover:border-dark/50 hover:shadow-lg focus-visible:ring-dark'
-          : isNice
-            ? 'border-gold/40 bg-gradient-to-br from-gold/10 to-gold/5 hover:border-gold hover:shadow-lg focus-visible:ring-gold'
-            : 'border-coral/30 bg-gradient-to-br from-coral/10 to-gold/10 hover:border-coral hover:shadow-lg focus-visible:ring-coral',
+          : 'border-success/40 bg-gradient-to-br from-success/15 to-success/5 hover:border-success hover:shadow-lg focus-visible:ring-success',
         styles.giftCard,
       )}
     >
@@ -715,11 +749,7 @@ function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, category
         <span
           className={cn(
             'mb-2 inline-flex rounded-full px-2 py-0.5 text-xs font-bold',
-            isEnvelope
-              ? 'bg-dark/10 text-dark'
-              : isNice
-                ? 'bg-gold/20 text-gold-dark'
-                : 'bg-coral/20 text-coral',
+            isEnvelope ? 'bg-dark/10 text-dark' : 'bg-success/25 text-dark',
             styles.badge,
           )}
         >
@@ -740,12 +770,8 @@ function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, category
 
       <span
         className={cn(
-          'mt-3 inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold text-white transition-all',
-          isEnvelope
-            ? 'bg-dark hover:bg-dark/80'
-            : isNice
-              ? 'bg-gold hover:bg-gold-dark'
-              : 'bg-coral hover:bg-coral-dark',
+          'mt-3 inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold transition-all',
+          isEnvelope ? 'bg-dark text-white hover:bg-dark/80' : 'bg-success text-dark hover:brightness-95',
           styles.cta,
         )}
       >

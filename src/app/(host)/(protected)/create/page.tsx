@@ -1,18 +1,19 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { useTranslate } from '@tolgee/react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useTolgee, useTranslate } from '@tolgee/react'
 import { StepIndicator } from '@/components/host/StepIndicator'
 import { EventDetailsStep, type EventDetailsData } from '@/components/host/EventDetailsStep'
 import { GiftListStep, type DraftGift } from '@/components/host/GiftListStep'
 import { ReviewStep } from '@/components/host/ReviewStep'
-import { createEvent, updateEvent, EventApiError, getEventById } from '@/lib/api/events'
+import { createEvent, updateEvent, uploadEventImage, EventApiError, getEventById } from '@/lib/api/events'
 import { useToast } from '@/components/shared/Toast'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
-import { compressImageToDataUrl } from '@/lib/utils/imageUpload'
 import { validateEventDetails } from '@/lib/validations/eventSchema'
+import { FALLBACK_COVER_IMAGE_URL } from '@/lib/utils/imageUpload'
+import { trackEvent } from '@/lib/analytics/track'
 
 interface Draft {
   step: number
@@ -30,18 +31,30 @@ const emptyDraft: Draft = {
 
 export default function CreatePage() {
   const { t } = useTranslate()
+  const tolgee = useTolgee(['language'])
   const toast = useToast()
   const { user } = useCurrentUser()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const eventId = searchParams.get('eventId')
+  // Wall-clock start of a fresh wizard visit, for the event_published duration metric.
+  const startTimeRef = useRef<number | null>(null)
 
   const [draft, setDraft] = useState<Draft>(emptyDraft)
   const [errors, setErrors] = useState<Partial<Record<keyof EventDetailsData, string>>>({})
-  const [createdEventId, setCreatedEventId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(!!eventId)
   // Date the event had when loaded for editing. Keeping it unchanged is
   // allowed even if it is in the past; picking a new past date is not.
   const [initialDate, setInitialDate] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    // Editing an existing event redirects here with ?eventId= — only a bare
+    // /create visit is the start of the creation funnel.
+    if (!eventId) {
+      trackEvent('create_event_start')
+      startTimeRef.current = Date.now()
+    }
+  }, [eventId])
 
   useEffect(() => {
     if (!eventId) return
@@ -87,7 +100,6 @@ export default function CreatePage() {
             ],
           })
           setInitialDate(eventDate)
-          setCreatedEventId(event.slug)
         }
       } catch (err) {
         toast.error(t('common.errors.generic'))
@@ -130,6 +142,9 @@ export default function CreatePage() {
       return
     }
     setErrors({})
+    trackEvent('create_event_step_complete', {
+      step: draft.step === 1 ? 'details' : 'gift_list',
+    })
     setStep(draft.step + 1)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -151,11 +166,16 @@ export default function CreatePage() {
       throw new Error('invalid-details')
     }
     try {
-      let backgroundImageUrl: string | undefined
+      // Unchanged/preset covers already carry a safe, storable URL.
+      let backgroundImageUrl = draft.details.backgroundImageUrl
 
       if (draft.imageFile) {
-        // Downscale/re-encode so the payload stays within the API's cap.
-        backgroundImageUrl = await compressImageToDataUrl(draft.imageFile)
+        try {
+          backgroundImageUrl = await uploadEventImage(draft.imageFile, session.accessToken)
+        } catch {
+          backgroundImageUrl = eventId ? undefined : FALLBACK_COVER_IMAGE_URL
+          toast.info(t('host.create.step3.imageUploadFailed'))
+        }
       }
 
       const eventPayload = {
@@ -164,7 +184,7 @@ export default function CreatePage() {
         gender: draft.details.gender,
         userId: user.id,
         message: draft.details.message,
-        backgroundImageUrl: backgroundImageUrl ?? draft.details.backgroundImageUrl,
+        backgroundImageUrl,
         date: draft.details.date,
         // Carry the backend gift id (when editing) so reservations survive.
         gifts: draft.gifts.map((g) => ({ ...g, serverId: g.id })),
@@ -174,13 +194,26 @@ export default function CreatePage() {
         ? await updateEvent(eventId, eventPayload, session.accessToken)
         : await createEvent(eventPayload, session.accessToken)
 
-      // The share URL uses the public slug, never the internal id.
-      setCreatedEventId(saved?.slug ?? eventId ?? null)
-      toast.success(
-        eventId
-          ? t('host.create.step3.successTitle', 'Event updated!')
-          : t('host.create.step3.successTitle', 'Event created!')
-      )
+      if (eventId) {
+        trackEvent('event_edited')
+      } else {
+        const durationSeconds = startTimeRef.current
+          ? Math.round((Date.now() - startTimeRef.current) / 1000)
+          : 0
+        trackEvent('event_published', {
+          duration_seconds: durationSeconds,
+          language: tolgee.getLanguage() ?? 'sr',
+        })
+      }
+      // The share URL uses the public slug, never the internal id. Leaving
+      // the wizard here (rather than staying on step 3) is what shows the
+      // success modal on the dashboard instead of behind it.
+      const slug = saved?.slug ?? eventId ?? ''
+      const params = new URLSearchParams()
+      if (slug) params.set('created', slug)
+      if (eventId) params.set('edited', '1')
+      const query = params.toString()
+      router.push(query ? `/dashboard?${query}` : '/dashboard')
     } catch (err) {
       const message =
         err instanceof EventApiError
@@ -231,7 +264,6 @@ export default function CreatePage() {
           <ReviewStep
             details={draft.details}
             gifts={draft.gifts}
-            id={createdEventId ?? ''}
             isEditing={!!eventId}
             onEdit={setStep}
             onBack={goBack}

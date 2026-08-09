@@ -142,16 +142,6 @@ function SuccessView({
       </p>
       <p className="mb-6 text-sm font-semibold text-dark">{email}</p>
 
-      <div
-        className="mb-6 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-left text-xs text-dark-light"
-        role="note"
-      >
-        <span className="mr-1" aria-hidden="true">
-          ⚠️
-        </span>
-        {t('auth.forgotPassword.comingSoonNotice')}
-      </div>
-
       <div className="flex flex-col gap-3">
         <Link
           href="/login"
