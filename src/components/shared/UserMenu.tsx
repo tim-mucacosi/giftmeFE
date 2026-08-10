@@ -154,7 +154,7 @@ export function UserMenu({ user, onLogout }: Props) {
                 setOpen(false)
                 setDeactivateOpen(true)
               }}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-0/10"
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-soft/10"
             >
               <span aria-hidden="true">🚫</span>
               {t('nav.deactivateAccount')}

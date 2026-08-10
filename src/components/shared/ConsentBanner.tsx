@@ -5,6 +5,7 @@ import { useTranslate } from '@tolgee/react'
 import { CONSENT_COOKIE, type ConsentValue } from '@/lib/consent/constants'
 
 interface Props {
+  /** Server-computed: true only for EEA visitors who haven't answered yet. */
   initialShow: boolean
 }
 

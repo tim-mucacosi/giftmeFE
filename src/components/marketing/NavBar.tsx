@@ -97,6 +97,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className={cn(
                   'rounded-full px-4 py-2 text-sm font-semibold transition-colors',
                   isActive(item.href) ? 'bg-coral/10 text-coral' : 'text-dark hover:bg-gray-light/60',
@@ -144,6 +145,7 @@ export function Navbar() {
               <li key={item.href + item.labelKey} className={styles.bottomItem}>
                 <Link
                   href={item.href}
+                  prefetch={false}
                   className={cn(styles.bottomLink, active && styles.bottomLinkActive)}
                 >
                   {active ? <span className={styles.activeIndicator} aria-hidden="true" /> : null}

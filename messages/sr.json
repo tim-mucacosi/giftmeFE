@@ -142,6 +142,7 @@
       "signUp": "Registruj se",
       "successToast": "Registracija je uspešna. Proverite svoje sanduče i potvrdite email adresu da biste završili registraciju.",
       "successNoVerification": "Nalog je kreiran. Možete se prijaviti.",
+      "reactivated": "Dobrodošli nazad! Vaš nalog je ponovo aktiviran, možete se prijaviti.",
       "verifyPending": {
         "title": "Proverite svoje sanduče",
         "desc": "Poslali smo link za potvrdu na:",
@@ -158,6 +159,7 @@
       "passwordSameAsOld": "Izaberite drugu lozinku od trenutne",
       "currentPasswordWrong": "Trenutna lozinka nije ispravna",
       "emailInUse": "Email je već u upotrebi",
+      "reactivateWrongPassword": "Taj email pripada deaktiviranom nalogu, ali lozinka se ne poklapa.",
       "invalidCredentials": "Neispravan email ili lozinka",
       "network": "Nema konekcije sa serverom. Pokušaj ponovo.",
       "googleFailed": "Google prijava nije uspela. Pokušaj ponovo.",

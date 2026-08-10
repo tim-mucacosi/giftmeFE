@@ -13,8 +13,8 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 // Exact copies of public/covers/*.svg, inlined so they can be embedded as a
-// data: URI below. The edge image renderer silently drops
-// backgroundImage values made only of CSS gradient() functions, a url()
+// data: URI below. The edge image renderer (Satori/resvg) silently drops
+// backgroundImage values made only of CSS gradient() functions — a url(...)
 // layer paints reliably, so every cover (including the branded fallback)
 // goes through that path instead of a bare linear-/radial-gradient.
 const PRESET_SVG: Record<(typeof COVER_PRESETS)[number]['id'], string> = {

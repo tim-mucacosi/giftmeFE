@@ -6,7 +6,10 @@ import { setLanguage } from '@/tolgee/language'
 import { ALL_LANGUAGES } from '@/tolgee/shared'
 import { cn } from '@/lib/utils/cn'
 
-
+// Emoji flags (🇷🇸 etc.) are two combined "regional indicator" letters; when
+// the OS font can't combine them (notably Windows) it falls back to showing
+// the raw letters (e.g. "GB") instead of a flag. SVGs render identically
+// everywhere.
 function FlagIcon({ code, className }: { code: string; className?: string }) {
   const common = cn('h-3.5 w-5 shrink-0 rounded-[2px]', className)
   switch (code) {

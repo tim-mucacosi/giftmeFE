@@ -50,6 +50,13 @@ export default function RegisterPage() {
         password: values.password,
         acceptedTerms: values.acceptedTerms,
       })
+      if (response.reactivated) {
+        // A previously deactivated account its already verified, no email
+        // was sent, and it just needs the user to log back in.
+        toast.success(t('auth.register.reactivated'))
+        router.push(withReturnTo('/login', next))
+        return
+      }
       if (!response.requiresVerification) {
         // No mail provider configured: the account is usable right away.
         toast.success(t('auth.register.successNoVerification'))
@@ -70,6 +77,10 @@ export default function RegisterPage() {
         // Older backends answered 400 for a duplicate address.
         if (err.status === 409 || err.code === 'EMAIL_IN_USE') {
           setError('email', { type: 'server', message: 'auth.errors.emailInUse' })
+          return
+        }
+        if (err.code === 'REACTIVATE_WRONG_PASSWORD') {
+          setError('password', { type: 'server', message: 'auth.errors.reactivateWrongPassword' })
           return
         }
         if (err.code === 'TERMS_NOT_ACCEPTED') {

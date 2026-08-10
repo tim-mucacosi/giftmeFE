@@ -142,6 +142,7 @@
       "signUp": "Registrieren",
       "successToast": "Registrierung erfolgreich. Bitte prüfen Sie Ihren Posteingang und bestätigen Sie Ihre E-Mail-Adresse, um die Registrierung abzuschließen.",
       "successNoVerification": "Konto erstellt. Sie können sich jetzt anmelden.",
+      "reactivated": "Willkommen zurück! Ihr Konto wurde reaktiviert, Sie können sich jetzt anmelden.",
       "verifyPending": {
         "title": "Prüfen Sie Ihren Posteingang",
         "desc": "Wir haben einen Bestätigungslink gesendet an:",
@@ -158,6 +159,7 @@
       "passwordSameAsOld": "Wähle ein anderes Passwort als das aktuelle",
       "currentPasswordWrong": "Das aktuelle Passwort ist falsch",
       "emailInUse": "E-Mail wird bereits verwendet",
+      "reactivateWrongPassword": "Diese E-Mail gehört zu einem deaktivierten Konto, aber das Passwort stimmt nicht überein.",
       "invalidCredentials": "Ungültige E-Mail oder Passwort",
       "network": "Server nicht erreichbar. Bitte erneut versuchen.",
       "googleFailed": "Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen.",

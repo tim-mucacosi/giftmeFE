@@ -142,6 +142,7 @@
       "signUp": "Sign up",
       "successToast": "Registration successful. Please check your email inbox and verify your email address to complete the registration.",
       "successNoVerification": "Account created. You can log in now.",
+      "reactivated": "Welcome back! Your account has been reactivated, you can log in now.",
       "verifyPending": {
         "title": "Check your inbox",
         "desc": "We sent a verification link to:",
@@ -158,6 +159,7 @@
       "passwordSameAsOld": "Pick a password different from the current one",
       "currentPasswordWrong": "Current password is incorrect",
       "emailInUse": "Email is already in use",
+      "reactivateWrongPassword": "That email belongs to a deactivated account, but this password doesn't match it.",
       "invalidCredentials": "Invalid email or password",
       "network": "Cannot reach the server. Please try again.",
       "googleFailed": "Google sign-in failed. Please try again.",

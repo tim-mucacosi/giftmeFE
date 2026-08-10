@@ -37,6 +37,8 @@ export interface RegisterResponse {
   /** False when the provider rejected the send; offer a resend. */
   emailSent: boolean
   user?: Pick<User, 'id' | 'name' | 'email'>
+  /** True when this "registration" was actually a deactivated account coming back. */
+  reactivated?: boolean
 }
 
 export interface AuthSession {

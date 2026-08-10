@@ -477,6 +477,7 @@ function EventCard({
           Sits behind interactive children (z-[1]) so buttons and links still work. */}
       <Link
         href={`/event/${event.id}/overview`}
+        prefetch={false}
         aria-label={`${t('host.event.viewTitle', 'Event details')} - ${event.name}`}
         className="absolute inset-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-coral"
       >
@@ -585,6 +586,7 @@ function EventCard({
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <Link
               href={`/event/${event.slug}`}
+              prefetch={false}
               className="relative z-[1] inline-flex items-center gap-1.5 text-xs font-semibold text-dark-light transition-colors hover:text-dark"
             >
               👁️ {t('host.dashboard.actions.view')}
@@ -608,6 +610,7 @@ function EventCard({
             </button>
             <Link
               href={`/create?eventId=${event.id}`}
+              prefetch={false}
               className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-coral px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:translate-x-0.5"
             >
               ✏️ {t('host.dashboard.actions.manage')} →
