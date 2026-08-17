@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/cn'
 import { Modal } from '@/components/shared/Modal'
 import { Button } from '@/components/shared/Button'
 import { useToast } from '@/components/shared/Toast'
-import { deactivateAccount } from '@/lib/api/auth'
+import { deleteAccount } from '@/lib/api/auth'
 import { loadSession } from '@/lib/auth/session'
 import { AuthError } from '@/types/auth'
 import type { User } from '@/types/user'
@@ -23,8 +23,8 @@ export function UserMenu({ user, onLogout }: Props) {
   // Fall back to initials when the provider photo fails to load (expired
   // Google/Facebook CDN URLs would otherwise render a broken image).
   const [imgError, setImgError] = useState(false)
-  const [deactivateOpen, setDeactivateOpen] = useState(false)
-  const [deactivating, setDeactivating] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const showImage = !!user.profilePicture && !imgError
 
@@ -49,23 +49,23 @@ export function UserMenu({ user, onLogout }: Props) {
     router.refresh()
   }
 
-  async function handleDeactivate() {
-    if (deactivating) return
+  async function handleDelete() {
+    if (deleting) return
     const session = loadSession()
     if (!session?.accessToken) return
-    setDeactivating(true)
+    setDeleting(true)
     try {
-      await deactivateAccount(user.id, session.accessToken)
-      setDeactivateOpen(false)
+      await deleteAccount(user.id, session.accessToken)
+      setDeleteOpen(false)
       onLogout()
-      toast.success(t('auth.deactivateAccount.successToast'))
+      toast.success(t('auth.deleteAccount.successToast'))
       router.push('/')
       router.refresh()
     } catch (err) {
       const message = err instanceof AuthError ? err.message : t('common.errors.generic')
       toast.error(message)
     } finally {
-      setDeactivating(false)
+      setDeleting(false)
     }
   }
 
@@ -152,35 +152,35 @@ export function UserMenu({ user, onLogout }: Props) {
               role="menuitem"
               onClick={() => {
                 setOpen(false)
-                setDeactivateOpen(true)
+                setDeleteOpen(true)
               }}
               className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-soft/10"
             >
-              <span aria-hidden="true">🚫</span>
-              {t('nav.deactivateAccount')}
+              <span aria-hidden="true">🗑</span>
+              {t('nav.deleteAccount')}
             </button>
           </div>
         </div>
       )}
 
       <Modal
-        open={deactivateOpen}
+        open={deleteOpen}
         onClose={() => {
-          if (!deactivating) setDeactivateOpen(false)
+          if (!deleting) setDeleteOpen(false)
         }}
-        title={t('auth.deactivateAccount.title')}
+        title={t('auth.deleteAccount.title')}
       >
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-dark">{t('auth.deactivateAccount.confirm')}</p>
+          <p className="text-sm text-dark">{t('auth.deleteAccount.confirm')}</p>
           <p className="rounded-xl bg-red-soft/15 px-3 py-2 text-xs text-dark">
-            ⚠️ {t('auth.deactivateAccount.warning')}
+            ⚠️ {t('auth.deleteAccount.warning')}
           </p>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button variant="outline" type="button" onClick={() => setDeactivateOpen(false)} disabled={deactivating}>
+            <Button variant="outline" type="button" onClick={() => setDeleteOpen(false)} disabled={deleting}>
               {t('common.buttons.cancel')}
             </Button>
-            <Button type="button" variant="dark" onClick={handleDeactivate} loading={deactivating} disabled={deactivating}>
-              🚫 {t('auth.deactivateAccount.submit')}
+            <Button type="button" variant="dark" onClick={handleDelete} loading={deleting} disabled={deleting}>
+              🗑 {t('auth.deleteAccount.submit')}
             </Button>
           </div>
         </div>

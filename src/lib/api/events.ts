@@ -6,7 +6,7 @@ import type { Gift, GiftCategory } from '@/types/gift'
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://giftmebe.onrender.com/api'
 
 export interface CreateEventGiftInput
-  extends Pick<Gift, 'name' | 'category' | 'description' | 'quantity' | 'unlimited' | 'link' | 'type'> {
+  extends Pick<Gift, 'name' | 'category' | 'description' | 'quantity' | 'unlimited' | 'link'> {
   /** Backend subdocument id, present when editing an existing gift. */
   serverId?: string
 }
@@ -40,7 +40,6 @@ interface ApiGift {
   name?: string
   description?: string
   whereToBuy?: string
-  type?: string
   quantity?: number
   unlimited?: boolean
   reservedQuantity?: number
@@ -86,9 +85,8 @@ export interface DetailGift {
   name: string
   description?: string
   whereToBuy?: string
-  type: 'item' | 'envelope'
   quantity: number
-  /** Reservable any number of times (envelope gifts and unlimited items). */
+  /** Reservable any number of times. */
   unlimited: boolean
   reservedQuantity: number
   /** Remaining units. Unlimited gifts are always available. */
@@ -140,16 +138,14 @@ function extractHostName(user: ApiEventDto['user']): string | undefined {
 }
 
 export function mapGift(g: ApiGift): DetailGift {
-  const type = g.type === 'envelope' ? 'envelope' : 'item'
   const quantity = typeof g.quantity === 'number' && g.quantity > 0 ? g.quantity : 1
   const reservedQuantity = typeof g.reservedQuantity === 'number' ? g.reservedQuantity : 0
-  const unlimited = type === 'envelope' || g.unlimited === true
+  const unlimited = g.unlimited === true
   return {
     id: g._id ?? g.id ?? '',
     name: (g.name ?? '').trim(),
     description: g.description,
     whereToBuy: g.whereToBuy,
-    type,
     quantity,
     unlimited,
     reservedQuantity,
@@ -177,7 +173,7 @@ export function mapApiEvent(dto: ApiEventDto): Event {
   const eventDate = dto.expirationDate ?? created
   // Unlimited gifts carry no inventory, so they stay out of the counters.
   const items = [...mapGiftArr(dto.iWant), ...mapGiftArr(dto.iAmOkWithIt)].filter(
-    (g) => g.type === 'item' && !g.unlimited,
+    (g) => !g.unlimited,
   )
   return {
     id,
@@ -268,7 +264,6 @@ function mockDetail(idOrSlug: string): EventDetail | null {
   const ev = mockEvents.find((e) => e.id === idOrSlug || e.slug === idOrSlug) ?? mockEvents[0]
   if (!ev) return null
   const gift = (partial: Partial<DetailGift> & { id: string; name: string }): DetailGift => ({
-    type: 'item',
     quantity: 1,
     unlimited: false,
     reservedQuantity: 0,
@@ -289,7 +284,7 @@ function mockDetail(idOrSlug: string): EventDetail | null {
     gifts: {
       want: [
         gift({ id: 'mock-wine', name: 'Bottle of red wine', quantity: 2, available: 2, description: 'A nice red wine' }),
-        gift({ id: 'mock-dish-washer', name: 'Dish washer', type: 'envelope', unlimited: true, available: Number.POSITIVE_INFINITY }),
+        gift({ id: 'mock-dish-washer', name: 'Dish washer', unlimited: true, available: Number.POSITIVE_INFINITY }),
       ],
       nice: [gift({ id: 'mock-linen', name: 'Linen tablecloth set', description: 'Natural linen' })],
       avoid: [gift({ id: 'mock-cards', name: 'Generic gift cards' })],
@@ -360,15 +355,12 @@ export function buildEventPayload(input: CreateEventInput) {
     input.gifts
       .filter((g) => g.category === cat)
       .map((g) => {
-        const isEnvelope = g.type === 'envelope'
         // "Please avoid" entries are informational and carry no inventory,
         // so quantity/unlimited are left out of their payload entirely.
-        const tracksInventory = cat !== 'avoid' && !isEnvelope
-        const gift: Record<string, unknown> = isEnvelope
-          ? { name: g.name.trim(), type: 'envelope' }
-          : tracksInventory
-            ? { name: g.name.trim(), quantity: g.quantity ?? 1 }
-            : { name: g.name.trim() }
+        const tracksInventory = cat !== 'avoid'
+        const gift: Record<string, unknown> = tracksInventory
+          ? { name: g.name.trim(), quantity: g.quantity ?? 1 }
+          : { name: g.name.trim() }
         if (tracksInventory && g.unlimited) gift.unlimited = true
         if (g.serverId && /^[0-9a-f]{24}$/i.test(g.serverId)) gift._id = g.serverId
         if (g.description?.trim()) gift.description = g.description.trim()

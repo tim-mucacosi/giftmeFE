@@ -39,7 +39,7 @@
     "dashboard": "My events",
     "login": "Log in",
     "logout": "Log out",
-    "deactivateAccount": "Deactivate account"
+    "deleteAccount": "Delete account"
   },
   "landing": {
     "meta": {
@@ -191,12 +191,12 @@
       "oauthDesc": "You signed in with a social account. Manage your password through that provider — there's nothing to change here.",
       "oauthOnly": "This account uses social sign-in. There is no password to change."
     },
-    "deactivateAccount": {
-      "title": "Deactivate account?",
-      "confirm": "Are you sure you want to deactivate your account?",
-      "warning": "You'll be signed out immediately and won't be able to log back in. This cannot be undone by yourself.",
-      "submit": "Deactivate",
-      "successToast": "Your account has been deactivated"
+    "deleteAccount": {
+      "title": "Delete account?",
+      "confirm": "Are you sure you want to permanently delete your account?",
+      "warning": "Your account and all your data will be permanently deleted. Every wishlist you created for an upcoming celebration will be closed and removed, so guests can no longer open it. This action cannot be undone.",
+      "submit": "Delete account",
+      "successToast": "Your account has been deleted"
     },
     "resetPassword": {
       "title": "Reset your password",
@@ -344,8 +344,7 @@
       "title": "My events",
       "stats": {
         "guests": "Guests",
-        "reserved": "Reserved gifts",
-        "envelope": "In envelopes"
+        "reserved": "Reserved gifts"
       },
       "filters": {
         "all": "All",
@@ -625,6 +624,36 @@
           "heading": "Contact",
           "body": "For questions about data processing and exercising your rights, write to us at podrska@poklonimi.rs."
         }
+      }
+    }
+  },
+  "contact": {
+    "title": "Write to us",
+    "intro": "Have a question, an idea, or want to work together? Send us a message below and we'll get back to you as soon as we can.",
+    "emailLabel": "Email address*",
+    "emailPlaceholder": "Your email address*",
+    "typeLabel": "Inquiry type*",
+    "typePlaceholder": "Pick an inquiry type",
+    "types": {
+      "business": "Business offer and cooperation",
+      "feedback": "Feedback and suggestions"
+    },
+    "messageLabel": "Message*",
+    "messagePlaceholder": "Message*",
+    "submit": "Send message",
+    "errors": {
+      "typeRequired": "Pick an inquiry type",
+      "sendFailed": "Something went wrong while sending your message. Please try again."
+    },
+    "success": {
+      "home": "Back to home",
+      "feedback": {
+        "title": "Thanks for writing!",
+        "desc": "Thank you for helping make PokloniMi better. We'll read your message and get back to you if needed."
+      },
+      "business": {
+        "title": "Thanks for your interest!",
+        "desc": "Thank you for wanting to work with us. We'll review your inquiry and get back to you soon."
       }
     }
   }

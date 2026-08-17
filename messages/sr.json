@@ -39,7 +39,7 @@
     "dashboard": "Moji eventi",
     "login": "Prijavi se",
     "logout": "Odjavi se",
-    "deactivateAccount": "Deaktiviraj nalog"
+    "deleteAccount": "Obriši nalog"
   },
   "landing": {
     "meta": {
@@ -191,12 +191,12 @@
       "oauthDesc": "Prijavili ste se putem društvene mreže. Upravljajte lozinkom kroz tog provajdera — ovde nema šta da se menja.",
       "oauthOnly": "Ovaj nalog koristi prijavu putem društvene mreže. Nema lozinke za promenu."
     },
-    "deactivateAccount": {
-      "title": "Deaktivirati nalog?",
-      "confirm": "Da li ste sigurni da želite da deaktivirate svoj nalog?",
-      "warning": "Bićete odmah odjavljeni i nećete moći ponovo da se prijavite. Ovo ne možete sami poništiti.",
-      "submit": "Deaktiviraj",
-      "successToast": "Vaš nalog je deaktiviran"
+    "deleteAccount": {
+      "title": "Obrisati nalog?",
+      "confirm": "Da li ste sigurni da želite trajno da obrišete svoj nalog?",
+      "warning": "Vaš nalog i svi vaši podaci biće trajno obrisani. Sve vaše liste želja za predstojeća slavlja biće zatvorene i obrisane, pa ih gosti više neće moći otvoriti. Ova radnja se ne može poništiti.",
+      "submit": "Obriši nalog",
+      "successToast": "Vaš nalog je obrisan"
     },
     "resetPassword": {
       "title": "Resetuj svoju lozinku",
@@ -344,8 +344,7 @@
       "title": "Moji eventi",
       "stats": {
         "guests": "Broj gostiju",
-        "reserved": "Rezervisanih poklona",
-        "envelope": "Ukupno u kovertama"
+        "reserved": "Rezervisanih poklona"
       },
       "filters": {
         "all": "Svi",
@@ -625,6 +624,36 @@
           "heading": "Kontakt",
           "body": "Za pitanja o obradi podataka i ostvarivanje vaših prava pišite nam na podrska@poklonimi.rs."
         }
+      }
+    }
+  },
+  "contact": {
+    "title": "Piši nam",
+    "intro": "Imaš pitanje, predlog ili želiš da sarađujemo? Piši nam putem forme ispod i javićemo ti se čim budemo u mogućnosti.",
+    "emailLabel": "Email adresa*",
+    "emailPlaceholder": "Vaša email adresa*",
+    "typeLabel": "Vrsta upita*",
+    "typePlaceholder": "Izaberi vrstu upita",
+    "types": {
+      "business": "Poslovna ponuda i saradnja",
+      "feedback": "Primedbe i sugestije"
+    },
+    "messageLabel": "Poruka*",
+    "messagePlaceholder": "Poruka*",
+    "submit": "Pošalji poruku",
+    "errors": {
+      "typeRequired": "Izaberi vrstu upita",
+      "sendFailed": "Došlo je do greške prilikom slanja poruke. Pokušaj ponovo."
+    },
+    "success": {
+      "home": "Nazad na početnu",
+      "feedback": {
+        "title": "Hvala na poruci!",
+        "desc": "Hvala ti što pomažeš da PokloniMi bude još bolji. Pročitaćemo tvoju poruku i javiti se ukoliko bude potrebno."
+      },
+      "business": {
+        "title": "Hvala na interesovanju!",
+        "desc": "Hvala ti što želiš da sarađuješ sa nama. Pregledaćemo tvoj upit i javićemo ti se uskoro."
       }
     }
   }

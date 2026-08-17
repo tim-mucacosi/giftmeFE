@@ -10,7 +10,7 @@ describe('isGiftAvailable', () => {
     expect(isGiftAvailable({ id: 'g1', unlimited: false, available: 0 })).toBe(false)
   })
 
-  it('unlimited gifts (envelopes, unlimited items) stay available regardless of count', () => {
+  it('unlimited gifts stay available regardless of count', () => {
     expect(isGiftAvailable({ id: 'e1', unlimited: true, available: 0 })).toBe(true)
   })
 

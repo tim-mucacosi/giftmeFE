@@ -39,7 +39,7 @@
     "dashboard": "Meine Events",
     "login": "Anmelden",
     "logout": "Abmelden",
-    "deactivateAccount": "Konto deaktivieren"
+    "deleteAccount": "Konto löschen"
   },
   "landing": {
     "meta": {
@@ -191,12 +191,12 @@
       "oauthDesc": "Du hast dich mit einem sozialen Konto angemeldet. Verwalte dein Passwort über diesen Anbieter — hier gibt es nichts zu ändern.",
       "oauthOnly": "Dieses Konto nutzt Social-Login. Es gibt kein Passwort zum Ändern."
     },
-    "deactivateAccount": {
-      "title": "Konto deaktivieren?",
-      "confirm": "Möchtest du dein Konto wirklich deaktivieren?",
-      "warning": "Du wirst sofort abgemeldet und kannst dich danach nicht mehr anmelden. Dies kannst du nicht selbst rückgängig machen.",
-      "submit": "Deaktivieren",
-      "successToast": "Dein Konto wurde deaktiviert"
+    "deleteAccount": {
+      "title": "Konto löschen?",
+      "confirm": "Möchtest du dein Konto wirklich endgültig löschen?",
+      "warning": "Dein Konto und alle deine Daten werden endgültig gelöscht. Alle Wunschlisten für bevorstehende Feiern werden geschlossen und entfernt, Gäste können sie danach nicht mehr öffnen. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "submit": "Konto löschen",
+      "successToast": "Dein Konto wurde gelöscht"
     },
     "resetPassword": {
       "title": "Passwort zurücksetzen",
@@ -344,8 +344,7 @@
       "title": "Meine Events",
       "stats": {
         "guests": "Gäste",
-        "reserved": "Reservierte Geschenke",
-        "envelope": "In Umschlägen"
+        "reserved": "Reservierte Geschenke"
       },
       "filters": {
         "all": "Alle",
@@ -625,6 +624,36 @@
           "heading": "Kontakt",
           "body": "Bei Fragen zur Datenverarbeitung und zur Ausübung Ihrer Rechte schreiben Sie uns an podrska@poklonimi.rs."
         }
+      }
+    }
+  },
+  "contact": {
+    "title": "Schreib uns",
+    "intro": "Hast du eine Frage, einen Vorschlag oder möchtest du mit uns zusammenarbeiten? Schreib uns über das Formular unten und wir melden uns, sobald wir können.",
+    "emailLabel": "E-Mail-Adresse*",
+    "emailPlaceholder": "Deine E-Mail-Adresse*",
+    "typeLabel": "Art der Anfrage*",
+    "typePlaceholder": "Art der Anfrage wählen",
+    "types": {
+      "business": "Geschäftsangebot und Zusammenarbeit",
+      "feedback": "Feedback und Anregungen"
+    },
+    "messageLabel": "Nachricht*",
+    "messagePlaceholder": "Nachricht*",
+    "submit": "Nachricht senden",
+    "errors": {
+      "typeRequired": "Wähle die Art der Anfrage",
+      "sendFailed": "Beim Senden der Nachricht ist ein Fehler aufgetreten. Bitte versuche es erneut."
+    },
+    "success": {
+      "home": "Zurück zur Startseite",
+      "feedback": {
+        "title": "Danke für deine Nachricht!",
+        "desc": "Danke, dass du hilfst, PokloniMi besser zu machen. Wir lesen deine Nachricht und melden uns, falls nötig."
+      },
+      "business": {
+        "title": "Danke für dein Interesse!",
+        "desc": "Danke, dass du mit uns zusammenarbeiten möchtest. Wir prüfen deine Anfrage und melden uns bald."
       }
     }
   }

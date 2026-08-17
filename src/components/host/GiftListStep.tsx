@@ -5,19 +5,11 @@ import { useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
 import { Modal } from '@/components/shared/Modal'
 import { GiftAddForm, type GiftDraft } from './GiftAddForm'
+import { GiftLinkPreview } from '@/components/shared/GiftLinkPreview'
 import type { Gift, GiftCategory } from '@/types/gift'
 import { cn } from '@/lib/utils/cn'
 
 export type DraftGift = Gift
-
-/** Compact display label for a gift link, e.g. "ikea.rs". */
-function linkLabel(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return url
-  }
-}
 
 const CATEGORY_META: { key: GiftCategory; icon: string; palette: string }[] = [
   { key: 'want', icon: '❤️', palette: 'want' },
@@ -187,7 +179,6 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
                       <div className="flex-1 overflow-hidden">
                         <div className="flex items-center gap-1.5">
                           <span className="truncate text-sm font-bold text-dark">
-                            {g.type === 'envelope' ? '💌 ' : ''}
                             {g.name}
                           </span>
                           {key !== 'avoid' ? (
@@ -199,16 +190,7 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
                         {g.description ? (
                           <div className="truncate text-xs text-dark-light">{g.description}</div>
                         ) : null}
-                        {g.link ? (
-                          <a
-                            href={g.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex max-w-full items-center gap-1 truncate text-xs font-medium text-coral hover:underline"
-                          >
-                            🔗 {linkLabel(g.link)}
-                          </a>
-                        ) : null}
+                        {g.link ? <GiftLinkPreview url={g.link} /> : null}
                       </div>
                       <button
                         type="button"
@@ -292,7 +274,6 @@ export function GiftListStep({ gifts, onChange, onNext, onBack }: Props) {
           >
             <div className="flex flex-col gap-4">
               <p className="rounded-xl bg-bg px-3 py-2.5 text-sm font-bold text-dark">
-                {gift.type === 'envelope' ? '💌 ' : ''}
                 {gift.name}
               </p>
               <p className="text-sm text-dark-light">

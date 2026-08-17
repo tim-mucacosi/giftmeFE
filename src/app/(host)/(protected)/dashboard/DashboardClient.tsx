@@ -609,7 +609,7 @@ function EventCard({
               📤 {t('host.event.share')}
             </button>
             <Link
-              href={`/create?eventId=${event.id}`}
+              href={`/edit?eventId=${event.id}`}
               prefetch={false}
               className="relative z-[1] inline-flex items-center gap-1 rounded-full bg-coral px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:translate-x-0.5"
             >

@@ -26,8 +26,8 @@ interface Props {
 }
 
 // Host-facing event overview: reservation status, share actions, and a
-// read-only gift list. All editing happens in the create wizard
-// (`/create?eventId=...`).
+// read-only gift list. All editing happens in the wizard
+// (`/edit?eventId=...`).
 export function EventDetailClient({ slug }: Props) {
   const { t } = useTranslate()
   const toast = useToast()
@@ -187,7 +187,7 @@ export function EventDetailClient({ slug }: Props) {
             </div>
             {isHost && !isPast ? (
               <Link
-                href={`/create?eventId=${event.id}`}
+                href={`/edit?eventId=${event.id}`}
                 className="shrink-0 rounded-full border-2 border-gray-light bg-white px-3 py-1.5 text-xs font-semibold text-dark transition-colors hover:border-coral hover:text-coral"
               >
                 ✏️ {t('host.event.editAction')}
@@ -282,7 +282,7 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
 
   const items = [...event.gifts.want, ...event.gifts.nice]
   // Unlimited gifts carry no inventory, so they stay out of the counters.
-  const itemGifts = items.filter((g) => g.type === 'item' && !g.unlimited)
+  const itemGifts = items.filter((g) => !g.unlimited)
   const reservations = event.reservations ?? []
 
   const totalDesired = itemGifts.reduce((acc, g) => acc + g.quantity, 0)
@@ -325,7 +325,6 @@ function HostGiftStatus({ event }: { event: EventDetail }) {
               <li key={gift.id || gift.name} className="rounded-xl bg-bg px-3 py-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="min-w-0 flex-1 break-words text-sm font-semibold text-dark">
-                    {gift.type === 'envelope' ? '💌 ' : ''}
                     {gift.name}
                   </span>
                   <span
@@ -467,11 +466,12 @@ interface GiftListProps {
 
 function GiftList({ palette, icon, title, tagline, items, emptyLabel }: GiftListProps) {
   const styles = {
+    // Same green as this category in the wizard (see GiftListStep).
     want: {
-      frame: 'bg-gradient-to-br from-coral/20 to-coral/10 ring-1 ring-coral/25',
-      header: 'bg-gradient-to-r from-coral to-coral-light text-white',
-      headerSub: 'text-white/90',
-      badge: 'bg-white/30 text-white',
+      frame: 'bg-gradient-to-br from-success/25 to-success/10 ring-1 ring-success/40',
+      header: 'bg-gradient-to-r from-success to-success/80 text-dark',
+      headerSub: 'text-dark/70',
+      badge: 'bg-dark/15 text-dark',
       itemIcon: '🎁',
     },
     nice: {
@@ -522,7 +522,7 @@ function GiftList({ palette, icon, title, tagline, items, emptyLabel }: GiftList
               className="flex items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm"
             >
               <span className="text-base text-dark-light" aria-hidden="true">
-                {gift.type === 'envelope' ? '💌' : styles.itemIcon}
+                {styles.itemIcon}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm font-semibold text-dark">
                 {gift.name}

@@ -38,13 +38,17 @@ export function Navbar() {
   // Highlight rules:
   //  - Home only on the exact "/" path.
   //  - Other items match their prefix.
-  //  - Event detail/edit pages (`/event/<id>` and `/event/<id>/edit`) live
-  //    under "My events" conceptually, so /dashboard stays selected there
-  //    instead of leaving the user with no active tab.
+  //  - Event detail pages (`/event/<id>`) and the edit wizard (`/edit`) live
+  //    under "My events", so /dashboard stays selected there. "New wishlist"
+  //    is only for /create.
   const isActive = (href: string) => {
     if (href === '/') return highlightPath === '/'
     if (href === '/dashboard') {
-      return highlightPath?.startsWith('/dashboard') || !!highlightPath?.startsWith('/event/')
+      return (
+        !!highlightPath?.startsWith('/dashboard') ||
+        !!highlightPath?.startsWith('/event/') ||
+        !!highlightPath?.startsWith('/edit')
+      )
     }
     return highlightPath?.startsWith(href)
   }

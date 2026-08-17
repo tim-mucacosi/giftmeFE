@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { usesQuantity, validateGiftForm, type GiftFormValues } from './giftSchema'
+import { usesLink, usesQuantity, validateGiftForm, type GiftFormValues } from './giftSchema'
 
 const form = (overrides: Partial<GiftFormValues> = {}): GiftFormValues => ({
-  type: 'item',
   category: 'want',
   name: 'Coffee machine',
   quantity: '2',
@@ -13,11 +12,18 @@ const form = (overrides: Partial<GiftFormValues> = {}): GiftFormValues => ({
 })
 
 describe('usesQuantity', () => {
-  it('is on for regular gifts and off for avoid entries and envelopes', () => {
-    expect(usesQuantity('want', 'item')).toBe(true)
-    expect(usesQuantity('nice', 'item')).toBe(true)
-    expect(usesQuantity('avoid', 'item')).toBe(false)
-    expect(usesQuantity('want', 'envelope')).toBe(false)
+  it('is on for regular gifts and off for avoid entries', () => {
+    expect(usesQuantity('want')).toBe(true)
+    expect(usesQuantity('nice')).toBe(true)
+    expect(usesQuantity('avoid')).toBe(false)
+  })
+})
+
+describe('usesLink', () => {
+  it('is on for regular gifts and off for avoid entries', () => {
+    expect(usesLink('want')).toBe(true)
+    expect(usesLink('nice')).toBe(true)
+    expect(usesLink('avoid')).toBe(false)
   })
 })
 
@@ -60,5 +66,13 @@ describe('validateGiftForm', () => {
     expect(validateGiftForm(form({ link: 'not a url' })).errors.link).toBeTruthy()
     // Empty stays valid: the link is optional.
     expect(validateGiftForm(form({ link: '' })).errors.link).toBeUndefined()
+  })
+
+  it('drops the link for "please avoid" entries instead of validating it', () => {
+    const { errors, parsed } = validateGiftForm(
+      form({ category: 'avoid', quantity: '', link: 'not a url' }),
+    )
+    expect(errors.link).toBeUndefined()
+    expect(parsed?.link).toBeUndefined()
   })
 })

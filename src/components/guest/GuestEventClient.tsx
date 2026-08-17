@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslate } from '@tolgee/react'
 import { Button } from '@/components/shared/Button'
+import { GiftLinkPreview } from '@/components/shared/GiftLinkPreview'
 import { useToast } from '@/components/shared/Toast'
 import { useCurrentUser } from '@/lib/auth/useCurrentUser'
 import { loadSession } from '@/lib/auth/session'
@@ -415,6 +416,7 @@ export function GuestEventClient({ slug }: Props) {
                     pickedByMe={(reservations[gift.id] ?? 0) > 0}
                     reservedLabel={t('host.guest.giftCard.reserved')}
                     badge={t('host.guest.giftCard.topWish')}
+                    tone="want"
                     onChoose={() => openConfirm(gift)}
                   />
                 ))}
@@ -442,6 +444,7 @@ export function GuestEventClient({ slug }: Props) {
                       pickedByMe={(reservations[gift.id] ?? 0) > 0}
                       reservedLabel={t('host.guest.giftCard.reserved')}
                       badge={t('host.guest.giftCard.welcomeToo')}
+                      tone="nice"
                       onChoose={() => openConfirm(gift)}
                     />
                   ))}
@@ -653,8 +656,8 @@ function SectionBlock({ icon, title, tagline, childCount, children, category }: 
     <section
       className={cn(
         'rounded-3xl p-4 shadow-card sm:p-5 border-2',
-        isWant && 'border-success/50 bg-gradient-to-br from-success/8 to-success/2',
-        isNice && 'border-gold/50 bg-gradient-to-br from-gold/5 to-gold/2',
+        isWant && 'border-success/50 bg-gradient-to-br from-success/10 to-success/5',
+        isNice && 'border-gold/50 bg-gradient-to-br from-gold/10 to-gold/5',
         !isWant && !isNice && 'border-gray-light',
         styles.frame,
       )}
@@ -699,20 +702,35 @@ function SectionBlock({ icon, title, tagline, childCount, children, category }: 
   )
 }
 
+// One tone per section, matching its frame.
+const CARD_TONE: Record<SectionCategory, { frame: string; badge: string; cta: string }> = {
+  want: {
+    frame: 'border-success/40 bg-gradient-to-br from-success/15 to-success/5 hover:border-success focus-within:ring-success',
+    badge: 'bg-success/25 text-dark',
+    cta: 'bg-success text-dark hover:brightness-95',
+  },
+  nice: {
+    frame: 'border-gold/50 bg-gradient-to-br from-gold/20 to-gold/5 hover:border-gold focus-within:ring-gold',
+    badge: 'bg-gold/25 text-dark',
+    cta: 'bg-gold text-dark hover:brightness-95',
+  },
+}
+
 interface GiftCardProps {
   gift: DetailGift
   isReserved: boolean
   pickedByMe?: boolean
   reservedLabel: string
   badge: string
+  tone: SectionCategory
   onChoose: () => void
 }
 
-function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, onChoose }: GiftCardProps) {
+function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, tone, onChoose }: GiftCardProps) {
   const { t } = useTranslate()
-  const isEnvelope = gift.type === 'envelope'
   const isUnlimited = gift.unlimited
   const remaining = Math.max(0, gift.quantity - gift.reservedQuantity)
+  const palette = CARD_TONE[tone]
 
   if (isReserved) {
     return (
@@ -726,58 +744,71 @@ function GiftCard({ gift, isReserved, pickedByMe, reservedLabel, badge, onChoose
           <span aria-hidden="true">✅</span>
           <span className="break-words">{gift.name}</span>
         </div>
-        <p className="mt-1 text-xs font-medium text-gray">
-          {reservedLabel}
-          {pickedByMe ? ` · ${t('host.guest.giftCard.pickedByYou')}` : ''}
-        </p>
+        <div className="mt-1">
+          <p className="text-xs font-medium text-gray">
+            {reservedLabel}
+            {pickedByMe ? ` · ${t('host.guest.giftCard.pickedByYou')}` : ''}
+          </p>
+          {/* Kept once taken: whoever reserved it still has to buy it. */}
+          {gift.whereToBuy ? (
+            <GiftLinkPreview url={gift.whereToBuy} className="mt-1.5" />
+          ) : null}
+        </div>
       </div>
     )
   }
 
   return (
-    <button
-      onClick={onChoose}
+    // Frame is a div so the link can sit next to the button, not inside it.
+    <div
       className={cn(
-        'group relative flex min-h-[100px] flex-col justify-between rounded-2xl border-2 p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 sm:p-5',
-        isEnvelope
-          ? 'border-dark/20 bg-gradient-to-br from-gold/15 to-white hover:border-dark/50 hover:shadow-lg focus-visible:ring-dark'
-          : 'border-success/40 bg-gradient-to-br from-success/15 to-success/5 hover:border-success hover:shadow-lg focus-visible:ring-success',
+        'group relative flex min-h-[100px] flex-col rounded-2xl border-2 p-4 transition-all hover:shadow-lg focus-within:ring-2 sm:p-5',
+        palette.frame,
         styles.giftCard,
       )}
     >
-      <div>
+      <button
+        onClick={onChoose}
+        className="flex flex-1 flex-col justify-between text-left focus-visible:outline-none"
+      >
+        <div>
+          <span
+            className={cn(
+              'mb-2 inline-flex rounded-full px-2 py-0.5 text-xs font-bold',
+              palette.badge,
+              styles.badge,
+            )}
+          >
+            {isUnlimited ? t('host.guest.giftCard.unlimited') : badge}
+          </span>
+          <span className="mb-3 mt-1 block break-words text-lg font-bold text-dark sm:text-xl">
+            {gift.name}
+          </span>
+          {gift.description && (
+            <p className="text-xs text-dark-light">{gift.description}</p>
+          )}
+          {!isUnlimited && gift.quantity > 1 && (
+            <p className="mt-1 text-xs font-medium text-dark-light">
+              {t('host.guest.giftCard.remaining')}: {remaining}/{gift.quantity}
+            </p>
+          )}
+        </div>
+
         <span
           className={cn(
-            'mb-2 inline-flex rounded-full px-2 py-0.5 text-xs font-bold',
-            isEnvelope ? 'bg-dark/10 text-dark' : 'bg-success/25 text-dark',
-            styles.badge,
+            'mt-3 inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold transition-all',
+            palette.cta,
+            styles.cta,
           )}
         >
-          {isEnvelope ? `💌 ${t('host.guest.giftCard.unlimited')}` : isUnlimited ? t('host.guest.giftCard.unlimited') : badge}
+          {t('host.guest.giftCard.cta')}
         </span>
-        <span className="mb-3 mt-1 block break-words text-lg font-bold text-dark sm:text-xl">
-          {gift.name}
-        </span>
-        {gift.description && (
-          <p className="text-xs text-dark-light">{gift.description}</p>
-        )}
-        {!isUnlimited && gift.quantity > 1 && (
-          <p className="mt-1 text-xs font-medium text-dark-light">
-            {t('host.guest.giftCard.remaining')}: {remaining}/{gift.quantity}
-          </p>
-        )}
-      </div>
+      </button>
 
-      <span
-        className={cn(
-          'mt-3 inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold transition-all',
-          isEnvelope ? 'bg-dark text-white hover:bg-dark/80' : 'bg-success text-dark hover:brightness-95',
-          styles.cta,
-        )}
-      >
-        {t('host.guest.giftCard.cta')}
-      </span>
-    </button>
+      {gift.whereToBuy ? (
+        <GiftLinkPreview url={gift.whereToBuy} className="mt-2 self-start" />
+      ) : null}
+    </div>
   )
 }
 
