@@ -2,9 +2,8 @@ import type { DetailGift } from '@/lib/api/events'
 
 /**
  * Whether a guest can still reserve this gift.
- * Unlimited gifts (envelopes and unlimited items) are always available;
- * item gifts need remaining units. Gifts without a backend id cannot be
- * reserved through the API.
+ * Unlimited gifts are always available; the rest need remaining units.
+ * Gifts without a backend id cannot be reserved through the API.
  */
 export function isGiftAvailable(gift: Pick<DetailGift, 'id' | 'unlimited' | 'available'>): boolean {
   if (!gift.id) return false
@@ -14,8 +13,8 @@ export function isGiftAvailable(gift: Pick<DetailGift, 'id' | 'unlimited' | 'ava
 
 /**
  * Total units guests can still reserve across a list of gifts.
- * Item gifts contribute their remaining units; unlimited gifts each count as
- * one so the section never reads "all reserved".
+ * Limited gifts contribute their remaining units; unlimited gifts each count
+ * as one so the section never reads "all reserved".
  */
 export function availableUnits(gifts: Pick<DetailGift, 'id' | 'unlimited' | 'available'>[]): number {
   return gifts.reduce(

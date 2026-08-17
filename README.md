@@ -50,8 +50,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Reservation & quantity behavior
 
-- Every **item gift** has a desired quantity; the backend atomically consumes one unit per guest reservation. At zero remaining, the gift shows as *reserved* and cannot be selected. The backend is the source of truth — the UI never decides availability.
-- The **money envelope** gift (`type: "envelope"`) is unlimited: any number of guests can select it, and it never shows an out-of-stock state.
+- Every **gift** has a desired quantity; the backend atomically consumes one unit per guest reservation. At zero remaining, the gift shows as *reserved* and cannot be selected. The backend is the source of truth — the UI never decides availability.
+- A gift marked **unlimited** ignores its quantity: any number of guests can select it, and it never shows an out-of-stock state.
 - **Do-not-want** items are informational only — visible to guests, never reservable.
 - Reservations send a client-generated `requestToken`; retries/double-taps of the same submission are idempotent on the server.
 - Guests enter only a display name; it is shown **only to the host**, never to other guests.

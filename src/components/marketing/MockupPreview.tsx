@@ -48,33 +48,33 @@ export function MockupPreview() {
               </div>
 
               {/* "Really want" section, styled like the real guest page */}
-              <div className="rounded-2xl border-2 border-coral/40 bg-gradient-to-br from-coral/10 to-coral/5 p-2">
+              <div className="rounded-2xl border-2 border-success/50 bg-gradient-to-br from-success/10 to-success/5 p-2">
                 <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 px-1 pb-1.5">
                   <span className="text-[11px] font-extrabold">
                     ❤️ {t('host.create.step2.categories.want')}
                   </span>
-                  <span className="rounded-full border border-coral/30 bg-coral/10 px-1.5 py-px text-[8px] font-semibold text-coral">
+                  <span className="rounded-full border border-success/40 bg-success/15 px-1.5 py-px text-[8px] font-semibold text-dark">
                     2 {t('host.guest.count.available')}
                   </span>
                   <span className="w-full text-[8px] italic text-dark-light">
                     {t('host.create.step2.categories.wantTagline')}
                   </span>
                 </div>
-                <div className="rounded-xl bg-white p-2 shadow-card">
-                  <span className="inline-flex rounded-full bg-coral/20 px-1.5 py-px text-[8px] font-bold text-coral">
+                <div className="rounded-xl border-2 border-success/40 bg-gradient-to-br from-success/15 to-success/5 p-2 shadow-card">
+                  <span className="inline-flex rounded-full bg-success/25 px-1.5 py-px text-[8px] font-bold text-dark">
                     {t('host.guest.giftCard.topWish')}
                   </span>
                   <div className="mt-1 text-xs font-bold">{t('landing.mockup.gift1')}</div>
                   <div className="mt-0.5 text-[8px] text-dark-light">
                     {t('host.guest.giftCard.remaining')}: 2/2
                   </div>
-                  <div className="mt-1.5 w-fit rounded-full bg-coral px-2.5 py-1 text-[9px] font-semibold text-white shadow-cta">
+                  <div className="mt-1.5 w-fit rounded-full bg-success px-2.5 py-1 text-[9px] font-semibold text-dark">
                     {t('host.guest.giftCard.cta')}
                   </div>
                 </div>
               </div>
 
-              {/* "Nice to have" section */}
+              {/* "Nice to have" section: yellow, like the real guest page */}
               <div className="rounded-2xl border-2 border-gold/50 bg-gradient-to-br from-gold/10 to-gold/5 p-2">
                 <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 px-1 pb-1.5">
                   <span className="text-[11px] font-extrabold">
@@ -84,8 +84,8 @@ export function MockupPreview() {
                     1 {t('host.guest.count.available')}
                   </span>
                 </div>
-                <div className="rounded-xl bg-white p-2 shadow-card">
-                  <span className="inline-flex rounded-full bg-gold/20 px-1.5 py-px text-[8px] font-bold text-gold-dark">
+                <div className="rounded-xl border-2 border-gold/50 bg-gradient-to-br from-gold/20 to-gold/5 p-2 shadow-card">
+                  <span className="inline-flex rounded-full bg-gold/25 px-1.5 py-px text-[8px] font-bold text-dark">
                     {t('host.guest.giftCard.welcomeToo')}
                   </span>
                   <div className="mt-1 text-xs font-bold">{t('landing.mockup.gift2')}</div>

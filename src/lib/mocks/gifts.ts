@@ -4,7 +4,6 @@ export const mockGifts: Gift[] = [
   {
     id: 'gft_1',
     eventId: 'evt_1',
-    type: 'item',
     category: 'want',
     name: 'Sudo mašina Bosch SMS',
     description: 'Ugradna, 14 kompleta, A++ energetski razred',
@@ -14,21 +13,8 @@ export const mockGifts: Gift[] = [
     order: 0,
   },
   {
-    id: 'gft_2',
-    eventId: 'evt_1',
-    type: 'envelope',
-    category: 'want',
-    name: 'Koverta',
-    description: 'Svaki iznos nam znači — pomoći ćete nam da opremimo stan.',
-    quantity: 1,
-    unlimited: true,
-    reservedQuantity: 0,
-    order: 1,
-  },
-  {
     id: 'gft_3',
     eventId: 'evt_1',
-    type: 'item',
     category: 'want',
     name: 'Komplet posteljine (bračni)',
     description: 'Pamuk, neutralne boje',
@@ -40,7 +26,6 @@ export const mockGifts: Gift[] = [
   {
     id: 'gft_4',
     eventId: 'evt_1',
-    type: 'item',
     category: 'nice',
     name: 'Čaše za vino',
     description: 'Kristalne, set od 6',
@@ -52,7 +37,6 @@ export const mockGifts: Gift[] = [
   {
     id: 'gft_5',
     eventId: 'evt_1',
-    type: 'item',
     category: 'nice',
     name: 'Aromatična sveća',
     description: 'Vanilla / Amber, velika',
@@ -63,7 +47,6 @@ export const mockGifts: Gift[] = [
   {
     id: 'gft_6',
     eventId: 'evt_1',
-    type: 'item',
     category: 'avoid',
     name: 'Kuhinjski setovi posuđa',
     description: 'Već imamo dva kompleta, hvala!',
@@ -74,7 +57,6 @@ export const mockGifts: Gift[] = [
   {
     id: 'gft_7',
     eventId: 'evt_1',
-    type: 'item',
     category: 'avoid',
     name: 'Figurice / ukrasi',
     description: 'Nemamo mesta na policama :)',

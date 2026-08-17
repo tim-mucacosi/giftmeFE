@@ -33,6 +33,13 @@ export function Footer() {
           >
             {t('landing.footer.privacy')}
           </Link>
+          <span aria-hidden="true">·</span>
+          <Link
+            href="/contact"
+            className="rounded px-1 py-0.5 hover:text-coral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+          >
+            {t('contact.title')}
+          </Link>
         </nav>
       </div>
     </footer>

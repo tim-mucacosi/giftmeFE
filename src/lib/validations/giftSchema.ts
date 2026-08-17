@@ -5,7 +5,6 @@ export const GIFT_LINK_MAX = 500
 export const GIFT_QUANTITY_MAX = 1000
 
 export interface GiftFormValues {
-  type: 'item' | 'envelope'
   /** "avoid" entries are informational, so they carry no inventory. */
   category: 'want' | 'nice' | 'avoid'
   name: string
@@ -16,18 +15,19 @@ export interface GiftFormValues {
   description: string
 }
 
-/** Whether a gift in this category/type needs a quantity from the host. */
-export function usesQuantity(
-  category: GiftFormValues['category'],
-  type: GiftFormValues['type'],
-): boolean {
-  return category !== 'avoid' && type !== 'envelope'
+/** Whether a gift in this category needs a quantity from the host. */
+export function usesQuantity(category: GiftFormValues['category']): boolean {
+  return category !== 'avoid'
+}
+
+/** Whether a gift in this category takes a "where to buy" link. */
+export function usesLink(category: GiftFormValues['category']): boolean {
+  return category !== 'avoid'
 }
 
 export type GiftFormErrors = Partial<Record<'name' | 'quantity' | 'link' | 'description', string>>
 
 export interface ParsedGiftForm {
-  type: 'item' | 'envelope'
   name: string
   quantity: number
   unlimited: boolean
@@ -67,7 +67,6 @@ export function validateGiftForm(values: GiftFormValues): {
 } {
   const errors: GiftFormErrors = {}
   const name = values.name.trim()
-  const isEnvelope = values.type === 'envelope'
 
   if (name.length === 0) {
     errors.name = 'common.errors.required'
@@ -76,7 +75,7 @@ export function validateGiftForm(values: GiftFormValues): {
     errors.name = 'common.errors.tooLong'
   }
 
-  const needsQuantity = usesQuantity(values.category, values.type)
+  const needsQuantity = usesQuantity(values.category)
   let quantity = 1
   if (needsQuantity && !values.unlimited) {
     const raw = values.quantity.trim()
@@ -89,7 +88,7 @@ export function validateGiftForm(values: GiftFormValues): {
     }
   }
 
-  const link = isEnvelope ? '' : normalizeUrl(values.link)
+  const link = usesLink(values.category) ? normalizeUrl(values.link) : ''
   if (link) {
     if (link.length > GIFT_LINK_MAX || !isValidUrl(link)) {
       errors.link = 'host.create.step2.form.linkError'
@@ -106,7 +105,6 @@ export function validateGiftForm(values: GiftFormValues): {
   return {
     errors,
     parsed: {
-      type: values.type,
       name,
       quantity,
       unlimited: needsQuantity && values.unlimited,
