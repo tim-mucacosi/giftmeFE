@@ -49,6 +49,7 @@
     "beta": {
       "badge": "Beta",
       "text": "PokloniMi je još u beta fazi, svakog dana doterujemo iskustvo. Ako naiđete na sitnicu koja još nije savršena, hvala na strpljenju; bićemo sve bolji. 💛",
+      "cta": "Javite nam šta ne valja",
       "dismiss": "Zatvori"
     },
     "hero": {
@@ -512,7 +513,8 @@
       "p1": "PokloniMi je aplikacija koja pomaže da se pokloni za proslave izaberu, organizuju i rezervišu, bez neželjenih duplikata i bez neprijatnih pitanja „šta da ti kupim?“.",
       "p2": "Domaćin pravi listu želja za rođendan, svadbu, krštenje, baby shower, godišnjicu ili useljenje, a zatim deli link sa gostima. Gost bira poklon, a lista se odmah ažurira kako bi se izbeglo dupliranje.",
       "p3": "Gosti ne moraju da prave nalog niti da ostavljaju svoje ime; dovoljan je link koji su dobili.",
-      "contact": "Imate pitanje ili predlog? Pišite nam na podrska@poklonimi.rs."
+      "contact": "Imate pitanje, predlog ili želite da sarađujemo?",
+      "contactLink": "Pišite nam"
     },
     "terms": {
       "title": "Uslovi korišćenja",

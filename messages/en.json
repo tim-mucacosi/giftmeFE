@@ -49,6 +49,7 @@
     "beta": {
       "badge": "Beta",
       "text": "GiftMe is still in beta, we're polishing the experience every day. If you run into a rough edge, thanks for bearing with us; it only gets better from here. 💛",
+      "cta": "Tell us what's off",
       "dismiss": "Dismiss"
     },
     "hero": {
@@ -512,7 +513,8 @@
       "p1": "GiftMe helps people choose, organize and reserve gifts for celebrations, without duplicates and without the awkward \"what should I get you?\" conversation.",
       "p2": "A host builds a wish list for a birthday, wedding, baptism, baby shower, anniversary or house warming, then shares a link with guests. Guests pick a gift and the list updates immediately so nothing is bought twice.",
       "p3": "Guests need no account and are never asked for their name; the link they received is enough.",
-      "contact": "Questions or suggestions? Write to us at podrska@poklonimi.rs."
+      "contact": "Have a question, an idea, or want to work together?",
+      "contactLink": "Write to us"
     },
     "terms": {
       "title": "Terms of Use",
