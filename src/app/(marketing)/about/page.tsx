@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { getTranslate } from '@/tolgee/server'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,7 +24,13 @@ export default async function AboutPage() {
         ))}
       </div>
       <p className="mt-8 rounded-2xl bg-bg px-4 py-3 text-sm text-dark-light">
-        {t('legal.about.contact')}
+        {t('legal.about.contact')}{' '}
+        <Link
+          href="/contact"
+          className="font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+        >
+          {t('legal.about.contactLink')}
+        </Link>
       </p>
     </div>
   )

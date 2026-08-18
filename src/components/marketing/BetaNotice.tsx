@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useTranslate } from '@tolgee/react'
 
 const DISMISSED_KEY = 'poklonimi.betaNoticeDismissed'
@@ -43,7 +44,13 @@ export function BetaNotice() {
           ✨ {t('landing.beta.badge')}
         </span>
         <p className="order-last w-full min-w-0 text-center text-sm font-medium leading-snug text-dark sm:order-none sm:w-auto sm:flex-1 sm:text-base">
-          {t('landing.beta.text')}
+          {t('landing.beta.text')}{' '}
+          <Link
+            href="/contact"
+            className="whitespace-nowrap font-semibold text-coral underline underline-offset-2 hover:text-coral-dark"
+          >
+            {t('landing.beta.cta')}
+          </Link>
         </p>
         <button
           type="button"

@@ -49,6 +49,7 @@
     "beta": {
       "badge": "Beta",
       "text": "SchenkMir ist noch in der Beta-Phase, wir feilen jeden Tag an der Erfahrung. Falls noch nicht alles perfekt ist, danke für deine Geduld; es wird täglich besser. 💛",
+      "cta": "Sag uns, was fehlt",
       "dismiss": "Schließen"
     },
     "hero": {
@@ -512,7 +513,8 @@
       "p1": "SchenkMir hilft dabei, Geschenke für Feiern auszuwählen, zu organisieren und zu reservieren, ohne Dubletten und ohne die unangenehme Frage „Was wünschst du dir?“.",
       "p2": "Gastgeber erstellen eine Wunschliste für Geburtstag, Hochzeit, Taufe, Babyparty, Jubiläum oder Einzug und teilen dann einen Link mit ihren Gästen. Gäste wählen ein Geschenk, und die Liste aktualisiert sich sofort, damit nichts doppelt gekauft wird.",
       "p3": "Gäste brauchen kein Konto und werden nie nach ihrem Namen gefragt; der erhaltene Link genügt.",
-      "contact": "Fragen oder Anregungen? Schreiben Sie uns an podrska@poklonimi.rs."
+      "contact": "Hast du eine Frage, einen Vorschlag oder möchtest du zusammenarbeiten?",
+      "contactLink": "Schreib uns"
     },
     "terms": {
       "title": "Nutzungsbedingungen",
